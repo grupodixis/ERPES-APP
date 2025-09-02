@@ -1,0 +1,377 @@
+<div class="mapping-rules-editor">
+  <!-- Header -->
+  <div class="editor-header">
+    <h2 mat-dialog-title>
+      {{ mode === 'create' ? 'Crear Mapeo de Campo' : 'Editar Mapeo de Campo' }}
+    </h2>
+    <button mat-icon-button mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Template Field Info -->
+  <div class="template-field-info">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Campo de Plantilla</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="field-details">
+          <div class="field-name">
+            <mat-icon>description</mat-icon>
+            <span>{{ templateField.name }}</span>
+          </div>
+          <div class="field-value" *ngIf="templateField.value">
+            <mat-icon>text_fields</mat-icon>
+            <span>"{{ templateField.value }}"</span>
+          </div>
+          <div class="field-position">
+            <mat-icon>place</mat-icon>
+            <span>Página {{ templateField.page }}, Posición ({{ templateField.x }}, {{ templateField.y }})</span>
+          </div>
+          <div class="field-confidence" *ngIf="templateField.confidence">
+            <mat-icon>verified</mat-icon>
+            <span>Confianza: {{ (templateField.confidence * 100) | number:'1.0-1' }}%</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Main Content -->
+  <mat-dialog-content class="editor-content">
+    <mat-tab-group>
+      <!-- Mapping Configuration Tab -->
+      <mat-tab label="Configuración">
+        <div class="tab-content">
+          <form [formGroup]="mappingForm" class="mapping-form">
+            <!-- ERP Field Selection -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Campo ERP</mat-label>
+              <mat-select formControlName="erpFieldId" (selectionChange)="onERPFieldChange()">
+                <mat-option value="">-- Seleccionar campo --</mat-option>
+                <mat-optgroup *ngFor="let module of getERPFieldsByModule()" [label]="module.name">
+                  <mat-option *ngFor="let field of module.fields" [value]="field.id">
+                    <div class="erp-field-option">
+                      <mat-icon>{{ getERPFieldTypeIcon(field.type) }}</mat-icon>
+                      <span class="field-label">{{ field.label }}</span>
+                      <span class="field-name">({{ field.name }})</span>
+                      <mat-chip *ngIf="field.required" class="required-chip">Requerido</mat-chip>
+                    </div>
+                  </mat-option>
+                </mat-optgroup>
+              </mat-select>
+              <mat-error *ngIf="mappingForm.get('erpFieldId')?.hasError('required')">
+                Debe seleccionar un campo ERP
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Selected ERP Field Info -->
+            <div class="selected-field-info" *ngIf="selectedERPField">
+              <mat-card>
+                <mat-card-content>
+                  <div class="field-info-row">
+                    <mat-icon>{{ getERPFieldTypeIcon(selectedERPField.type) }}</mat-icon>
+                    <div class="field-details">
+                      <div class="field-label">{{ selectedERPField.label }}</div>
+                      <div class="field-meta">
+                        <span class="field-type">{{ selectedERPField.type }}</span>
+                        <span class="field-module">{{ selectedERPField.module }}</span>
+                        <mat-chip *ngIf="selectedERPField.required" class="required-chip">Requerido</mat-chip>
+                      </div>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+
+            <!-- Mapping Options -->
+            <div class="mapping-options">
+              <mat-slide-toggle formControlName="isRequired">
+                Campo requerido
+              </mat-slide-toggle>
+              
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Valor por defecto</mat-label>
+                <input matInput formControlName="defaultValue" placeholder="Valor cuando el campo esté vacío">
+                <mat-hint>Se usará este valor si el campo de la plantilla está vacío</mat-hint>
+              </mat-form-field>
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+
+      <!-- Transformations Tab -->
+      <mat-tab label="Transformaciones">
+        <div class="tab-content">
+          <!-- Transformation List -->
+          <div class="transformations-section">
+            <div class="section-header">
+              <h3>Transformaciones Aplicadas</h3>
+              <button mat-button color="primary" (click)="addTransformationDialog()">
+                <mat-icon>add</mat-icon>
+                Agregar Transformación
+              </button>
+            </div>
+
+            <div class="transformations-list" *ngIf="transformations.length > 0; else noTransformations">
+              <div class="transformation-item" *ngFor="let transformation of transformations; let i = index">
+                <div class="transformation-header">
+                  <mat-icon>{{ getTransformationTypeIcon(transformation.type) }}</mat-icon>
+                  <span class="transformation-name">{{ getTransformationTypeLabel(transformation.type) }}</span>
+                  <div class="transformation-actions">
+                    <button mat-icon-button 
+                            [disabled]="i === 0" 
+                            (click)="moveTransformationUp(i)"
+                            matTooltip="Mover arriba">
+                      <mat-icon>keyboard_arrow_up</mat-icon>
+                    </button>
+                    <button mat-icon-button 
+                            [disabled]="i === transformations.length - 1" 
+                            (click)="moveTransformationDown(i)"
+                            matTooltip="Mover abajo">
+                      <mat-icon>keyboard_arrow_down</mat-icon>
+                    </button>
+                    <button mat-icon-button 
+                            color="warn" 
+                            (click)="removeTransformation(i)"
+                            matTooltip="Eliminar">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Transformation Parameters -->
+                <div class="transformation-params" *ngIf="hasTransformationParameters(transformation.type)">
+                  <ng-container [ngSwitch]="transformation.type">
+                    <!-- Date Parameters -->
+                    <div *ngSwitchCase="'DATE'" class="param-group">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Formato de fecha</mat-label>
+                        <mat-select [(value)]="transformation.parameters['format']" (selectionChange)="onTransformationsChange()">
+                          <mat-option value="DD/MM/YYYY">DD/MM/YYYY</mat-option>
+                          <mat-option value="MM/DD/YYYY">MM/DD/YYYY</mat-option>
+                          <mat-option value="YYYY-MM-DD">YYYY-MM-DD</mat-option>
+                          <mat-option value="DD-MM-YYYY">DD-MM-YYYY</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                    
+                    <!-- Number Parameters -->
+                    <div *ngSwitchCase="'NUMBER'" class="param-group">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Decimales</mat-label>
+                        <input matInput type="number" 
+                               [(ngModel)]="transformation.parameters['decimals']" 
+                               (ngModelChange)="onTransformationsChange()"
+                               min="0" max="10">
+                      </mat-form-field>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Separador decimal</mat-label>
+                        <mat-select [(value)]="transformation.parameters['decimalSeparator']" (selectionChange)="onTransformationsChange()">
+                          <mat-option value=".">Punto (.)</mat-option>
+                          <mat-option value=",">Coma (,)</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                    
+                    <!-- Regex Parameters -->
+                    <div *ngSwitchCase="'REGEX'" class="param-group">
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Expresión regular</mat-label>
+                        <input matInput 
+                               [(ngModel)]="transformation.parameters['pattern']" 
+                               (ngModelChange)="onTransformationsChange()"
+                               placeholder="/patrón/flags">
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Reemplazo</mat-label>
+                        <input matInput 
+                               [(ngModel)]="transformation.parameters['replacement']" 
+                               (ngModelChange)="onTransformationsChange()"
+                               placeholder="Texto de reemplazo">
+                      </mat-form-field>
+                    </div>
+                  </ng-container>
+                </div>
+              </div>
+            </div>
+
+            <ng-template #noTransformations>
+              <div class="no-transformations">
+                <mat-icon>transform</mat-icon>
+                <p>No hay transformaciones configuradas</p>
+                <p class="hint">Las transformaciones se aplicarán en el orden mostrado</p>
+              </div>
+            </ng-template>
+          </div>
+
+          <!-- Preview Section -->
+          <div class="preview-section" *ngIf="templateField.value">
+            <h4>Vista Previa</h4>
+            <div class="preview-container">
+              <div class="preview-input">
+                <label>Valor original:</label>
+                <span class="value">{{ templateField.value }}</span>
+              </div>
+              <mat-icon class="arrow">arrow_forward</mat-icon>
+              <div class="preview-output">
+                <label>Resultado:</label>
+                <span class="value" [class.changed]="previewResult !== templateField.value">
+                  {{ previewResult || templateField.value }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Presets Tab -->
+      <mat-tab label="Presets">
+        <div class="tab-content">
+          <!-- Create Preset Section -->
+          <div class="create-preset-section" *ngIf="transformations.length > 0">
+            <button mat-raised-button color="primary" (click)="createPreset()">
+              <mat-icon>save</mat-icon>
+              Guardar como Preset
+            </button>
+          </div>
+
+          <!-- Presets List -->
+          <div class="presets-section">
+            <h3>Presets Disponibles</h3>
+            
+            <div class="presets-list" *ngIf="transformPresets.length > 0; else noPresets">
+              <mat-card class="preset-item" 
+                        *ngFor="let preset of transformPresets" 
+                        [class.applicable]="isPresetApplicable(preset)">
+                <mat-card-header>
+                  <mat-card-title>
+                    <div class="preset-title">
+                      <span>{{ preset.name }}</span>
+                      <mat-chip *ngIf="preset.isGlobal" class="global-chip">Global</mat-chip>
+                    </div>
+                  </mat-card-title>
+                  <mat-card-subtitle>{{ preset.description }}</mat-card-subtitle>
+                </mat-card-header>
+                
+                <mat-card-content>
+                  <div class="preset-transformations">
+                    <mat-chip-list>
+                      <mat-chip *ngFor="let transformation of preset.transformations">
+                        <mat-icon>{{ getTransformationTypeIcon(transformation.type) }}</mat-icon>
+                        {{ getTransformationTypeLabel(transformation.type) }}
+                      </mat-chip>
+                    </mat-chip-list>
+                  </div>
+                  
+                  <div class="preset-meta">
+                    <span class="created-by">Por: {{ preset.createdBy }}</span>
+                    <span class="created-date">{{ preset.createdAt | date:'short' }}</span>
+                  </div>
+                </mat-card-content>
+                
+                <mat-card-actions>
+                  <button mat-button 
+                          color="primary" 
+                          (click)="applyPreset(preset)"
+                          [disabled]="!isPresetApplicable(preset)">
+                    <mat-icon>download</mat-icon>
+                    Aplicar
+                  </button>
+                  <button mat-button 
+                          color="warn" 
+                          (click)="deletePreset(preset)"
+                          *ngIf="!preset.isGlobal">
+                    <mat-icon>delete</mat-icon>
+                    Eliminar
+                  </button>
+                </mat-card-actions>
+              </mat-card>
+            </div>
+
+            <ng-template #noPresets>
+              <div class="no-presets">
+                <mat-icon>bookmark_border</mat-icon>
+                <p>No hay presets disponibles</p>
+                <p class="hint">Crea transformaciones y guárdalas como presets para reutilizarlas</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+
+    <!-- Validation Errors -->
+    <div class="validation-errors" *ngIf="validationErrors.length > 0">
+      <mat-card class="error-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon color="warn">error</mat-icon>
+            Errores de Validación
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <ul>
+            <li class="validation-error" *ngFor="let error of validationErrors">{{ error }}</li>
+          </ul>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-dialog-content>
+
+  <!-- Actions -->
+  <mat-dialog-actions class="editor-actions">
+    <button mat-button (click)="cancel()">Cancelar</button>
+    <button mat-raised-button 
+            color="primary" 
+            (click)="save()"
+            [disabled]="mappingForm.invalid || validationErrors.length > 0">
+      <mat-icon>save</mat-icon>
+      {{ mode === 'create' ? 'Crear' : 'Guardar' }}
+    </button>
+  </mat-dialog-actions>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <mat-spinner></mat-spinner>
+  </div>
+</div>
+
+<!-- Create Preset Dialog -->
+<div class="create-preset-dialog" *ngIf="showCreatePresetDialog">
+  <div class="dialog-backdrop" (click)="cancelPresetCreation()"></div>
+  <div class="dialog-content">
+    <h3>Crear Preset</h3>
+    
+    <form [formGroup]="presetForm" class="preset-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nombre del preset</mat-label>
+        <input matInput formControlName="name" placeholder="Ej: Formato Nombre Cliente">
+        <mat-error *ngIf="presetForm.get('name')?.hasError('required')">
+          El nombre es requerido
+        </mat-error>
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Descripción</mat-label>
+        <textarea matInput formControlName="description" rows="3" 
+                  placeholder="Describe qué hace este preset..."></textarea>
+      </mat-form-field>
+      
+      <mat-slide-toggle formControlName="isGlobal">
+        Preset global (disponible para todos los usuarios)
+      </mat-slide-toggle>
+    </form>
+    
+    <div class="dialog-actions">
+      <button mat-button (click)="cancelPresetCreation()">Cancelar</button>
+      <button mat-raised-button 
+              color="primary" 
+              (click)="savePreset()"
+              [disabled]="presetForm.invalid">
+        Guardar Preset
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,571 @@
+<!-- ============================================================================ -->
+<!-- ASIGNACION MASIVA DIALOG TEMPLATE -->
+<!-- ============================================================================ -->
+<!-- Diálogo para asignación masiva de roles a usuarios -->
+<!-- Incluye selección de usuarios, roles y configuración de acciones -->
+<!-- ============================================================================ -->
+
+<div class="asignacion-masiva-dialog">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <div class="title-section">
+        <mat-icon class="title-icon">group_add</mat-icon>
+        <div class="title-text">
+          <h2 mat-dialog-title>Asignación Masiva de Roles</h2>
+          <p class="subtitle">Asigna o revoca roles a múltiples usuarios de forma eficiente</p>
+        </div>
+      </div>
+      
+      <button 
+        mat-icon-button 
+        (click)="cerrar()"
+        matTooltip="Cerrar">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="dialog-content">
+    <form [formGroup]="formulario" class="asignacion-form">
+      <!-- Paso 1: Tipo de Asignación -->
+      <mat-card class="config-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>settings</mat-icon>
+            Configuración de Asignación
+          </mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="config-grid">
+            <!-- Tipo de Asignación -->
+            <mat-form-field appearance="outline" class="tipo-asignacion">
+              <mat-label>Tipo de Asignación</mat-label>
+              <mat-select formControlName="tipoAsignacion" (selectionChange)="onTipoAsignacionChange($event.value)">
+                <mat-option value="usuario-a-roles">Asignar roles a usuarios seleccionados</mat-option>
+                <mat-option value="rol-a-usuarios">Asignar usuarios a rol seleccionado</mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <!-- Acción -->
+            <mat-form-field appearance="outline" class="accion">
+              <mat-label>Acción</mat-label>
+              <mat-select formControlName="accion">
+                <mat-option value="asignar">Asignar</mat-option>
+                <mat-option value="revocar">Revocar</mat-option>
+                <mat-option value="reemplazar">Reemplazar</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          
+          <!-- Opciones Adicionales -->
+          <div class="opciones-adicionales">
+            <mat-checkbox formControlName="notificarUsuarios">
+              Notificar a los usuarios sobre los cambios
+            </mat-checkbox>
+            
+            <mat-checkbox formControlName="aplicarInmediatamente">
+              Aplicar cambios inmediatamente
+            </mat-checkbox>
+            
+            <mat-checkbox formControlName="crearAuditoria">
+              Crear registro de auditoría
+            </mat-checkbox>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Paso 2: Selección según tipo -->
+      @if (formulario.get('tipoAsignacion')?.value === 'usuario-a-roles') {
+        <!-- Selección de Usuarios -->
+        <mat-card class="seleccion-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>people</mat-icon>
+              Seleccionar Usuarios
+              @if (usuariosSeleccionados().length > 0) {
+                <mat-chip class="count-chip">{{ usuariosSeleccionados().length }}</mat-chip>
+              }
+            </mat-card-title>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <!-- Filtros de Usuarios -->
+            <div class="filtros-usuarios">
+              <mat-form-field appearance="outline" class="filtro-busqueda">
+                <mat-label>Buscar usuarios</mat-label>
+                <input matInput [(ngModel)]="filtroUsuarios" placeholder="Nombre, email..." [ngModelOptions]="{standalone: true}">
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="filtro-rol-actual">
+                <mat-label>Filtrar por rol actual</mat-label>
+                <mat-select [(ngModel)]="filtroRolActual" [ngModelOptions]="{standalone: true}">
+                  <mat-option value="">Todos</mat-option>
+                  @for (rol of roles(); track rol.id) {
+                    <mat-option [value]="rol.id">{{ rol.nombre }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="filtro-estado">
+                <mat-label>Estado</mat-label>
+                <mat-select [(ngModel)]="filtroEstadoUsuario" [ngModelOptions]="{standalone: true}">
+                  <mat-option value="">Todos</mat-option>
+                  <mat-option [value]="true">Activos</mat-option>
+                  <mat-option [value]="false">Inactivos</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            
+            <!-- Acciones Masivas de Usuarios -->
+            <div class="acciones-masivas">
+              <button 
+                mat-stroked-button 
+                size="small"
+                (click)="seleccionarTodosUsuarios()">
+                <mat-icon>select_all</mat-icon>
+                Seleccionar Todos
+              </button>
+              
+              <button 
+                mat-stroked-button 
+                size="small"
+                (click)="limpiarSeleccionUsuarios()">
+                <mat-icon>clear</mat-icon>
+                Limpiar Selección
+              </button>
+              
+              <button 
+                mat-stroked-button 
+                size="small"
+                (click)="invertirSeleccionUsuarios()">
+                <mat-icon>swap_horiz</mat-icon>
+                Invertir Selección
+              </button>
+            </div>
+            
+            <!-- Lista de Usuarios -->
+            <div class="usuarios-lista">
+              @if (usuariosFiltrados().length === 0) {
+                <div class="empty-state">
+                  <mat-icon>people_outline</mat-icon>
+                  <p>No se encontraron usuarios</p>
+                </div>
+              } @else {
+                <div class="usuarios-grid">
+                  @for (usuario of usuariosFiltrados(); track usuario.id) {
+                    <div 
+                      class="usuario-item"
+                      [class.selected]="estaUsuarioSeleccionado(usuario.id)"
+                      (click)="toggleUsuarioSeleccion(usuario.id)">
+                      
+                      <mat-checkbox 
+                        [checked]="estaUsuarioSeleccionado(usuario.id)"
+                        (change)="toggleUsuarioSeleccion(usuario.id)"
+                        (click)="$event.stopPropagation()">
+                      </mat-checkbox>
+                      
+                      <div class="usuario-avatar">
+                        @if (usuario.avatar) {
+                          <img [src]="usuario.avatar" [alt]="usuario.nombre">
+                        } @else {
+                          <mat-icon>person</mat-icon>
+                        }
+                      </div>
+                      
+                      <div class="usuario-info">
+                        <div class="usuario-nombre">{{ usuario.nombre }} {{ usuario.apellidos }}</div>
+                        <div class="usuario-email">{{ usuario.email }}</div>
+                        
+                        <div class="usuario-roles">
+                          @if (obtenerRolesUsuario(usuario.id).length === 0) {
+                            <span class="sin-roles">Sin roles</span>
+                          } @else {
+                            @for (rol of obtenerRolesUsuario(usuario.id); track rol.id) {
+                              <mat-chip size="small" class="rol-chip">{{ rol.nombre }}</mat-chip>
+                            }
+                          }
+                        </div>
+                      </div>
+                      
+                      <div class="usuario-estado">
+                        <mat-chip 
+                          size="small"
+                          [class]="usuario.activo ? 'estado-activo' : 'estado-inactivo'">
+                          {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+                        </mat-chip>
+                      </div>
+                    </div>
+                  }
+                }
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+        
+        <!-- Selección de Roles para Usuarios -->
+        <mat-card class="seleccion-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>security</mat-icon>
+              Seleccionar Roles
+              @if (rolesSeleccionados().length > 0) {
+                <mat-chip class="count-chip">{{ rolesSeleccionados().length }}</mat-chip>
+              }
+            </mat-card-title>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <!-- Filtros de Roles -->
+            <div class="filtros-roles">
+              <mat-form-field appearance="outline" class="filtro-busqueda">
+                <mat-label>Buscar roles</mat-label>
+                <input matInput [(ngModel)]="filtroRoles" placeholder="Nombre, descripción..." [ngModelOptions]="{standalone: true}">
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="filtro-tipo-rol">
+                <mat-label>Tipo de rol</mat-label>
+                <mat-select [(ngModel)]="filtroTipoRol" [ngModelOptions]="{standalone: true}">
+                  <mat-option value="">Todos</mat-option>
+                  <mat-option value="sistema">Sistema</mat-option>
+                  <mat-option value="personalizado">Personalizado</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            
+            <!-- Lista de Roles -->
+            <div class="roles-lista">
+              @if (rolesFiltrados().length === 0) {
+                <div class="empty-state">
+                  <mat-icon>security</mat-icon>
+                  <p>No se encontraron roles</p>
+                </div>
+              } @else {
+                <div class="roles-grid">
+                  @for (rol of rolesFiltrados(); track rol.id) {
+                    <div 
+                      class="rol-item"
+                      [class.selected]="estaRolSeleccionado(rol.id)"
+                      (click)="toggleRolSeleccion(rol.id)">
+                      
+                      <mat-checkbox 
+                        [checked]="estaRolSeleccionado(rol.id)"
+                        (change)="toggleRolSeleccion(rol.id)"
+                        (click)="$event.stopPropagation()">
+                      </mat-checkbox>
+                      
+                      <div class="rol-info">
+                        <div class="rol-nombre">{{ rol.nombre }}</div>
+                        @if (rol.descripcion) {
+                          <div class="rol-descripcion">{{ rol.descripcion }}</div>
+                        }
+                        
+                        <div class="rol-meta">
+                          <mat-chip size="small" class="tipo-chip">
+                            {{ rol.esSistema ? 'Sistema' : 'Personalizado' }}
+                          </mat-chip>
+                          
+                          <span class="permisos-count">
+                            {{ contarPermisosRol(rol.id) }} permisos
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div class="rol-estado">
+                        <mat-chip 
+                          size="small"
+                          [class]="rol.activo ? 'estado-activo' : 'estado-inactivo'">
+                          {{ rol.activo ? 'Activo' : 'Inactivo' }}
+                        </mat-chip>
+                      </div>
+                    </div>
+                  }
+                }
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      } @else {
+        <!-- Selección de Rol Único -->
+        <mat-card class="seleccion-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>security</mat-icon>
+              Seleccionar Rol
+            </mat-card-title>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <mat-form-field appearance="outline" class="rol-unico">
+              <mat-label>Rol a asignar</mat-label>
+              <mat-select formControlName="rolUnico">
+                @for (rol of roles(); track rol.id) {
+                  <mat-option [value]="rol.id">
+                    <div class="rol-option">
+                      <span class="rol-nombre">{{ rol.nombre }}</span>
+                      @if (rol.descripcion) {
+                        <span class="rol-descripcion">{{ rol.descripcion }}</span>
+                      }
+                    </div>
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            
+            @if (formulario.get('rolUnico')?.value) {
+              <div class="rol-seleccionado-info">
+                @if (obtenerRolPorId(formulario.get('rolUnico')?.value); as rol) {
+                  <mat-card class="rol-info-card">
+                    <mat-card-content>
+                      <div class="rol-detalles">
+                        <h4>{{ rol.nombre }}</h4>
+                        @if (rol.descripcion) {
+                          <p>{{ rol.descripcion }}</p>
+                        }
+                        
+                        <div class="rol-estadisticas">
+                          <div class="estadistica">
+                            <mat-icon>security</mat-icon>
+                            <span>{{ contarPermisosRol(rol.id) }} permisos</span>
+                          </div>
+                          
+                          <div class="estadistica">
+                            <mat-icon>people</mat-icon>
+                            <span>{{ contarUsuariosConRol(rol.id) }} usuarios</span>
+                          </div>
+                        </div>
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+                }
+              }
+            }
+          </mat-card-content>
+        </mat-card>
+        
+        <!-- Selección de Usuarios para Rol -->
+        <mat-card class="seleccion-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>people</mat-icon>
+              Seleccionar Usuarios
+              @if (usuariosSeleccionados().length > 0) {
+                <mat-chip class="count-chip">{{ usuariosSeleccionados().length }}</mat-chip>
+              }
+            </mat-card-title>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <!-- Reutilizar la misma lógica de selección de usuarios -->
+            <!-- (Mismo contenido que arriba) -->
+            <div class="filtros-usuarios">
+              <mat-form-field appearance="outline" class="filtro-busqueda">
+                <mat-label>Buscar usuarios</mat-label>
+                <input matInput [(ngModel)]="filtroUsuarios" placeholder="Nombre, email..." [ngModelOptions]="{standalone: true}">
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="filtro-estado">
+                <mat-label>Estado</mat-label>
+                <mat-select [(ngModel)]="filtroEstadoUsuario" [ngModelOptions]="{standalone: true}">
+                  <mat-option value="">Todos</mat-option>
+                  <mat-option [value]="true">Activos</mat-option>
+                  <mat-option [value]="false">Inactivos</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            
+            <div class="acciones-masivas">
+              <button 
+                mat-stroked-button 
+                size="small"
+                (click)="seleccionarTodosUsuarios()">
+                <mat-icon>select_all</mat-icon>
+                Seleccionar Todos
+              </button>
+              
+              <button 
+                mat-stroked-button 
+                size="small"
+                (click)="limpiarSeleccionUsuarios()">
+                <mat-icon>clear</mat-icon>
+                Limpiar Selección
+              </button>
+            </div>
+            
+            <div class="usuarios-lista">
+              @if (usuariosFiltrados().length === 0) {
+                <div class="empty-state">
+                  <mat-icon>people_outline</mat-icon>
+                  <p>No se encontraron usuarios</p>
+                </div>
+              } @else {
+                <div class="usuarios-grid">
+                  @for (usuario of usuariosFiltrados(); track usuario.id) {
+                    <div 
+                      class="usuario-item"
+                      [class.selected]="estaUsuarioSeleccionado(usuario.id)"
+                      (click)="toggleUsuarioSeleccion(usuario.id)">
+                      
+                      <mat-checkbox 
+                        [checked]="estaUsuarioSeleccionado(usuario.id)"
+                        (change)="toggleUsuarioSeleccion(usuario.id)"
+                        (click)="$event.stopPropagation()">
+                      </mat-checkbox>
+                      
+                      <div class="usuario-avatar">
+                        @if (usuario.avatar) {
+                          <img [src]="usuario.avatar" [alt]="usuario.nombre">
+                        } @else {
+                          <mat-icon>person</mat-icon>
+                        }
+                      </div>
+                      
+                      <div class="usuario-info">
+                        <div class="usuario-nombre">{{ usuario.nombre }} {{ usuario.apellidos }}</div>
+                        <div class="usuario-email">{{ usuario.email }}</div>
+                      </div>
+                      
+                      <div class="usuario-estado">
+                        <mat-chip 
+                          size="small"
+                          [class]="usuario.activo ? 'estado-activo' : 'estado-inactivo'">
+                          {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+                        </mat-chip>
+                      </div>
+                    </div>
+                  }
+                }
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      <!-- Paso 3: Vista Previa -->
+      @if (mostrarVistaPrevia()) {
+        <mat-card class="preview-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>preview</mat-icon>
+              Vista Previa de Cambios
+            </mat-card-title>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <div class="preview-content">
+              <!-- Resumen de la Acción -->
+              <div class="accion-resumen">
+                <div class="resumen-item">
+                  <mat-icon class="resumen-icon">{{ obtenerIconoAccion() }}</mat-icon>
+                  <div class="resumen-texto">
+                    <h4>{{ obtenerTituloAccion() }}</h4>
+                    <p>{{ obtenerDescripcionAccion() }}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Estadísticas de Cambios -->
+              <div class="cambios-estadisticas">
+                <div class="estadistica-item">
+                  <div class="estadistica-valor">{{ usuariosSeleccionados().length }}</div>
+                  <div class="estadistica-label">Usuarios afectados</div>
+                </div>
+                
+                <div class="estadistica-item">
+                  <div class="estadistica-valor">{{ obtenerRolesAfectados().length }}</div>
+                  <div class="estadistica-label">Roles involucrados</div>
+                </div>
+                
+                <div class="estadistica-item">
+                  <div class="estadistica-valor">{{ calcularTotalCambios() }}</div>
+                  <div class="estadistica-label">Total de cambios</div>
+                </div>
+              </div>
+              
+              <!-- Detalles de Cambios -->
+              <div class="cambios-detalles">
+                <mat-expansion-panel class="cambios-panel">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      <mat-icon>list</mat-icon>
+                      Detalles de los cambios
+                    </mat-panel-title>
+                  </mat-expansion-panel-header>
+                  
+                  <div class="cambios-lista">
+                    @for (cambio of generarVistaPrevia(); track $index) {
+                      <div class="cambio-item">
+                        <mat-icon class="cambio-icon" [ngClass]="cambio.tipo">
+                          {{ cambio.icono }}
+                        </mat-icon>
+                        
+                        <div class="cambio-info">
+                          <div class="cambio-usuario">{{ cambio.usuario }}</div>
+                          <div class="cambio-accion">{{ cambio.descripcion }}</div>
+                        </div>
+                        
+                        <div class="cambio-roles">
+                          @for (rol of cambio.roles; track rol) {
+                            <mat-chip size="small" class="rol-chip">{{ rol }}</mat-chip>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </mat-expansion-panel>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </form>
+  </div>
+
+  <!-- Actions -->
+  <div class="dialog-actions">
+    <div class="actions-left">
+      <button 
+        mat-stroked-button 
+        (click)="limpiarTodo()"
+        [disabled]="procesando()">
+        <mat-icon>clear_all</mat-icon>
+        Limpiar Todo
+      </button>
+      
+      <button 
+        mat-stroked-button 
+        (click)="guardarPlantilla()"
+        [disabled]="!puedeGuardarPlantilla() || procesando()">
+        <mat-icon>save</mat-icon>
+        Guardar como Plantilla
+      </button>
+    </div>
+    
+    <div class="actions-right">
+      <button 
+        mat-stroked-button 
+        (click)="cerrar()"
+        [disabled]="procesando()">
+        Cancelar
+      </button>
+      
+      <button 
+        mat-raised-button 
+        color="primary"
+        (click)="aplicarCambios()"
+        [disabled]="!puedeAplicarCambios() || procesando()">
+        @if (procesando()) {
+          <mat-spinner diameter="16"></mat-spinner>
+        } @else {
+          <mat-icon>{{ obtenerIconoAccion() }}</mat-icon>
+        }
+        {{ obtenerTextoBotonAccion() }}
+      </button>
+    </div>
+  </div>
+</div>

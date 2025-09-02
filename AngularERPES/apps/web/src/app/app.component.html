@@ -1,0 +1,349 @@
+<mat-sidenav-container class="app-container">
+  <!-- Sidebar -->
+  <mat-sidenav
+    #sidenav
+    class="app-sidenav"
+    [class.collapsed]="sidenavCollapsed()"
+    [mode]="sidenavMode()"
+    [opened]="sidenavOpened()"
+    [fixedInViewport]="true"
+    [disableClose]="false"
+    [autoFocus]="false">
+
+    <!-- Sidebar Header -->
+    <div class="sidenav-header">
+      @if (sidenavMode() === 'side') {
+        <button
+          mat-icon-button
+          class="sidenav-toggle"
+          (click)="toggleSidenav()"
+          >
+          <mat-icon>{{ sidenavCollapsed() ? 'menu' : 'menu_open' }}</mat-icon>
+        </button>
+      }
+    </div>
+
+    <!-- Navigation Menu -->
+    <mat-nav-list class="sidenav-menu">
+      <!-- Dashboard -->
+      <a mat-list-item
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        class="nav-item">
+        <mat-icon matListItemIcon class="nav-icon">dashboard</mat-icon>
+        @if (!sidenavCollapsed()) {
+          <span matListItemTitle class="nav-text">Dashboard</span>
+        }
+      </a>
+
+
+
+      <!-- Terceros -->
+      <a mat-list-item
+        routerLink="/terceros"
+        routerLinkActive="active"
+        class="nav-item">
+        <mat-icon matListItemIcon class="nav-icon">people</mat-icon>
+        @if (!sidenavCollapsed()) {
+          <span matListItemTitle class="nav-text">Terceros</span>
+        }
+      </a>
+
+      <!-- Producción -->
+      <mat-expansion-panel class="nav-group" [expanded]="produccionExpanded">
+        <mat-expansion-panel-header class="nav-group-header" (click)="toggleProduccion()">
+          <mat-panel-title class="nav-group-title">
+            <mat-icon class="nav-icon">precision_manufacturing</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span class="nav-text">Producción</span>
+            }
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="nav-subitems">
+          <a mat-list-item
+            routerLink="/obras"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">construction</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Obras</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/planificacion"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">schedule</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Planificación</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/productos"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">category</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Productos</span>
+            }
+          </a>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Logística -->
+      <mat-expansion-panel class="nav-group" [expanded]="logisticaExpanded">
+        <mat-expansion-panel-header class="nav-group-header" (click)="toggleLogistica()">
+          <mat-panel-title class="nav-group-title">
+            <mat-icon class="nav-icon">local_shipping</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span class="nav-text">Logística</span>
+            }
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="nav-subitems">
+          <a mat-list-item
+            routerLink="/articulos"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">inventory_2</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Artículos</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/inventario"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">warehouse</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Inventario</span>
+            }
+          </a>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Comercial -->
+      <mat-expansion-panel class="nav-group" [expanded]="comercialExpanded">
+        <mat-expansion-panel-header class="nav-group-header" (click)="toggleComercial()">
+          <mat-panel-title class="nav-group-title">
+            <mat-icon class="nav-icon">business_center</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span class="nav-text">Comercial</span>
+            }
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="nav-subitems">
+          <a mat-list-item
+            routerLink="/compras"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">shopping_cart</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Compras</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/ventas"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">point_of_sale</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Ventas</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/presupuestos"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">calculate</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Presupuestos</span>
+            }
+          </a>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Administración -->
+      <mat-expansion-panel class="nav-group" [expanded]="administracionExpanded">
+        <mat-expansion-panel-header class="nav-group-header" (click)="toggleAdministracion()">
+          <mat-panel-title class="nav-group-title">
+            <mat-icon class="nav-icon">admin_panel_settings</mat-icon>
+            @if (!sidenavCollapsed()) {
+              Administración
+            }
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="nav-subitems">
+          <a mat-list-item
+            routerLink="/seguridad"
+            routerLinkActive="active"
+            class="nav-subitem"
+            *hasPermission="'usuarios:read'">
+            <mat-icon matListItemIcon class="nav-subicon">security</mat-icon>
+            @if (!sidenavCollapsed()) {
+              Seguridad
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/configuracion"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">settings</mat-icon>
+            @if (!sidenavCollapsed()) {
+              Configuración
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/rrhh"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">work</mat-icon>
+            @if (!sidenavCollapsed()) {
+              RRHH
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/dms"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">folder</mat-icon>
+            @if (!sidenavCollapsed()) {
+              DMS
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/contabilidad"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">account_balance</mat-icon>
+            @if (!sidenavCollapsed()) {
+              Contabilidad
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/administracion/documentos"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">description</mat-icon>
+            @if (!sidenavCollapsed()) {
+              Documentos
+            }
+          </a>
+        </div>
+      </mat-expansion-panel>
+    </mat-nav-list>
+
+    <!-- Sidebar Footer -->
+    <div class="sidenav-footer">
+      <mat-divider></mat-divider>
+      <div class="user-info">
+        <mat-icon class="user-avatar">account_circle</mat-icon>
+        @if (!sidenavCollapsed()) {
+          <div class="user-details">
+            <span class="user-name">{{ authStore.user()?.nombre || 'Usuario' }}</span>
+            <span class="user-role">{{ authStore.user()?.roles?.[0]?.nombre || 'Rol' }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </mat-sidenav>
+
+  <!-- Main Content -->
+  <mat-sidenav-content class="app-content">
+    <!-- Top Toolbar -->
+    <mat-toolbar class="app-toolbar" color="primary">
+      <div class="toolbar-left">
+        @if (sidenavMode() === 'over') {
+          <button
+            mat-icon-button
+            class="menu-button"
+            (click)="toggleSidenav()"
+            >
+            <mat-icon>menu</mat-icon>
+          </button>
+        }
+
+        <!-- Logo Container -->
+        <div class="logo-container">
+          <mat-icon class="logo-icon">business</mat-icon>
+          <span class="logo-text">ERP ES</span>
+        </div>
+
+        @if (!sidenavCollapsed()) {
+          <div class="breadcrumb">
+            <span class="breadcrumb-text">{{ getCurrentPageTitle() }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="toolbar-center">
+        <!-- Environment Badge -->
+        <mat-chip
+          class="env-chip"
+          [color]="getEnvironmentColor()"
+          selected>
+          <mat-icon class="env-icon">{{ getEnvironmentIcon() }}</mat-icon>
+        </mat-chip>
+
+        <!-- Demo Badge -->
+        @if (isDemo()) {
+          <mat-chip
+            class="demo-chip"
+            color="accent"
+            selected>
+            <mat-icon class="demo-icon">play_circle</mat-icon>
+          </mat-chip>
+        }
+      </div>
+
+      <div class="toolbar-right">
+        <!-- Theme Toggle -->
+        <button
+          mat-icon-button
+          class="theme-toggle"
+          (click)="toggleTheme()"
+          matTooltip="Cambiar tema">
+          <mat-icon>{{ isDarkTheme() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
+
+        <!-- User Menu -->
+        <button
+          mat-icon-button
+          [matMenuTriggerFor]="userMenu"
+          class="user-menu-button">
+          <mat-icon>account_circle</mat-icon>
+        </button>
+        <mat-menu #userMenu="matMenu" class="user-menu">
+          <button mat-menu-item routerLink="/perfil">
+            <mat-icon>person</mat-icon>
+            <span>Perfil</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Cerrar Sesión</span>
+          </button>
+        </mat-menu>
+      </div>
+    </mat-toolbar>
+
+    <!-- Page Content -->
+    <div class="page-content">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,233 @@
+<div class="partida-editor-dialog">
+  <!-- Header -->
+  <div class="dialog-header">
+    <h2 mat-dialog-title class="dialog-title">
+      <mat-icon class="title-icon">{{ isCreateMode() ? 'add' : 'edit' }}</mat-icon>
+      {{ dialogTitle() }}
+      <mat-chip *ngIf="hasChanges()" class="changes-indicator" color="accent">
+        <mat-icon>edit</mat-icon>
+        Modificado
+      </mat-chip>
+    </h2>
+    
+    <button mat-icon-button mat-dialog-close class="close-button" [disabled]="saving()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando datos...</p>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading()" class="dialog-content">
+    <form [formGroup]="partidaForm" class="partida-form">
+      
+      <!-- Tabs -->
+      <mat-tab-group class="form-tabs" animationDuration="300ms">
+        
+        <!-- Pestaña: Información General -->
+        <mat-tab label="General">
+          <div class="tab-content">
+            
+            <!-- Código y Nombre -->
+            <div class="form-row">
+              <mat-form-field class="form-field-half">
+                <mat-label>Código</mat-label>
+                <input matInput formControlName="codigo" placeholder="Ej: P001" maxlength="20">
+                <mat-hint>Código único de la partida</mat-hint>
+                <mat-error>{{ getFieldError('codigo') }}</mat-error>
+              </mat-form-field>
+              
+              <mat-form-field class="form-field-half">
+                <mat-label>Nombre</mat-label>
+                <input matInput formControlName="nombre" placeholder="Nombre de la partida" maxlength="200">
+                <mat-error>{{ getFieldError('nombre') }}</mat-error>
+              </mat-form-field>
+            </div>
+            
+            <!-- Descripción -->
+            <mat-form-field class="form-field-full">
+              <mat-label>Descripción</mat-label>
+              <textarea matInput formControlName="descripcion" 
+                       placeholder="Descripción detallada de la partida" 
+                       rows="3" maxlength="1000"></textarea>
+              <mat-hint align="end">{{ partidaForm.get('descripcion')?.value?.length || 0 }}/1000</mat-hint>
+              <mat-error>{{ getFieldError('descripcion') }}</mat-error>
+            </mat-form-field>
+            
+            <!-- Tipo de Recurso y Unidad de Medida -->
+            <div class="form-row">
+              <mat-form-field class="form-field-half">
+                <mat-label>Tipo de Recurso</mat-label>
+                <mat-select formControlName="tipoRecurso">
+                  <mat-option *ngFor="let tipo of tiposRecurso()" [value]="tipo.id">
+                    <div class="option-content">
+                      <span class="option-name">{{ tipo.nombre }}</span>
+                      <span class="option-description">{{ tipo.descripcion }}</span>
+                    </div>
+                  </mat-option>
+                </mat-select>
+                <mat-error>{{ getFieldError('tipoRecurso') }}</mat-error>
+              </mat-form-field>
+              
+              <mat-form-field class="form-field-half">
+                <mat-label>Unidad de Medida</mat-label>
+                <mat-select formControlName="unidadMedida">
+                  <mat-option *ngFor="let unidad of unidadesMedida()" [value]="unidad.id">
+                    <div class="option-content">
+                      <span class="option-name">{{ unidad.nombre }}</span>
+                      <span class="option-symbol">({{ unidad.simbolo }})</span>
+                    </div>
+                  </mat-option>
+                </mat-select>
+                <mat-error>{{ getFieldError('unidadMedida') }}</mat-error>
+              </mat-form-field>
+            </div>
+            
+            <!-- Estado -->
+            <div class="form-row">
+              <mat-slide-toggle formControlName="activa" class="toggle-field">
+                Partida activa
+              </mat-slide-toggle>
+            </div>
+            
+          </div>
+        </mat-tab>
+        
+        <!-- Pestaña: Cantidades y Precios -->
+        <mat-tab label="Precios">
+          <div class="tab-content">
+            
+            <!-- Cantidad y Precio Unitario -->
+            <div class="form-row">
+              <mat-form-field class="form-field-half">
+                <mat-label>Cantidad</mat-label>
+                <input matInput type="number" formControlName="cantidad" 
+                       placeholder="1.00" step="0.01" min="0.01">
+                <mat-hint>Cantidad de unidades</mat-hint>
+                <mat-error>{{ getFieldError('cantidad') }}</mat-error>
+              </mat-form-field>
+              
+              <mat-form-field class="form-field-half">
+                <mat-label>Precio Unitario</mat-label>
+                <input matInput type="number" formControlName="precioUnitario" 
+                       placeholder="0.00" step="0.01" min="0">
+                <span matTextPrefix>€ </span>
+                <mat-hint>Precio por unidad</mat-hint>
+                <mat-error>{{ getFieldError('precioUnitario') }}</mat-error>
+              </mat-form-field>
+            </div>
+            
+            <!-- Configuración IVA -->
+            <div class="iva-section">
+              <mat-slide-toggle formControlName="aplicaIva" class="toggle-field">
+                Aplicar IVA
+              </mat-slide-toggle>
+              
+              <mat-form-field *ngIf="partidaForm.get('aplicaIva')?.value" class="iva-field">
+                <mat-label>Porcentaje IVA</mat-label>
+                <input matInput type="number" formControlName="porcentajeIva" 
+                       placeholder="21" step="1" min="0" max="100">
+                <span matTextSuffix>%</span>
+                <mat-error>{{ getFieldError('porcentajeIva') }}</mat-error>
+              </mat-form-field>
+            </div>
+            
+            <mat-divider></mat-divider>
+            
+            <!-- Resumen de Importes -->
+            <div class="importes-summary">
+              <h4>Resumen de Importes</h4>
+              
+              <div class="importe-row">
+                <span class="importe-label">Importe Base:</span>
+                <span class="importe-value">{{ getImporteBase() | currency:'EUR':'symbol':'1.2-2' }}</span>
+              </div>
+              
+              <div class="importe-row" *ngIf="partidaForm.get('aplicaIva')?.value">
+                <span class="importe-label">IVA ({{ partidaForm.get('porcentajeIva')?.value }}%):</span>
+                <span class="importe-value">{{ getImporteIva() | currency:'EUR':'symbol':'1.2-2' }}</span>
+              </div>
+              
+              <mat-divider></mat-divider>
+              
+              <div class="importe-row total">
+                <span class="importe-label">Total:</span>
+                <span class="importe-value">{{ getImporteTotal() | currency:'EUR':'symbol':'1.2-2' }}</span>
+              </div>
+            </div>
+            
+          </div>
+        </mat-tab>
+        
+        <!-- Pestaña: Planificación -->
+        <mat-tab label="Planificación">
+          <div class="tab-content">
+            
+            <!-- Fechas -->
+            <div class="form-row">
+              <mat-form-field class="form-field-half">
+                <mat-label>Fecha de Inicio</mat-label>
+                <input matInput [matDatepicker]="fechaInicioPicker" formControlName="fechaInicio">
+                <mat-datepicker-toggle matIconSuffix [for]="fechaInicioPicker"></mat-datepicker-toggle>
+                <mat-datepicker #fechaInicioPicker></mat-datepicker>
+                <mat-hint>Fecha prevista de inicio</mat-hint>
+                <mat-error>{{ getFieldError('fechaInicio') }}</mat-error>
+              </mat-form-field>
+              
+              <mat-form-field class="form-field-half">
+                <mat-label>Fecha de Fin</mat-label>
+                <input matInput [matDatepicker]="fechaFinPicker" formControlName="fechaFin">
+                <mat-datepicker-toggle matIconSuffix [for]="fechaFinPicker"></mat-datepicker-toggle>
+                <mat-datepicker #fechaFinPicker></mat-datepicker>
+                <mat-hint>Fecha prevista de finalización</mat-hint>
+                <mat-error>{{ getFieldError('fechaFin') }}</mat-error>
+              </mat-form-field>
+            </div>
+            
+            <!-- Observaciones -->
+            <mat-form-field class="form-field-full">
+              <mat-label>Observaciones</mat-label>
+              <textarea matInput formControlName="observaciones" 
+                       placeholder="Observaciones adicionales sobre la planificación" 
+                       rows="4" maxlength="500"></textarea>
+              <mat-hint align="end">{{ partidaForm.get('observaciones')?.value?.length || 0 }}/500</mat-hint>
+              <mat-error>{{ getFieldError('observaciones') }}</mat-error>
+            </mat-form-field>
+            
+          </div>
+        </mat-tab>
+        
+      </mat-tab-group>
+      
+    </form>
+  </div>
+
+  <!-- Actions -->
+  <div class="dialog-actions" mat-dialog-actions>
+    <div class="actions-left">
+      <button mat-button type="button" (click)="onReset()" 
+              [disabled]="saving() || !hasChanges()">
+        <mat-icon>refresh</mat-icon>
+        Restablecer
+      </button>
+    </div>
+    
+    <div class="actions-right">
+      <button mat-button type="button" (click)="onCancel()" [disabled]="saving()">
+        Cancelar
+      </button>
+      
+      <button mat-raised-button color="primary" type="button" 
+              (click)="onSave()" [disabled]="!canSave()">
+        <mat-spinner *ngIf="saving()" diameter="20" class="inline-spinner"></mat-spinner>
+        <mat-icon *ngIf="!saving()">save</mat-icon>
+        {{ saving() ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+  </div>
+  
+</div>

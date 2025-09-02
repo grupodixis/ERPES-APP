@@ -1,0 +1,342 @@
+<div class="desglose-container">
+  
+  <!-- Toolbar -->
+  <mat-toolbar class="desglose-toolbar">
+    <div class="toolbar-left">
+      <h3 class="toolbar-title">
+        <mat-icon>view_list</mat-icon>
+        Desglose de Partida
+        <mat-chip *ngIf="hasChanges()" class="changes-indicator" color="accent">
+          <mat-icon>edit</mat-icon>
+          Modificado
+        </mat-chip>
+      </h3>
+    </div>
+    
+    <div class="toolbar-right" *ngIf="!readonly">
+      <button mat-raised-button color="primary" (click)="addNewRow()" [disabled]="saving()">
+        <mat-icon>add</mat-icon>
+        Agregar
+      </button>
+      
+      <button mat-button [matMenuTriggerFor]="actionsMenu" 
+              [disabled]="selection.selected.length === 0 || saving()">
+        <mat-icon>more_vert</mat-icon>
+        Acciones ({{ selection.selected.length }})
+      </button>
+      
+      <mat-menu #actionsMenu="matMenu">
+        <button mat-menu-item (click)="duplicateSelected()">
+          <mat-icon>content_copy</mat-icon>
+          Duplicar seleccionados
+        </button>
+        <button mat-menu-item (click)="deleteSelected()" class="delete-action">
+          <mat-icon>delete</mat-icon>
+          Eliminar seleccionados
+        </button>
+      </mat-menu>
+    </div>
+  </mat-toolbar>
+  
+  <!-- Filtros -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-row">
+        
+        <!-- Búsqueda -->
+        <mat-form-field class="filter-field">
+          <mat-label>Buscar</mat-label>
+          <input matInput 
+                 [value]="filters().search"
+                 (input)="onFilterChange('search', $event.target.value)"
+                 placeholder="Código, nombre o descripción">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        
+        <!-- Tipo de Recurso -->
+        <mat-form-field class="filter-field">
+          <mat-label>Tipo de Recurso</mat-label>
+          <mat-select [value]="filters().tipoRecurso"
+                     (selectionChange)="onFilterChange('tipoRecurso', $event.value)">
+            <mat-option value="">Todos</mat-option>
+            <mat-option *ngFor="let tipo of tiposRecurso()" [value]="tipo.id">
+              {{ tipo.nombre }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        
+        <!-- Unidad de Medida -->
+        <mat-form-field class="filter-field">
+          <mat-label>Unidad de Medida</mat-label>
+          <mat-select [value]="filters().unidadMedida"
+                     (selectionChange)="onFilterChange('unidadMedida', $event.value)">
+            <mat-option value="">Todas</mat-option>
+            <mat-option *ngFor="let unidad of unidadesMedida()" [value]="unidad.id">
+              {{ unidad.nombre }} ({{ unidad.simbolo }})
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        
+        <!-- Filtros de estado -->
+        <div class="toggle-filters">
+          <mat-slide-toggle 
+            [checked]="filters().activos"
+            (change)="onFilterChange('activos', $event.checked)">
+            Solo activos
+          </mat-slide-toggle>
+          
+          <mat-slide-toggle 
+            [checked]="filters().conStock"
+            (change)="onFilterChange('conStock', $event.checked)">
+            Con stock
+          </mat-slide-toggle>
+        </div>
+        
+        <!-- Limpiar filtros -->
+        <button mat-button (click)="clearFilters()" class="clear-filters-btn">
+          <mat-icon>clear</mat-icon>
+          Limpiar
+        </button>
+        
+      </div>
+    </mat-card-content>
+  </mat-card>
+  
+  <!-- Resumen -->
+  <mat-card class="summary-card">
+    <mat-card-content>
+      <div class="summary-row">
+        <div class="summary-item">
+          <span class="summary-label">Total Elementos:</span>
+          <span class="summary-value">{{ filteredDesgloses().length }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Cantidad Total:</span>
+          <span class="summary-value">{{ totalCantidad() | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Importe Total:</span>
+          <span class="summary-value total-amount">{{ totalImporte() | currency:'EUR':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="summary-item" *ngIf="selection.selected.length > 0">
+          <span class="summary-label">Seleccionados:</span>
+          <span class="summary-value">{{ selection.selected.length }}</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando desglose...</p>
+  </div>
+  
+  <!-- Tabla -->
+  <div *ngIf="!loading()" class="table-container">
+    <mat-card class="table-card">
+      
+      <!-- Estado vacío -->
+      <div *ngIf="filteredDesgloses().length === 0" class="empty-state">
+        <mat-icon class="empty-icon">inventory_2</mat-icon>
+        <h3>No hay elementos en el desglose</h3>
+        <p *ngIf="filters().search || filters().tipoRecurso || filters().unidadMedida">
+          No se encontraron elementos que coincidan con los filtros aplicados.
+        </p>
+        <p *ngIf="!filters().search && !filters().tipoRecurso && !filters().unidadMedida">
+          Comienza agregando elementos al desglose de esta partida.
+        </p>
+        <button *ngIf="!readonly" mat-raised-button color="primary" (click)="addNewRow()">
+          <mat-icon>add</mat-icon>
+          Agregar primer elemento
+        </button>
+      </div>
+      
+      <!-- Tabla de datos -->
+      <div *ngIf="filteredDesgloses().length > 0" class="table-wrapper">
+        <table mat-table [dataSource]="dataSource" matSort class="desglose-table">
+          
+          <!-- Columna de selección -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef class="select-column">
+              <mat-checkbox 
+                *ngIf="!readonly"
+                [checked]="selection.hasValue() && isAllSelected()"
+                [indeterminate]="selection.hasValue() && !isAllSelected()"
+                (change)="toggleAllRows()">
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let row" class="select-column">
+              <mat-checkbox 
+                *ngIf="!readonly"
+                [checked]="selection.isSelected(row)"
+                (change)="toggleRow(row)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+          
+          <!-- Columnas dinámicas -->
+          <ng-container *ngFor="let column of columns" [matColumnDef]="column.key">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header 
+                [style.width]="column.width" class="column-header">
+              {{ column.label }}
+            </th>
+            
+            <td mat-cell *matCellDef="let element" 
+                [style.width]="column.width" 
+                [class.editing-cell]="editingRowId() === element.id && column.editable"
+                class="data-cell">
+              
+              <!-- Modo edición -->
+              <div *ngIf="editingRowId() === element.id && column.editable && !readonly" class="edit-cell">
+                
+                <!-- Campo de texto -->
+                <mat-form-field *ngIf="column.type === 'text'" appearance="outline" class="inline-field">
+                  <input matInput [formControlName]="column.key" [placeholder]="column.label">
+                </mat-form-field>
+                
+                <!-- Campo numérico -->
+                <mat-form-field *ngIf="column.type === 'number' || column.type === 'currency'" 
+                               appearance="outline" class="inline-field">
+                  <input matInput type="number" [formControlName]="column.key" 
+                         [placeholder]="column.label" step="0.01" min="0">
+                  <span *ngIf="column.type === 'currency'" matTextPrefix>€ </span>
+                </mat-form-field>
+                
+                <!-- Campo select -->
+                <mat-form-field *ngIf="column.type === 'select'" appearance="outline" class="inline-field">
+                  <mat-select [formControlName]="column.key" [placeholder]="column.label">
+                    <mat-option *ngFor="let option of column.options" [value]="option.id">
+                      {{ option.nombre }}
+                      <span *ngIf="option.simbolo"> ({{ option.simbolo }})</span>
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                
+                <!-- Campo checkbox -->
+                <mat-checkbox *ngIf="column.type === 'checkbox'" [formControlName]="column.key">
+                </mat-checkbox>
+                
+              </div>
+              
+              <!-- Modo visualización -->
+              <div *ngIf="editingRowId() !== element.id || !column.editable || readonly" class="view-cell">
+                
+                <!-- Checkbox -->
+                <mat-checkbox *ngIf="column.type === 'checkbox'" 
+                             [checked]="getColumnValue(element, column)" 
+                             [disabled]="readonly || editingRowId() === element.id"
+                             (change)="!readonly && startEdit(element)">
+                </mat-checkbox>
+                
+                <!-- Texto -->
+                <span *ngIf="column.type === 'text'" 
+                      [class.clickable]="!readonly && column.editable"
+                      (click)="!readonly && column.editable && startEdit(element)">
+                  {{ getColumnValue(element, column) }}
+                </span>
+                
+                <!-- Número -->
+                <span *ngIf="column.type === 'number'" 
+                      [class.clickable]="!readonly && column.editable"
+                      (click)="!readonly && column.editable && startEdit(element)">
+                  {{ getColumnValue(element, column) | number:'1.2-2' }}
+                </span>
+                
+                <!-- Moneda -->
+                <span *ngIf="column.type === 'currency'" 
+                      [class.clickable]="!readonly && column.editable"
+                      (click)="!readonly && column.editable && startEdit(element)">
+                  {{ getColumnValue(element, column) | currency:'EUR':'symbol':'1.2-2' }}
+                </span>
+                
+                <!-- Select -->
+                <span *ngIf="column.type === 'select'" 
+                      [class.clickable]="!readonly && column.editable"
+                      (click)="!readonly && column.editable && startEdit(element)">
+                  {{ getOptionLabel(column.options, getColumnValue(element, column)) }}
+                </span>
+                
+              </div>
+              
+            </td>
+          </ng-container>
+          
+          <!-- Columna de acciones -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="actions-column">
+              Acciones
+            </th>
+            <td mat-cell *matCellDef="let element" class="actions-column">
+              
+              <!-- Acciones en modo edición -->
+              <div *ngIf="editingRowId() === element.id" class="edit-actions">
+                <button mat-icon-button color="primary" 
+                        (click)="saveEdit()" 
+                        [disabled]="!editForm.valid || saving()"
+                        matTooltip="Guardar cambios">
+                  <mat-spinner *ngIf="saving()" diameter="20"></mat-spinner>
+                  <mat-icon *ngIf="!saving()">check</mat-icon>
+                </button>
+                
+                <button mat-icon-button 
+                        (click)="cancelEdit()" 
+                        [disabled]="saving()"
+                        matTooltip="Cancelar edición">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              
+              <!-- Acciones en modo visualización -->
+              <div *ngIf="editingRowId() !== element.id && !readonly" class="view-actions">
+                <button mat-icon-button 
+                        (click)="startEdit(element)"
+                        matTooltip="Editar">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                
+                <button mat-icon-button [matMenuTriggerFor]="rowMenu" matTooltip="Más opciones">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                
+                <mat-menu #rowMenu="matMenu">
+                  <button mat-menu-item (click)="selection.select(element); duplicateSelected()">
+                    <mat-icon>content_copy</mat-icon>
+                    Duplicar
+                  </button>
+                  <button mat-menu-item (click)="selection.select(element); deleteSelected()" class="delete-action">
+                    <mat-icon>delete</mat-icon>
+                    Eliminar
+                  </button>
+                </mat-menu>
+              </div>
+              
+              <!-- Modo solo lectura -->
+              <div *ngIf="readonly" class="readonly-actions">
+                <mat-icon class="readonly-icon">visibility</mat-icon>
+              </div>
+              
+            </td>
+          </ng-container>
+          
+          <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns()" 
+              [class.selected-row]="selection.isSelected(row)"
+              [class.editing-row]="editingRowId() === row.id">
+          </tr>
+          
+        </table>
+        
+        <!-- Paginador -->
+        <mat-paginator 
+          [pageSizeOptions]="[10, 25, 50, 100]"
+          [pageSize]="25"
+          showFirstLastButtons>
+        </mat-paginator>
+        
+      </div>
+      
+    </mat-card>
+  </div>
+  
+</div>

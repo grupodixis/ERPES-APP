@@ -1,0 +1,287 @@
+<div class="formas-pago-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>Formas de Pago</h1>
+    <p class="subtitle">Gestión de formas de pago del sistema</p>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div class="loading" *ngIf="loading()">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando formas de pago...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div class="error-message" *ngIf="error()">
+    <mat-icon>error</mat-icon>
+    <span>{{ error() }}</span>
+    <button mat-icon-button (click)="limpiarError()" aria-label="Cerrar error">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div class="content" *ngIf="!loading()">
+    <!-- Filters Card -->
+    <mat-card class="filters-card">
+      <mat-card-header>
+        <mat-card-title>Filtros</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="filtroForm" class="filters-form">
+          <div class="filters-row">
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Buscar</mat-label>
+              <input matInput formControlName="search" placeholder="Código o nombre...">
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Tipo</mat-label>
+              <mat-select formControlName="tipo">
+                <mat-option value="">Todos</mat-option>
+                <mat-option *ngFor="let tipo of tiposFormaPago()" [value]="tipo.value">
+                  {{ tipo.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Requiere Cuenta</mat-label>
+              <mat-select formControlName="requiereCuenta">
+                <mat-option value="">Todos</mat-option>
+                <mat-option [value]="true">Sí</mat-option>
+                <mat-option [value]="false">No</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Estado</mat-label>
+              <mat-select formControlName="activa">
+                <mat-option value="">Todos</mat-option>
+                <mat-option [value]="true">Activa</mat-option>
+                <mat-option [value]="false">Inactiva</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="filters-actions">
+            <button mat-raised-button color="primary" (click)="aplicarFiltros()" type="button">
+              <mat-icon>filter_list</mat-icon>
+              Aplicar Filtros
+            </button>
+            <button mat-button (click)="limpiarFiltros()" type="button">
+              <mat-icon>clear</mat-icon>
+              Limpiar
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Form Card -->
+    <mat-card class="form-card">
+      <mat-card-header>
+        <mat-card-title>
+          {{ editando() ? 'Editar Forma de Pago' : 'Nueva Forma de Pago' }}
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="formaPagoForm" (ngSubmit)="guardarFormaPago()" class="forma-pago-form">
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Código *</mat-label>
+              <input matInput formControlName="codigo" placeholder="Ej: EFECTIVO" [readonly]="editando()">
+              <mat-error *ngIf="formaPagoForm.get('codigo')?.invalid && formaPagoForm.get('codigo')?.touched">
+                {{ getErrorMessage('codigo') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Nombre *</mat-label>
+              <input matInput formControlName="nombre" placeholder="Ej: Pago en Efectivo">
+              <mat-error *ngIf="formaPagoForm.get('nombre')?.invalid && formaPagoForm.get('nombre')?.touched">
+                {{ getErrorMessage('nombre') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Tipo *</mat-label>
+              <mat-select formControlName="tipo">
+                <mat-option *ngFor="let tipo of tiposFormaPago()" [value]="tipo.value">
+                  {{ tipo.label }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="formaPagoForm.get('tipo')?.invalid && formaPagoForm.get('tipo')?.touched">
+                {{ getErrorMessage('tipo') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field full-width">
+              <mat-label>Descripción</mat-label>
+              <textarea matInput formControlName="descripcion" rows="3" 
+                       placeholder="Descripción opcional de la forma de pago"></textarea>
+              <mat-error *ngIf="formaPagoForm.get('descripcion')?.invalid && formaPagoForm.get('descripcion')?.touched">
+                {{ getErrorMessage('descripcion') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Días de Vencimiento</mat-label>
+              <input matInput type="number" formControlName="diasVencimiento" 
+                     placeholder="Días para vencimiento (opcional)" min="0" max="365">
+              <mat-error *ngIf="formaPagoForm.get('diasVencimiento')?.invalid && formaPagoForm.get('diasVencimiento')?.touched">
+                {{ getErrorMessage('diasVencimiento') }}
+              </mat-error>
+            </mat-form-field>
+
+            <div class="checkbox-field">
+              <mat-checkbox formControlName="requiereCuenta">
+                Requiere Cuenta Bancaria
+              </mat-checkbox>
+            </div>
+
+            <div class="checkbox-field">
+              <mat-checkbox formControlName="activa">
+                Activa
+              </mat-checkbox>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button mat-raised-button color="primary" type="submit" 
+                    [disabled]="formaPagoForm.invalid || loading()">
+              <mat-icon>{{ editando() ? 'edit' : 'add' }}</mat-icon>
+              {{ editando() ? 'Actualizar' : 'Crear' }}
+            </button>
+            <button mat-button type="button" (click)="cancelarEdicion()" 
+                    [disabled]="loading()">
+              <mat-icon>cancel</mat-icon>
+              Cancelar
+            </button>
+            <button mat-button type="button" (click)="nuevaFormaPago()" 
+                    *ngIf="editando()" [disabled]="loading()">
+              <mat-icon>add</mat-icon>
+              Nueva
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Data Table Card -->
+    <mat-card class="table-card">
+      <mat-card-header>
+        <mat-card-title>Formas de Pago ({{ formasPagoFiltradas().length }})</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="formasPagoFiltradas()" class="formas-table" 
+                 matSort matSortActive="nombre" matSortDirection="asc">
+            
+            <!-- Código Column -->
+            <ng-container matColumnDef="codigo">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Código</th>
+              <td mat-cell *matCellDef="let forma">
+                <span class="codigo-badge">{{ forma.codigo }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Nombre Column -->
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
+              <td mat-cell *matCellDef="let forma">
+                <div class="nombre-cell">
+                  <strong>{{ forma.nombre }}</strong>
+                  <small *ngIf="forma.descripcion">{{ forma.descripcion }}</small>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Tipo Column -->
+            <ng-container matColumnDef="tipo">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
+              <td mat-cell *matCellDef="let forma">
+                <span class="tipo-badge" [class]="'tipo-' + forma.tipo">
+                  {{ getTipoLabel(forma.tipo) }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Requiere Cuenta Column -->
+            <ng-container matColumnDef="requiereCuenta">
+              <th mat-header-cell *matHeaderCellDef>Req. Cuenta</th>
+              <td mat-cell *matCellDef="let forma">
+                <mat-icon class="status-icon" [class.active]="forma.requiereCuenta">
+                  {{ forma.requiereCuenta ? 'check_circle' : 'cancel' }}
+                </mat-icon>
+              </td>
+            </ng-container>
+
+            <!-- Días Vencimiento Column -->
+            <ng-container matColumnDef="diasVencimiento">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Días Venc.</th>
+              <td mat-cell *matCellDef="let forma">
+                <span *ngIf="forma.diasVencimiento; else noDias">
+                  {{ forma.diasVencimiento }} días
+                </span>
+                <ng-template #noDias>
+                  <span class="no-data">-</span>
+                </ng-template>
+              </td>
+            </ng-container>
+
+            <!-- Estado Column -->
+            <ng-container matColumnDef="activa">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let forma">
+                <span class="status-badge" [class.active]="forma.activa">
+                  {{ forma.activa ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let forma">
+                <div class="actions-cell">
+                  <button mat-icon-button color="primary" 
+                          (click)="editarFormaPago(forma)"
+                          [disabled]="loading()"
+                          matTooltip="Editar forma de pago">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" 
+                          (click)="eliminarFormaPago(forma)"
+                          [disabled]="loading()"
+                          matTooltip="Eliminar forma de pago">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+
+          <!-- Empty State -->
+          <div class="empty-state" *ngIf="formasPagoFiltradas().length === 0 && !loading()">
+            <mat-icon>payment</mat-icon>
+            <h3>No hay formas de pago</h3>
+            <p>No se encontraron formas de pago que coincidan con los filtros aplicados.</p>
+            <button mat-raised-button color="primary" (click)="limpiarFiltros()">
+              <mat-icon>refresh</mat-icon>
+              Mostrar Todas
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

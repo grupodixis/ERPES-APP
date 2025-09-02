@@ -1,0 +1,1049 @@
+@use './styles/theme.scss';
+
+
+
+// Material 3 Global Styles
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--mat-card-background-color);
+  color: var(--sidebar-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+// Dark theme text improvements
+.dark-theme {
+  body {
+    color: var(--mat-body-text-color);
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--mat-headline-text-color) !important;
+  }
+  
+  p, span, div {
+    color: var(--mat-body-text-color);
+  }
+  
+  // Span elements with improved contrast for both themes
+  span {
+    // General span contrast improvements
+    color: var(--mat-body-text-color) !important;
+    
+    &.codigo-badge, &.codigo-chip, &.codigo {
+      background-color: #0277bd !important; // Darker blue for better contrast
+      color: #ffffff !important;
+      padding: 4px 8px;
+      border-radius: var(--border-radius-sm);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      font-weight: 600; // Increased weight for better readability
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    &.status-badge, &.estado-badge {
+      padding: 4px 8px;
+      border-radius: var(--border-radius-sm);
+      font-size: 12px;
+      font-weight: 600; // Increased weight
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      
+      &.active, &.activo {
+        background-color: #2e7d32 !important; // Darker green
+        color: #ffffff !important;
+      }
+      
+      &.inactive, &.inactivo {
+        background-color: #c62828 !important; // Darker red
+        color: #ffffff !important;
+      }
+    }
+    
+    &.tipo-badge, &.magnitud-badge {
+      background-color: #00695c !important; // Darker primary
+      color: #ffffff !important;
+      padding: 4px 8px;
+      border-radius: var(--border-radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    &.porcentaje-badge, &.numero-chip {
+      background-color: var(--status-warning);
+      color: var(--mat-body-text-color);
+      padding: 4px 8px;
+      border-radius: var(--border-radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    &.nivel-badge {
+      background-color: var(--sidebar-active);
+      color: var(--status-info);
+      padding: 4px 8px;
+      border-radius: var(--border-radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    &.rol-nombre, &.permiso-nombre, &.modulo-nombre {
+      color: var(--mat-headline-text-color);
+      font-weight: 600;
+    }
+    
+    &.rol-descripcion, &.permiso-descripcion {
+      color: var(--mat-subheading-text-color);
+      font-style: italic;
+    }
+    
+    &.count-badge, &.counter {
+       background-color: var(--primary-color);
+       color: white;
+       padding: 2px 6px;
+       border-radius: var(--border-radius-xl);
+       font-size: 11px;
+       font-weight: 600;
+       min-width: 18px;
+       text-align: center;
+     }
+   }
+   
+   // Material Design Switch elements
+   .mdc-switch__track {
+     background-color: var(--sidebar-border) !important;
+     
+     &::before {
+       background-color: var(--status-error) !important;
+     }
+     
+     &::after {
+       background-color: var(--primary-color) !important;
+     }
+   }
+   
+   .mdc-switch--selected .mdc-switch__track {
+     background-color: var(--primary-color) !important;
+     opacity: 0.54 !important;
+   }
+   
+   .mdc-switch__ripple {
+     .mat-ripple {
+       color: var(--primary-color) !important;
+     }
+   }
+   
+   .mat-mdc-slide-toggle {
+      .mdc-switch__thumb {
+        background-color: var(--mat-card-background-color) !important;
+        border-color: var(--sidebar-border) !important;
+      }
+      
+      &.mat-checked {
+        .mdc-switch__thumb {
+          background-color: var(--primary-color) !important;
+          border-color: var(--primary-color) !important;
+        }
+      }
+      
+      // SVG icons in switch
+      .mdc-switch__icon {
+        svg {
+          fill: var(--mat-subheading-text-color) !important;
+        }
+        
+        &.mdc-switch__icon--on svg {
+          fill: var(--primary-color) !important;
+        }
+        
+        &.mdc-switch__icon--off svg {
+          fill: var(--sidebar-border) !important;
+        }
+      }
+    }
+    
+    // Button span elements with muted colors
+    .mat-mdc-button, .mat-mdc-raised-button, .mat-mdc-icon-button {
+      span:not(.mat-mdc-button-touch-target) {
+        color: var(--mat-subheading-text-color) !important;
+        opacity: 0.8;
+      }
+      
+      &.mat-primary span:not(.mat-mdc-button-touch-target) {
+        color: white !important;
+        opacity: 0.9;
+      }
+      
+      // SVG icons in buttons
+      svg, mat-icon svg {
+        fill: var(--mat-body-text-color) !important;
+      }
+      
+      &.mat-primary svg, &.mat-primary mat-icon svg {
+        fill: white !important;
+      }
+      
+      &:disabled {
+        span:not(.mat-mdc-button-touch-target) {
+          color: var(--mat-button-disabled-text-color) !important;
+          opacity: 0.5;
+        }
+        
+        svg, mat-icon svg {
+          fill: var(--mat-button-disabled-text-color) !important;
+        }
+      }
+    }
+  
+  .mat-mdc-card {
+    color: var(--mat-body-text-color) !important;
+  }
+  
+  .mat-mdc-card-title {
+    color: var(--mat-headline-text-color) !important;
+  }
+  
+  .mat-mdc-card-subtitle {
+    color: var(--mat-subheading-text-color) !important;
+  }
+}
+
+// Material 3 Component Overrides
+.mat-mdc-card {
+  border-radius: var(--border-radius-lg) !important;
+  box-shadow: var(--shadow-1) !important;
+  transition: box-shadow 0.3s ease;
+  background-color: var(--mat-card-background-color) !important;
+  
+  &:hover {
+    box-shadow: var(--shadow-2) !important;
+  }
+}
+
+// Mat Card Content Responsive Styles
+.mat-mdc-card-content {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-x: auto !important;
+  
+  // Ensure proper responsive behavior
+  @media (max-width: 1200px) {
+    padding: 16px !important;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 12px !important;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 8px !important;
+  }
+  
+  // Fix for tables and wide content
+  .table-wrapper,
+  .data-table-container,
+  .filters-section,
+  .stats-section {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  
+  // Responsive form layouts
+  .filters-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      
+      mat-form-field {
+        width: 100% !important;
+        min-width: auto !important;
+      }
+    }
+  }
+  
+  // Responsive button groups
+  .action-buttons,
+  .form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      
+      button {
+        width: 100% !important;
+      }
+    }
+  }
+}
+
+.mat-mdc-raised-button {
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: 0.5px !important;
+  transition: all 0.2s ease !important;
+  background-color: var(--mat-button-background-color) !important;
+  color: var(--mat-button-text-color) !important;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23) !important;
+  }
+}
+
+.mat-mdc-button {
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.mat-mdc-icon-button {
+  border-radius: 50% !important;
+  transition: all 0.2s ease !important;
+  
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+.mat-mdc-chip {
+  border-radius: var(--border-radius-xl) !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.mat-mdc-form-field {
+  .mat-mdc-form-field-focus-overlay {
+    background-color: transparent !important;
+  }
+  
+  .mat-mdc-text-field-wrapper {
+    border-radius: var(--border-radius-md) !important;
+  }
+}
+
+.mat-mdc-select {
+  border-radius: var(--border-radius-md) !important;
+}
+
+.mat-mdc-slide-toggle {
+  .mdc-switch {
+    border-radius: 12px !important;
+  }
+}
+
+.mat-mdc-menu-panel {
+  border-radius: var(--border-radius-lg) !important;
+  box-shadow: var(--shadow-2) !important;
+}
+
+.mat-mdc-dialog-container {
+  .mdc-dialog__surface {
+    border-radius: var(--border-radius-lg) !important;
+  }
+}
+
+.mat-mdc-snack-bar-container {
+  border-radius: var(--border-radius-md) !important;
+}
+
+// Status indicators
+.status-success {
+  color: var(--status-success) !important;
+}
+
+.status-warning {
+  color: var(--status-warning) !important;
+}
+
+.status-error {
+  color: var(--status-error) !important;
+}
+
+.status-info {
+  color: var(--status-info) !important;
+}
+
+// Stock indicators
+.stock-low {
+  color: var(--stock-low) !important;
+}
+
+.stock-critical {
+  color: var(--stock-critical) !important;
+}
+
+.stock-ok {
+  color: var(--stock-ok) !important;
+}
+
+// Animation classes
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.scale-in {
+  animation: scaleIn 0.3s ease-in-out;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Loading animations
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+// Utility classes
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.d-flex { display: flex; }
+.d-inline-flex { display: inline-flex; }
+.d-block { display: block; }
+.d-none { display: none; }
+
+.justify-center { justify-content: center; }
+.justify-start { justify-content: flex-start; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+
+.align-center { align-items: center; }
+.align-start { align-items: flex-start; }
+.align-end { align-items: flex-end; }
+
+.flex-column { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+
+.w-100 { width: 100%; }
+.h-100 { height: 100%; }
+
+.m-0 { margin: 0; }
+.p-0 { padding: 0; }
+
+// Spacing utilities
+.m-1 { margin: var(--spacing-xs); }
+.m-2 { margin: var(--spacing-sm); }
+.m-3 { margin: var(--spacing-md); }
+.m-4 { margin: var(--spacing-lg); }
+.m-5 { margin: var(--spacing-xl); }
+
+.p-1 { padding: var(--spacing-xs); }
+.p-2 { padding: var(--spacing-sm); }
+.p-3 { padding: var(--spacing-md); }
+.p-4 { padding: var(--spacing-lg); }
+.p-5 { padding: var(--spacing-xl); }
+
+// Border radius utilities
+.rounded-sm { border-radius: var(--border-radius-sm); }
+.rounded-md { border-radius: var(--border-radius-md); }
+.rounded-lg { border-radius: var(--border-radius-lg); }
+.rounded-xl { border-radius: var(--border-radius-xl); }
+
+// Shadow utilities
+.shadow-1 { box-shadow: var(--shadow-1); }
+.shadow-2 { box-shadow: var(--shadow-2); }
+.shadow-3 { box-shadow: var(--shadow-3); }
+
+// Responsive utilities
+@media (max-width: 576px) {
+  .d-xs-none { display: none !important; }
+  .d-xs-block { display: block !important; }
+  .d-xs-flex { display: flex !important; }
+}
+
+@media (min-width: 577px) and (max-width: 768px) {
+  .d-sm-none { display: none !important; }
+  .d-sm-block { display: block !important; }
+  .d-sm-flex { display: flex !important; }
+}
+
+@media (min-width: 769px) and (max-width: 992px) {
+  .d-md-none { display: none !important; }
+  .d-md-block { display: block !important; }
+  .d-md-flex { display: flex !important; }
+}
+
+@media (min-width: 993px) and (max-width: 1200px) {
+  .d-lg-none { display: none !important; }
+  .d-lg-block { display: block !important; }
+  .d-lg-flex { display: flex !important; }
+}
+
+@media (min-width: 1201px) {
+  .d-xl-none { display: none !important; }
+  .d-xl-block { display: block !important; }
+  .d-xl-flex { display: flex !important; }
+}
+
+// Print styles
+@media print {
+  .no-print { display: none !important; }
+  
+  .mat-mdc-card {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+  
+  .mat-mdc-raised-button,
+  .mat-mdc-button {
+    display: none !important;
+  }
+}
+
+// Focus styles for accessibility
+.mat-mdc-button:focus-visible,
+.mat-mdc-raised-button:focus-visible,
+.mat-mdc-icon-button:focus-visible {
+  outline: 2px solid var(--status-info) !important;
+  outline-offset: 2px !important;
+}
+
+// Dark theme Material Component improvements
+.dark-theme {
+  // Table improvements
+  .mat-mdc-table {
+    background-color: var(--mat-table-background-color) !important;
+    color: var(--mat-table-text-color) !important;
+  }
+  
+  .mat-mdc-header-row {
+    background-color: var(--mat-table-header-background-color) !important;
+  }
+  
+  .mat-mdc-header-cell {
+    color: var(--mat-table-header-text-color) !important;
+    font-weight: 600 !important;
+  }
+  
+  .mat-mdc-cell {
+    color: var(--mat-table-text-color) !important;
+  }
+  
+  .mat-mdc-row:hover {
+    background-color: var(--mat-table-row-hover-color) !important;
+  }
+  
+  // Paginator improvements
+  .mat-mdc-paginator {
+    background-color: var(--mat-card-background-color) !important;
+    color: var(--mat-body-text-color) !important;
+  }
+  
+  .mat-mdc-paginator-container {
+    background-color: var(--mat-card-background-color) !important;
+  }
+  
+  .mat-mdc-paginator-page-size-label,
+  .mat-mdc-paginator-range-label {
+    color: var(--mat-body-text-color) !important;
+  }
+  
+  .mat-mdc-paginator-page-size-select {
+    .mat-mdc-select-value {
+      color: var(--mat-body-text-color) !important;
+    }
+    
+    .mat-mdc-select-arrow {
+      color: var(--mat-body-text-color) !important;
+    }
+  }
+  
+  .mat-mdc-paginator-navigation-first,
+  .mat-mdc-paginator-navigation-previous,
+  .mat-mdc-paginator-navigation-next,
+  .mat-mdc-paginator-navigation-last {
+    color: var(--mat-body-text-color) !important;
+    
+    &:disabled {
+      color: var(--mat-button-disabled-text-color) !important;
+    }
+  }
+  
+  // Form field improvements
+  .mat-mdc-form-field {
+    .mat-mdc-form-field-label {
+      color: var(--mat-form-field-label-color) !important;
+    }
+    
+    .mat-mdc-input-element {
+      color: var(--mat-input-text-color) !important;
+    }
+    
+    .mat-mdc-form-field-underline {
+      background-color: var(--mat-form-field-underline-color) !important;
+    }
+  }
+  
+  // Button improvements
+  .mat-mdc-button {
+    color: var(--mat-button-text-color-dark) !important;
+    
+    &.mat-primary {
+      background-color: var(--primary-action-color) !important;
+      color: var(--primary-action-text) !important;
+      
+      &:hover {
+        background-color: var(--primary-action-hover) !important;
+      }
+      
+      .mat-mdc-button-touch-target {
+        background-color: transparent !important;
+      }
+    }
+    
+    &:disabled {
+      color: var(--mat-button-disabled-text-color) !important;
+    }
+  }
+  
+  .mat-mdc-raised-button {
+    &.mat-primary {
+      background-color: var(--primary-action-color) !important;
+      color: var(--primary-action-text) !important;
+      
+      &:hover {
+        background-color: var(--primary-action-hover) !important;
+      }
+    }
+  }
+  
+  // Icon button improvements for better contrast
+  .mat-mdc-icon-button {
+    color: var(--mat-button-text-color-dark) !important;
+    
+    &.mat-primary {
+      color: var(--primary-action-color) !important;
+      
+      &:hover {
+        background-color: rgba(38, 198, 218, 0.12) !important;
+      }
+      
+      .mat-mdc-button-touch-target {
+        background-color: transparent !important;
+      }
+    }
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.08) !important;
+    }
+    
+    &:disabled {
+      color: var(--mat-button-disabled-text-color) !important;
+    }
+    
+    // Ensure mat-icon inside has proper color
+    mat-icon {
+      color: inherit !important;
+    }
+  }
+  
+  // Span elements with primary actions
+  span.mat-mdc-button-touch-target {
+    background-color: transparent !important;
+  }
+  
+  // Primary action spans and elements
+  .primary-action,
+  [color="primary"] {
+    color: var(--primary-action-color) !important;
+    
+    &:hover {
+      color: var(--primary-action-hover) !important;
+    }
+  }
+  
+  // Chip improvements
+  .mat-mdc-chip {
+    background-color: var(--mat-chip-background-color) !important;
+    color: var(--mat-chip-text-color) !important;
+    
+    .mat-mdc-chip-action-label {
+      color: var(--mat-chip-text-color) !important;
+    }
+  }
+  
+  // Select improvements
+  .mat-mdc-select {
+    color: var(--mat-body-text-color) !important;
+    
+    .mat-mdc-select-placeholder {
+      color: rgba(255, 255, 255, 0.6) !important;
+    }
+    
+    .mat-mdc-select-value {
+      color: var(--mat-body-text-color) !important;
+    }
+  }
+  
+  // Form field improvements
+  .mat-mdc-form-field {
+    .mat-mdc-form-field-label {
+      color: rgba(255, 255, 255, 0.7) !important;
+    }
+    
+    .mat-mdc-form-field-hint {
+      color: rgba(255, 255, 255, 0.6) !important;
+    }
+  }
+  
+  // Menu improvements
+  .mat-mdc-menu-panel {
+    background-color: var(--mat-card-background-color) !important;
+  }
+  
+  .mat-mdc-menu-item {
+    color: var(--mat-body-text-color) !important;
+  }
+  
+  // Dialog improvements
+  .mat-mdc-dialog-container {
+    background-color: var(--mat-card-background-color) !important;
+  }
+  
+  .mat-mdc-dialog-title {
+    color: var(--mat-headline-text-color) !important;
+  }
+  
+  .mat-mdc-dialog-content {
+    color: var(--mat-body-text-color) !important;
+  }
+  
+  // Divider improvements
+  .mat-divider {
+    border-top-color: var(--mat-divider-color) !important;
+  }
+  
+  // List improvements
+  .mat-mdc-list-item {
+    color: var(--mat-body-text-color) !important;
+  }
+  
+  .mat-mdc-list-item-title {
+    color: var(--mat-headline-text-color) !important;
+  }
+  
+  .mat-mdc-list-item-line {
+    color: var(--mat-subheading-text-color) !important;
+  }
+  
+  .mdc-list-item__primary-text {
+    color: white !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+  }
+}
+
+// Material Design Component overrides
+.mdc-list-item__primary-text {
+  color: white !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+// Material Select Panel Contrast Improvements - Enhanced for WCAG AA
+.mat-mdc-select-panel {
+  background-color: #ffffff !important; // Pure white for light theme
+  border: 2px solid #424242 !important; // Stronger border
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important; // Enhanced shadow
+  
+  .mat-mdc-option {
+    color: #212121 !important; // Dark text for light background
+    background-color: transparent !important;
+    min-height: 48px !important;
+    padding: 12px 16px !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
+    font-weight: 500 !important;
+    
+    &:last-child {
+      border-bottom: none !important;
+    }
+    
+    &:hover {
+      background-color: #f5f5f5 !important; // Light gray hover
+      color: #000000 !important; // Pure black text
+      font-weight: 600 !important;
+    }
+    
+    &.mat-mdc-option-active,
+    &.mdc-list-item--selected {
+      background-color: #0277bd !important; // Darker blue for better contrast
+      color: #ffffff !important;
+      font-weight: 700 !important; // Bold for selected state
+      
+      .mdc-list-item__primary-text {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+      }
+
+      .mat-pseudo-checkbox {
+        color: #ffffff !important;
+        background-color: #ffffff !important;
+        border-color: #ffffff !important;
+      }
+    }
+    
+    &:focus {
+      background-color: #1976d2 !important; // Strong blue focus
+      color: #ffffff !important;
+      outline: 3px solid #ffeb3b !important; // Yellow outline for visibility
+      outline-offset: -2px !important;
+      font-weight: 600 !important;
+    }
+    
+    .mdc-list-item__primary-text {
+      color: inherit !important;
+      font-size: 14px !important;
+      font-weight: inherit !important;
+      line-height: 1.4 !important;
+    }
+    
+    .mat-pseudo-checkbox {
+      color: #0277bd !important; // Darker blue for checkbox
+      
+      &.mat-pseudo-checkbox-checked {
+        background-color: #0277bd !important;
+        border-color: #0277bd !important;
+      }
+    }
+  }
+}
+
+// Dark theme improvements for select panel - Enhanced contrast
+.dark-theme {
+  .mat-mdc-select-panel {
+    background-color: #121212 !important; // Darker background
+    border: 2px solid #ffffff !important; // White border for contrast
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important; // Stronger shadow
+    
+    .mat-mdc-option {
+      color: #ffffff !important; // Pure white text
+      border-bottom-color: rgba(255, 255, 255, 0.2) !important; // More visible separator
+      font-weight: 500 !important;
+      
+      &:hover {
+        background-color: #424242 !important; // Lighter gray hover
+        color: #ffffff !important;
+        font-weight: 600 !important;
+      }
+      
+      &.mat-mdc-option-active,
+      &.mdc-list-item--selected {
+        background-color: #26c6da !important; // Lighter blue for dark theme
+        color: #000000 !important; // Black text for contrast
+        font-weight: 700 !important;
+        
+        .mdc-list-item__primary-text {
+          color: #000000 !important; // Black text on light blue
+          font-weight: 700 !important;
+        }
+        
+        .mat-pseudo-checkbox {
+          color: #000000 !important;
+          background-color: #000000 !important;
+          border-color: #000000 !important;
+        }
+      }
+      
+      &:focus {
+        background-color: #4fc3f7 !important; // Light blue focus
+        color: #000000 !important; // Black text for contrast
+        outline: 3px solid #ffeb3b !important; // Yellow outline
+        outline-offset: -2px !important;
+        font-weight: 600 !important;
+      }
+      
+      .mdc-list-item__primary-text {
+        color: inherit !important;
+        font-weight: inherit !important;
+      }
+      
+      .mat-pseudo-checkbox {
+        color: #26c6da !important; // Light blue for checkbox
+        
+        &.mat-pseudo-checkbox-checked {
+          background-color: #26c6da !important;
+          border-color: #26c6da !important;
+        }
+      }
+    }
+  }
+}
+
+// Angular Material expansion indicator color override
+:root {
+  --mat-expansion-header-indicator-color: white;
+}
+
+// Scrollbar styling
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+  
+  &:hover {
+    background: #a8a8a8;
+  }
+}
+
+// Dark theme scrollbar
+.dark-theme {
+  ::-webkit-scrollbar-track {
+    background: #2d2d2d;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #555555;
+    
+    &:hover {
+      background: #777777;
+    }
+  }
+  height: 8px;
+}
+
+// General span contrast improvements for toolbar and UI elements
+span {
+  &.toolbar-title {
+    color: #ffffff !important; // Pure white for toolbar titles
+    font-weight: 600 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important; // Subtle shadow for better readability
+  }
+  
+  &.mat-mdc-button-touch-target {
+    background-color: transparent !important;
+  }
+  
+  // Ensure all span elements have proper contrast
+  &:not(.codigo-badge):not(.codigo-chip):not(.codigo):not(.status-badge):not(.estado-badge):not(.tipo-badge):not(.magnitud-badge):not(.toolbar-title) {
+    color: var(--mat-body-text-color) !important;
+  }
+}
+
+// Dark theme specific span improvements
+.dark-theme {
+  span {
+    &.toolbar-title {
+      color: #ffffff !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important; // Stronger shadow for dark theme
+    }
+    
+    &.codigo-badge, &.codigo-chip, &.codigo {
+      background-color: #4fc3f7 !important; // Lighter blue for dark theme
+      color: #000000 !important; // Black text for contrast
+      border-color: rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    &.status-badge, &.estado-badge {
+      &.active, &.activo {
+        background-color: #66bb6a !important; // Lighter green for dark theme
+        color: #000000 !important;
+      }
+      
+      &.inactive, &.inactivo {
+        background-color: #ef5350 !important; // Lighter red for dark theme
+        color: #000000 !important;
+      }
+    }
+    
+    &.tipo-badge, &.magnitud-badge {
+      background-color: #26c6da !important; // Lighter primary for dark theme
+      color: #000000 !important;
+    }
+  }
+}
+
+::-webkit-scrollbar-track {
+  background: var(--sidebar-hover);
+  border-radius: var(--border-radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sidebar-border);
+  border-radius: var(--border-radius-sm);
+  
+  &:hover {
+    background: var(--mat-card-subtitle-text-color);
+  }
+}
+
+// Selection styling
+::selection {
+  background-color: var(--status-info);
+  color: white;
+}
+
+::-moz-selection {
+  background-color: var(--status-info);
+  color: white;
+}

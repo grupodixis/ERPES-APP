@@ -1,0 +1,346 @@
+<div class="presupuesto-editor-container">
+  <!-- Toolbar superior -->
+  <mat-toolbar class="editor-toolbar">
+    <div class="toolbar-left">
+      <button mat-icon-button (click)="onCancel()" matTooltip="Volver">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <span class="toolbar-title">
+        {{ esNuevo() ? 'Nuevo Presupuesto' : 'Editar Presupuesto' }}
+      </span>
+      @if (presupuesto()) {
+        <mat-chip [color]="getEstadoColor(presupuesto()!.estado)" selected>
+          {{ presupuesto()!.estado }}
+        </mat-chip>
+      }
+    </div>
+    
+    <div class="toolbar-right">
+      @if (!esNuevo()) {
+        <button mat-button (click)="onDuplicatePresupuesto()" matTooltip="Duplicar">
+          <mat-icon>content_copy</mat-icon>
+          Duplicar
+        </button>
+        <button mat-button (click)="onExportPresupuesto()" matTooltip="Exportar">
+          <mat-icon>download</mat-icon>
+          Exportar
+        </button>
+        <button mat-button (click)="onPrintPresupuesto()" matTooltip="Imprimir">
+          <mat-icon>print</mat-icon>
+          Imprimir
+        </button>
+      }
+      
+      <button mat-raised-button color="primary" 
+              (click)="onSubmit()" 
+              [disabled]="loading() || !presupuestoForm.valid"
+              matTooltip="Guardar cambios">
+        @if (loading()) {
+          <mat-spinner diameter="20" class="inline-spinner"></mat-spinner>
+        } @else {
+          <mat-icon>save</mat-icon>
+        }
+        {{ esNuevo() ? 'Crear' : 'Guardar' }}
+      </button>
+    </div>
+  </mat-toolbar>
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb-nav" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a [routerLink]="['/presupuestos']" class="breadcrumb-link">
+          <mat-icon>business</mat-icon>
+          Presupuestos
+        </a>
+      </li>
+      @if (presupuesto()) {
+        <li class="breadcrumb-item">
+          <span class="breadcrumb-separator">/</span>
+          <span class="breadcrumb-current">
+            <mat-icon>description</mat-icon>
+            {{ presupuesto()!.nombre }}
+          </span>
+        </li>
+      }
+    </ol>
+  </nav>
+
+  <!-- Contenido principal -->
+  <div class="editor-content">
+    <!-- Panel izquierdo: Formulario -->
+    <div class="left-panel">
+      <mat-card class="form-card">
+        <mat-card-header>
+          <mat-card-title>Datos del Presupuesto</mat-card-title>
+          @if (estadoEditor().cambiosPendientes) {
+            <mat-icon class="changes-indicator" color="warn" matTooltip="Cambios pendientes">edit</mat-icon>
+          }
+        </mat-card-header>
+        
+        <mat-card-content>
+          <form [formGroup]="presupuestoForm" (ngSubmit)="onSubmit()">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field-half">
+                <mat-label>Código</mat-label>
+                <input matInput formControlName="codigo" placeholder="PRES-2024-001">
+                @if (presupuestoForm.get('codigo')?.hasError('required') && presupuestoForm.get('codigo')?.touched) {
+                  <mat-error>El código es obligatorio</mat-error>
+                }
+                @if (presupuestoForm.get('codigo')?.hasError('maxlength')) {
+                  <mat-error>Máximo 20 caracteres</mat-error>
+                }
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="form-field-half">
+                <mat-label>Estado</mat-label>
+                <mat-select formControlName="estado">
+                  @for (estado of estadosPresupuesto; track estado) {
+                    <mat-option [value]="estado">{{ estado }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+            
+            <mat-form-field appearance="outline" class="form-field-full">
+              <mat-label>Nombre</mat-label>
+              <input matInput formControlName="nombre" placeholder="Nombre del presupuesto">
+              @if (presupuestoForm.get('nombre')?.hasError('required') && presupuestoForm.get('nombre')?.touched) {
+                <mat-error>El nombre es obligatorio</mat-error>
+              }
+              @if (presupuestoForm.get('nombre')?.hasError('maxlength')) {
+                <mat-error>Máximo 200 caracteres</mat-error>
+              }
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="form-field-full">
+              <mat-label>Descripción</mat-label>
+              <textarea matInput formControlName="descripcion" 
+                       placeholder="Descripción detallada del presupuesto"
+                       rows="3"></textarea>
+              @if (presupuestoForm.get('descripcion')?.hasError('maxlength')) {
+                <mat-error>Máximo 1000 caracteres</mat-error>
+              }
+            </mat-form-field>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field-half">
+                <mat-label>Cliente</mat-label>
+                <mat-select formControlName="clienteId">
+                  <!-- TODO: Cargar clientes dinámicamente -->
+                  <mat-option [value]="1">Empresa ABC S.L.</mat-option>
+                  <mat-option [value]="2">Industrias XYZ S.A.</mat-option>
+                  <mat-option [value]="3">Logística DEF S.L.</mat-option>
+                </mat-select>
+                @if (presupuestoForm.get('clienteId')?.hasError('required') && presupuestoForm.get('clienteId')?.touched) {
+                  <mat-error>El cliente es obligatorio</mat-error>
+                }
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="form-field-half">
+                <mat-label>Fecha de Validez</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="fechaValidez">
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+              </mat-form-field>
+            </div>
+            
+            <mat-form-field appearance="outline" class="form-field-full">
+              <mat-label>Observaciones</mat-label>
+              <textarea matInput formControlName="observaciones" 
+                       placeholder="Observaciones adicionales"
+                       rows="3"></textarea>
+              @if (presupuestoForm.get('observaciones')?.hasError('maxlength')) {
+                <mat-error>Máximo 2000 caracteres</mat-error>
+              }
+            </mat-form-field>
+          </form>
+        </mat-card-content>
+      </mat-card>
+      
+      <!-- Resumen de totales -->
+      @if (presupuesto()) {
+        <mat-card class="totals-card">
+          <mat-card-header>
+            <mat-card-title>Resumen</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="totals-grid">
+              <div class="total-item">
+                <span class="total-label">Capítulos:</span>
+                <span class="total-value">{{ numeroCapitulos }}</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">Partidas:</span>
+                <span class="total-value">{{ numeroPartidas }}</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">Base Imponible:</span>
+                <span class="total-value">{{ formatCurrency(totalSinIva) }}</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">IVA:</span>
+                <span class="total-value">{{ formatCurrency(totalIva) }}</span>
+              </div>
+              <div class="total-item total-final">
+                <span class="total-label">Total:</span>
+                <span class="total-value">{{ formatCurrency(totalConIva) }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+    
+    <!-- Panel derecho: Árbol de capítulos y partidas -->
+    <div class="right-panel">
+      <mat-card class="tree-card">
+        <mat-card-header>
+          <mat-card-title>Estructura del Presupuesto</mat-card-title>
+          <div class="tree-actions">
+            @if (!esNuevo()) {
+              <button mat-icon-button 
+                      (click)="onAddCapitulo()" 
+                      matTooltip="Agregar capítulo raíz"
+                      color="primary">
+                <mat-icon>add_circle</mat-icon>
+              </button>
+            }
+          </div>
+        </mat-card-header>
+        
+        <mat-card-content>
+          @if (loading()) {
+            <div class="loading-container">
+              <mat-spinner></mat-spinner>
+              <p>Cargando estructura...</p>
+            </div>
+          } @else if (arbolCapitulos().length === 0) {
+            <div class="empty-tree">
+              <mat-icon class="empty-icon">folder_open</mat-icon>
+              <p>No hay capítulos definidos</p>
+              @if (!esNuevo()) {
+                <button mat-raised-button color="primary" (click)="onAddCapitulo()">
+                  <mat-icon>add</mat-icon>
+                  Agregar primer capítulo
+                </button>
+              }
+            </div>
+          } @else {
+            <!-- Tabla estructurada -->
+            <div class="presupuesto-table-container">
+              <table class="presupuesto-table">
+                <thead>
+                  <tr class="table-header">
+                    <th class="header-cell codigo-col">LIN</th>
+                    <th class="header-cell articulo-col">ARTÍCULO</th>
+                    <th class="header-cell descripcion-col">DESCRIPCIÓN</th>
+                    <th class="header-cell cantidad-col">CANTIDAD</th>
+                    <th class="header-cell precio-col">PRECIO</th>
+                    <th class="header-cell dto1-col">DTO 1</th>
+                    <th class="header-cell dto3-col">DTO 3</th>
+                    <th class="header-cell total-col">TOTAL</th>
+                    <th class="header-cell iva-col">% IVA</th>
+                    <th class="header-cell noimp-col">NO IMP.</th>
+                  </tr>
+                </thead>
+                <tbody>
+              
+                  <!-- Filas de datos -->
+                  @for (node of getFlattenedNodes(); track node.tipo + '_' + node.id) {
+                    <tr class="table-row" 
+                        [class.selected]="node.seleccionado"
+                        [class.capitulo]="node.tipo === 'capitulo'"
+                        [class.partida]="node.tipo === 'partida'">
+                      
+                      <!-- Columna LIN -->
+                      <td class="table-cell codigo-col">
+                        @if (node.tipo === 'capitulo') {
+                          <div class="expand-toggle" (click)="toggleExpand(node)">
+                            <mat-icon>{{ node.expandido ? 'expand_less' : 'expand_more' }}</mat-icon>
+                          </div>
+                        }
+                        <span class="cell-content">{{ node.codigo }}</span>
+                      </td>
+                      
+                      <!-- Columna ARTÍCULO -->
+                      <td class="table-cell articulo-col">
+                        <span class="cell-content">{{ node.codigo }}</span>
+                      </td>
+                      
+                      <!-- Columna DESCRIPCIÓN -->
+                      <td class="table-cell descripcion-col">
+                        <span class="cell-content">{{ node.nombre }}</span>
+                      </td>
+                      
+                      <!-- Columna CANTIDAD -->
+                      <td class="table-cell cantidad-col">
+                        @if (node.tipo === 'partida') {
+                          <span class="cell-content">{{ node.unidades || '1,0000' }}</span>
+                        } @else {
+                          <span class="cell-content">-</span>
+                        }
+                      </td>
+                      
+                      <!-- Columna PRECIO -->
+                      <td class="table-cell precio-col">
+                        @if (node.tipo === 'partida') {
+                          <span class="cell-content">{{ node.precioUnitario ? formatCurrency(node.precioUnitario) : '0,00' }}</span>
+                        } @else {
+                          <span class="cell-content">-</span>
+                        }
+                      </td>
+                      
+                      <!-- Columna DTO 1 -->
+                      <td class="table-cell dto1-col">
+                        <span class="cell-content">0,00</span>
+                      </td>
+                      
+                      <!-- Columna DTO 3 -->
+                      <td class="table-cell dto3-col">
+                        <span class="cell-content">0,00</span>
+                      </td>
+                      
+                      <!-- Columna TOTAL -->
+                      <td class="table-cell total-col">
+                        <span class="cell-content total-amount">{{ formatCurrency(node.totalConIva) }}</span>
+                      </td>
+                      
+                      <!-- Columna % IVA -->
+                      <td class="table-cell iva-col">
+                        <span class="cell-content">21 %</span>
+                      </td>
+                      
+                      <!-- Columna NO IMP. -->
+                      <td class="table-cell noimp-col">
+                        <mat-checkbox></mat-checkbox>
+                      </td>
+                    </tr>
+                  }
+              
+                  <!-- Fila de totales -->
+                  <tr class="table-row totals-row">
+                    <td class="table-cell codigo-col"></td>
+                    <td class="table-cell articulo-col"></td>
+                    <td class="table-cell descripcion-col">
+                      <strong>TOTAL PRESUPUESTO</strong>
+                    </td>
+                    <td class="table-cell cantidad-col"></td>
+                    <td class="table-cell precio-col"></td>
+                    <td class="table-cell dto1-col"></td>
+                    <td class="table-cell dto3-col"></td>
+                    <td class="table-cell total-col">
+                      <strong class="total-amount">{{ formatCurrency(totalConIva) }}</strong>
+                    </td>
+                    <td class="table-cell iva-col"></td>
+                    <td class="table-cell noimp-col"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

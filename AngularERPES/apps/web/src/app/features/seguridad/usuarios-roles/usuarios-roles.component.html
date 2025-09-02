@@ -1,0 +1,487 @@
+<!-- ============================================================================ -->
+<!-- USUARIOS-ROLES COMPONENT TEMPLATE -->
+<!-- ============================================================================ -->
+<!-- Componente principal para gestión de asignaciones usuario-rol -->
+<!-- Incluye multi-selección, filtros, estadísticas y acciones masivas -->
+<!-- ============================================================================ -->
+
+<div class="usuarios-roles-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <mat-icon class="page-icon">group</mat-icon>
+        <div class="title-text">
+          <h1>Usuarios y Roles</h1>
+          <p class="subtitle">Gestión de asignaciones de roles a usuarios</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <button 
+          mat-raised-button 
+          color="primary"
+          (click)="abrirAsignacionMasiva()"
+          [disabled]="loading()">
+          <mat-icon>group_add</mat-icon>
+          Asignación Masiva
+        </button>
+        
+        <button 
+          mat-stroked-button 
+          (click)="exportarDatos()"
+          [disabled]="loading()">
+          <mat-icon>file_download</mat-icon>
+          Exportar
+        </button>
+        
+        <button 
+          mat-icon-button 
+          [matMenuTriggerFor]="menuOpciones"
+          matTooltip="Más opciones">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        
+        <mat-menu #menuOpciones="matMenu">
+          <button mat-menu-item (click)="importarDatos()">
+            <mat-icon>file_upload</mat-icon>
+            <span>Importar datos</span>
+          </button>
+          
+          <button mat-menu-item (click)="generarReporte()">
+            <mat-icon>assessment</mat-icon>
+            <span>Generar reporte</span>
+          </button>
+          
+          <mat-divider></mat-divider>
+          
+          <button mat-menu-item (click)="configurarVista()">
+            <mat-icon>settings</mat-icon>
+            <span>Configurar vista</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="estadisticas-section">
+    <div class="estadisticas-grid">
+      <mat-card class="estadistica-card">
+        <mat-card-content>
+          <div class="estadistica-content">
+            <mat-icon class="estadistica-icon usuarios-icon">people</mat-icon>
+            <div class="estadistica-info">
+              <div class="estadistica-valor">{{ estadisticas().totalUsuarios }}</div>
+              <div class="estadistica-label">Total Usuarios</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      
+      <mat-card class="estadistica-card">
+        <mat-card-content>
+          <div class="estadistica-content">
+            <mat-icon class="estadistica-icon roles-icon">security</mat-icon>
+            <div class="estadistica-info">
+              <div class="estadistica-valor">{{ estadisticas().totalRoles }}</div>
+              <div class="estadistica-label">Total Roles</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      
+      <mat-card class="estadistica-card">
+        <mat-card-content>
+          <div class="estadistica-content">
+            <mat-icon class="estadistica-icon asignaciones-icon">link</mat-icon>
+            <div class="estadistica-info">
+              <div class="estadistica-valor">{{ estadisticas().totalUsuarioRoles }}</div>
+              <div class="estadistica-label">Asignaciones</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      
+      <mat-card class="estadistica-card">
+        <mat-card-content>
+          <div class="estadistica-content">
+            <mat-icon class="estadistica-icon activos-icon">verified_user</mat-icon>
+            <div class="estadistica-info">
+              <div class="estadistica-valor">{{ estadisticas().totalUsuarios }}</div>
+              <div class="estadistica-label">Usuarios Activos</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-section">
+    <mat-card class="filtros-card">
+      <mat-card-content>
+        <form [formGroup]="filtrosForm" class="filtros-form">
+          <div class="filtros-row">
+            <mat-form-field appearance="outline" class="filtro-busqueda">
+              <mat-label>Buscar usuarios</mat-label>
+              <input matInput formControlName="busqueda" placeholder="Nombre, email o ID...">
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="filtro-rol">
+              <mat-label>Filtrar por rol</mat-label>
+              <mat-select formControlName="rolId" multiple>
+                <mat-option value="">Todos los roles</mat-option>
+                @for (rol of roles(); track rol.id) {
+                  <mat-option [value]="rol.id">{{ rol.nombre }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="filtro-estado">
+              <mat-label>Estado</mat-label>
+              <mat-select formControlName="activo">
+                <mat-option value="">Todos</mat-option>
+                <mat-option [value]="true">Activos</mat-option>
+                <mat-option [value]="false">Inactivos</mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="filtro-fecha">
+              <mat-label>Fecha desde</mat-label>
+              <input matInput [matDatepicker]="fechaDesde" formControlName="fechaDesde">
+              <mat-datepicker-toggle matIconSuffix [for]="fechaDesde"></mat-datepicker-toggle>
+              <mat-datepicker #fechaDesde></mat-datepicker>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="filtro-fecha">
+              <mat-label>Fecha hasta</mat-label>
+              <input matInput [matDatepicker]="fechaHasta" formControlName="fechaHasta">
+              <mat-datepicker-toggle matIconSuffix [for]="fechaHasta"></mat-datepicker-toggle>
+              <mat-datepicker #fechaHasta></mat-datepicker>
+            </mat-form-field>
+            
+            <div class="filtros-acciones">
+              <button 
+                mat-icon-button 
+                (click)="limpiarFiltros()"
+                matTooltip="Limpiar filtros">
+                <mat-icon>clear</mat-icon>
+              </button>
+              
+              <button 
+                mat-icon-button 
+                (click)="aplicarFiltros()"
+                matTooltip="Aplicar filtros">
+                <mat-icon>filter_list</mat-icon>
+              </button>
+            </div>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Cargando usuarios y roles...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (error(); as errorMsg) {
+    <div class="error-container">
+      <mat-icon class="error-icon">error</mat-icon>
+      <h3>Error al cargar datos</h3>
+      <p>{{ errorMsg }}</p>
+      <button mat-raised-button color="primary" (click)="recargar()">
+        <mat-icon>refresh</mat-icon>
+        Reintentar
+      </button>
+    </div>
+  }
+
+  <!-- Main Content -->
+  @else {
+    <div class="main-content">
+      <!-- Modo de Selección -->
+      @if (modoSeleccion()) {
+        <div class="selection-toolbar">
+          <div class="selection-info">
+            <mat-icon>check_circle</mat-icon>
+            <span>{{ usuariosSeleccionados().length }} usuario(s) seleccionado(s)</span>
+          </div>
+          
+          <div class="selection-actions">
+            <button 
+              mat-stroked-button 
+              (click)="asignarRolMasivo()"
+              [disabled]="usuariosSeleccionados().length === 0">
+              <mat-icon>group_add</mat-icon>
+              Asignar Rol
+            </button>
+            
+            <button 
+              mat-stroked-button 
+              (click)="revocarRolMasivo()"
+              [disabled]="usuariosSeleccionados().length === 0">
+              <mat-icon>group_remove</mat-icon>
+              Revocar Rol
+            </button>
+            
+            <button 
+              mat-stroked-button 
+              (click)="exportarSeleccionados()"
+              [disabled]="usuariosSeleccionados().length === 0">
+              <mat-icon>file_download</mat-icon>
+              Exportar
+            </button>
+            
+            <button 
+              mat-icon-button 
+              (click)="cancelarSeleccion()"
+              matTooltip="Cancelar selección">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Tabla de Usuarios-Roles -->
+      <div class="table-container">
+        <table mat-table [dataSource]="usuariosFiltrados()" class="usuarios-table" matSort>
+          <!-- Columna de Selección -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox 
+                [checked]="todosSeleccionados()"
+                [indeterminate]="algunosSeleccionados() && !todosSeleccionados()"
+                (change)="toggleTodosSeleccionados($event.checked)">
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let usuario">
+              <mat-checkbox 
+                [checked]="estaSeleccionado(usuario.id)"
+                (change)="toggleSeleccion(usuario.id, $event.checked)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
+          <!-- Columna de Usuario -->
+          <ng-container matColumnDef="usuario">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Usuario</th>
+            <td mat-cell *matCellDef="let usuario">
+              <div class="usuario-info">
+                <div class="usuario-avatar">
+                  @if (usuario.avatar) {
+                    <img [src]="usuario.avatar" [alt]="usuario.nombre" class="avatar-img">
+                  } @else {
+                    <mat-icon class="avatar-icon">person</mat-icon>
+                  }
+                </div>
+                
+                <div class="usuario-detalles">
+                  <div class="usuario-nombre">{{ usuario.nombre }} {{ usuario.apellidos }}</div>
+                  <div class="usuario-email">{{ usuario.email }}</div>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Columna de Roles Asignados -->
+          <ng-container matColumnDef="roles">
+            <th mat-header-cell *matHeaderCellDef>Roles Asignados</th>
+            <td mat-cell *matCellDef="let usuario">
+              <div class="roles-container">
+                @if (obtenerRolesUsuario(usuario.id).length === 0) {
+                  <span class="sin-roles">Sin roles asignados</span>
+                } @else {
+                  <div class="roles-chips">
+                    @for (rol of obtenerRolesUsuario(usuario.id); track rol.id) {
+                      <mat-chip 
+                        class="rol-chip"
+                        [removable]="true"
+                        (removed)="revocarRol(usuario.id, rol.id)">
+                        {{ rol.nombre }}
+                        <mat-icon matChipRemove>cancel</mat-icon>
+                      </mat-chip>
+                    }
+                  </div>
+                }
+                
+                <button 
+                  mat-icon-button 
+                  size="small"
+                  (click)="abrirAsignacionRol(usuario.id)"
+                  matTooltip="Asignar rol">
+                  <mat-icon>add</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Columna de Estado -->
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+            <td mat-cell *matCellDef="let usuario">
+              <mat-chip 
+                [class]="usuario.activo ? 'estado-activo' : 'estado-inactivo'">
+                <mat-icon>{{ usuario.activo ? 'check_circle' : 'cancel' }}</mat-icon>
+                {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Columna de Última Actividad -->
+          <ng-container matColumnDef="ultimaActividad">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Última Actividad</th>
+            <td mat-cell *matCellDef="let usuario">
+              @if (usuario.ultimaActividad) {
+                <div class="fecha-actividad">
+                  <mat-icon class="fecha-icon">schedule</mat-icon>
+                  <span>{{ formatearFecha(usuario.ultimaActividad) }}</span>
+                </div>
+              } @else {
+                <span class="sin-actividad">Sin actividad</span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Columna de Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let usuario">
+              <div class="acciones-container">
+                <button 
+                  mat-icon-button 
+                  (click)="verPermisosEfectivos(usuario.id)"
+                  matTooltip="Ver permisos efectivos">
+                  <mat-icon>security</mat-icon>
+                </button>
+                
+                <button 
+                  mat-icon-button 
+                  (click)="editarUsuario(usuario.id)"
+                  matTooltip="Editar usuario">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                
+                <button 
+                  mat-icon-button 
+                  [matMenuTriggerFor]="menuAcciones"
+                  matTooltip="Más acciones">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                
+                <mat-menu #menuAcciones="matMenu">
+                  <button mat-menu-item (click)="duplicarRoles(usuario.id)">
+                    <mat-icon>content_copy</mat-icon>
+                    <span>Duplicar roles</span>
+                  </button>
+                  
+                  <button mat-menu-item (click)="historialCambios(usuario.id)">
+                    <mat-icon>history</mat-icon>
+                    <span>Historial de cambios</span>
+                  </button>
+                  
+                  <mat-divider></mat-divider>
+                  
+                  <button 
+                    mat-menu-item 
+                    (click)="toggleEstadoUsuario(usuario.id)"
+                    [class]="usuario.activo ? 'menu-item-danger' : 'menu-item-success'">
+                    <mat-icon>{{ usuario.activo ? 'block' : 'check_circle' }}</mat-icon>
+                    <span>{{ usuario.activo ? 'Desactivar' : 'Activar' }}</span>
+                  </button>
+                </mat-menu>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columnasVisibles()"></tr>
+          <tr 
+            mat-row 
+            *matRowDef="let row; columns: columnasVisibles();"
+            [class.selected-row]="estaSeleccionado(row.id)"
+            (click)="toggleSeleccion(row.id, !estaSeleccionado(row.id))">
+          </tr>
+        </table>
+
+        <!-- Empty State -->
+        @if (usuariosFiltrados().length === 0) {
+          <div class="empty-state">
+            <mat-icon class="empty-icon">people_outline</mat-icon>
+            <h3>No se encontraron usuarios</h3>
+            <p>No hay usuarios que coincidan con los filtros aplicados</p>
+            <button mat-raised-button color="primary" (click)="limpiarFiltros()">
+              <mat-icon>clear</mat-icon>
+              Limpiar Filtros
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Paginación -->
+      @if (usuariosFiltrados().length > 0) {
+        <mat-paginator 
+          [length]="usuariosFiltrados().length"
+          [pageSize]="10"
+          [pageSizeOptions]="[5, 10, 25, 50, 100]"
+          showFirstLastButtons>
+        </mat-paginator>
+      }
+    </div>
+  }
+
+  <!-- Floating Actions -->
+  @if (!modoSeleccion() && !loading()) {
+    <div class="floating-actions">
+      <button 
+        mat-fab 
+        color="primary"
+        (click)="activarModoSeleccion()"
+        matTooltip="Activar modo selección">
+        <mat-icon>checklist</mat-icon>
+      </button>
+    </div>
+  }
+
+  <!-- Indicador de Cambios Pendientes -->
+  @if (cambiosPendientes()) {
+    <div class="cambios-pendientes">
+      <mat-card class="cambios-card">
+        <mat-card-content>
+          <div class="cambios-content">
+            <mat-icon class="cambios-icon">pending</mat-icon>
+            <span>Tienes cambios pendientes por guardar</span>
+            
+            <div class="cambios-acciones">
+              <button 
+                mat-stroked-button 
+                (click)="descartarCambios()">
+                <mat-icon>close</mat-icon>
+                Descartar
+              </button>
+              
+              <button 
+                mat-raised-button 
+                color="primary"
+                (click)="guardarCambios()"
+                [disabled]="guardando()">
+                @if (guardando()) {
+                  <mat-spinner diameter="16"></mat-spinner>
+                } @else {
+                  <mat-icon>save</mat-icon>
+                }
+                Guardar
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+</div>

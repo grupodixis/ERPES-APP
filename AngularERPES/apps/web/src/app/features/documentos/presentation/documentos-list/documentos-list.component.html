@@ -1,0 +1,249 @@
+<div class="documentos-list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>folder_open</mat-icon>
+          Plantillas PDF
+        </h1>
+        <p class="page-subtitle">Gestiona las plantillas de documentos PDF para rellenado automático</p>
+      </div>
+      <div class="actions-section">
+        <button mat-raised-button color="primary" (click)="createTemplate()">
+          <mat-icon>add</mat-icon>
+          Nueva Plantilla
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-container">
+        <div class="filter-row">
+          <!-- Search -->
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Buscar plantillas</mat-label>
+            <input matInput [formControl]="searchControl" placeholder="Nombre, descripción...">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <!-- Tipo Filter -->
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo</mat-label>
+            <mat-select [formControl]="tipoControl">
+              <mat-option value="">Todos los tipos</mat-option>
+              <mat-option *ngFor="let tipo of tiposTemplate" [value]="tipo">
+                <mat-icon>{{ getTipoIcon(tipo) }}</mat-icon>
+                {{ tipo }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Estado Filter -->
+          <mat-form-field appearance="outline">
+            <mat-label>Estado</mat-label>
+            <mat-select [formControl]="estadoControl">
+              <mat-option value="">Todos los estados</mat-option>
+              <mat-option *ngFor="let estado of estadosTemplate" [value]="estado">
+                <mat-chip [color]="getEstadoColor(estado)" selected>{{ estado }}</mat-chip>
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Clear Filters -->
+          <button mat-stroked-button (click)="clearFilters()" class="clear-filters-btn">
+            <mat-icon>clear</mat-icon>
+            Limpiar Filtros
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Results Table -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      <!-- Loading Indicator -->
+      <mat-progress-bar *ngIf="isLoading" mode="indeterminate" class="loading-bar"></mat-progress-bar>
+
+      <!-- Table -->
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" matSort class="templates-table">
+          <!-- Nombre Column -->
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
+            <td mat-cell *matCellDef="let template">
+              <div class="template-name-cell">
+                <mat-icon class="template-icon">{{ getTipoIcon(template.tipo) }}</mat-icon>
+                <div class="template-info">
+                  <span class="template-name">{{ template.nombre }}</span>
+                  <span class="template-description" *ngIf="template.descripcion">{{ template.descripcion }}</span>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Tipo Column -->
+          <ng-container matColumnDef="tipo">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
+            <td mat-cell *matCellDef="let template">
+              <mat-chip [color]="template.tipo === 'AcroForm' ? 'primary' : 'accent'" selected>
+                {{ template.tipo }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Estado Column -->
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+            <td mat-cell *matCellDef="let template">
+              <mat-chip [color]="getEstadoColor(template.estado)" selected>
+                {{ template.estado }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Total Campos Column -->
+          <ng-container matColumnDef="totalCampos">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Campos</th>
+            <td mat-cell *matCellDef="let template">
+              <div class="campos-info">
+                <span class="total-campos">{{ template.totalCampos }}</span>
+                <span class="campos-label">total</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Campos Mapeados Column -->
+          <ng-container matColumnDef="camposMapeados">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Mapeados</th>
+            <td mat-cell *matCellDef="let template">
+              <div class="campos-info">
+                <span class="campos-mapeados">{{ template.camposMapeados }}</span>
+                <span class="campos-label">mapeados</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Porcentaje Completitud Column -->
+          <ng-container matColumnDef="porcentajeCompletitud">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Completitud</th>
+            <td mat-cell *matCellDef="let template">
+              <div class="completitud-cell">
+                <mat-progress-bar 
+                  mode="determinate" 
+                  [value]="template.porcentajeCompletitud"
+                  [color]="template.porcentajeCompletitud >= 80 ? 'primary' : template.porcentajeCompletitud >= 50 ? 'accent' : 'warn'">
+                </mat-progress-bar>
+                <span class="completitud-text">{{ template.porcentajeCompletitud }}%</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Creado Por Column -->
+          <ng-container matColumnDef="creadoPor">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Creado por</th>
+            <td mat-cell *matCellDef="let template">
+              <div class="created-by-cell">
+                <mat-icon class="user-icon">person</mat-icon>
+                <span>{{ template.creadoPor }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Fecha Creación Column -->
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+            <td mat-cell *matCellDef="let template">
+              <div class="date-cell">
+                <mat-icon class="date-icon">schedule</mat-icon>
+                <span>{{ formatDate(template.createdAt) }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Acciones Column -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let template">
+              <div class="actions-cell">
+                <button mat-icon-button [matMenuTriggerFor]="actionsMenu" 
+                        matTooltip="Más acciones">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                
+                <mat-menu #actionsMenu="matMenu">
+                  <button mat-menu-item (click)="viewTemplate(template)">
+                    <mat-icon>visibility</mat-icon>
+                    <span>Ver Detalle</span>
+                  </button>
+                  
+                  <button mat-menu-item (click)="editTemplate(template)" 
+                          [disabled]="template.estado === 'Archivada'">
+                    <mat-icon>edit</mat-icon>
+                    <span>Editar</span>
+                  </button>
+                  
+                  <button mat-menu-item (click)="fillTemplate(template)"
+                          [disabled]="template.estado !== 'Activa' || template.porcentajeCompletitud < 100">
+                    <mat-icon>fill_pdf</mat-icon>
+                    <span>Rellenar PDF</span>
+                  </button>
+                  
+                  <mat-divider></mat-divider>
+                  
+                  <button mat-menu-item (click)="duplicateTemplate(template)">
+                    <mat-icon>content_copy</mat-icon>
+                    <span>Duplicar</span>
+                  </button>
+                  
+                  <button mat-menu-item (click)="toggleTemplateStatus(template)"
+                          [disabled]="template.estado === 'Archivada'">
+                    <mat-icon>{{ template.estado === 'Activa' ? 'pause' : 'play_arrow' }}</mat-icon>
+                    <span>{{ template.estado === 'Activa' ? 'Desactivar' : 'Activar' }}</span>
+                  </button>
+                  
+                  <mat-divider></mat-divider>
+                  
+                  <button mat-menu-item (click)="deleteTemplate(template)" 
+                          class="delete-action">
+                    <mat-icon>delete</mat-icon>
+                    <span>Eliminar</span>
+                  </button>
+                </mat-menu>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+
+      <!-- No Data Message -->
+      <div *ngIf="!isLoading && dataSource.data.length === 0" class="no-data-container">
+        <mat-icon class="no-data-icon">folder_open</mat-icon>
+        <h3>No se encontraron plantillas</h3>
+        <p>No hay plantillas que coincidan con los filtros aplicados.</p>
+        <button mat-raised-button color="primary" (click)="createTemplate()">
+          <mat-icon>add</mat-icon>
+          Crear Primera Plantilla
+        </button>
+      </div>
+
+      <!-- Pagination -->
+      <mat-paginator 
+        *ngIf="!isLoading && dataSource.data.length > 0"
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[5, 10, 25, 50]"
+        [pageIndex]="currentPage"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>

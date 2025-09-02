@@ -1,0 +1,408 @@
+<div class="fill-preview-container">
+  <!-- Header -->
+  <div class="preview-header">
+    <h2 mat-dialog-title>
+      <mat-icon>{{ mode === 'create' ? 'add_circle' : 'edit' }}</mat-icon>
+      {{ mode === 'create' ? 'Fill Template' : 'Edit Fill Job' }}: {{ template.name }}
+    </h2>
+    <button mat-icon-button (click)="onCancel()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Template Info -->
+  <div class="template-info">
+    <mat-card>
+      <mat-card-content>
+        <div class="template-details">
+          <div class="template-name">
+            <mat-icon>description</mat-icon>
+            <span>{{ template.name }}</span>
+          </div>
+          <div class="template-description" *ngIf="template.description">
+            <mat-icon>info</mat-icon>
+            <span>{{ template.description }}</span>
+          </div>
+          <div class="template-fields">
+            <mat-icon>list_alt</mat-icon>
+            <span>{{ template.fields.length }} fields</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Main Content -->
+  <div class="preview-content">
+    <!-- Data Input Section -->
+    <div class="data-section">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>input</mat-icon>
+            Input Data
+          </mat-card-title>
+          <mat-card-subtitle>
+            Fill in the template fields with your data
+          </mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <form [formGroup]="dataForm" class="data-form">
+            <div class="form-fields">
+              <div 
+                *ngFor="let field of template.fields" 
+                class="field-group"
+                [class.has-error]="hasFieldError(field.name)"
+              >
+                <mat-form-field class="full-width" appearance="outline">
+                  <mat-label>
+                    <mat-icon class="field-icon">{{ getFieldTypeIcon(field.type) }}</mat-icon>
+                    {{ field.name }}
+                    <span *ngIf="field.required" class="required-indicator">*</span>
+                  </mat-label>
+                  
+                  <!-- Text Input -->
+                  <input 
+                    *ngIf="field.type === 'text' || field.type === 'email'"
+                    matInput 
+                    [formControlName]="field.name"
+                    [placeholder]="field.defaultValue || 'Enter ' + field.name"
+                    [type]="field.type === 'email' ? 'email' : 'text'"
+                  >
+                  
+                  <!-- Number Input -->
+                  <input 
+                    *ngIf="field.type === 'number'"
+                    matInput 
+                    [formControlName]="field.name"
+                    [placeholder]="field.defaultValue || 'Enter number'"
+                    type="number"
+                  >
+                  
+                  <!-- Date Input -->
+                  <input 
+                    *ngIf="field.type === 'date'"
+                    matInput 
+                    [formControlName]="field.name"
+                    [matDatepicker]="picker"
+                    readonly
+                  >
+                  <mat-datepicker-toggle 
+                    *ngIf="field.type === 'date'"
+                    matSuffix 
+                    [for]="picker"
+                  ></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
+                  
+                  <!-- Textarea -->
+                  <textarea 
+                    *ngIf="field.type === 'textarea'"
+                    matInput 
+                    [formControlName]="field.name"
+                    [placeholder]="field.defaultValue || 'Enter text'"
+                    rows="3"
+                  ></textarea>
+                  
+                  <!-- Checkbox -->
+                  <mat-checkbox 
+                    *ngIf="field.type === 'checkbox'"
+                    [formControlName]="field.name"
+                  >
+                    {{ field.name }}
+                  </mat-checkbox>
+                  
+                  <!-- Field Error Messages -->
+                  <mat-error *ngIf="dataForm.get(field.name)?.errors?.['required']">
+                    {{ getErrorMessage(field.name) }}
+                  </mat-error>
+                  <mat-error *ngIf="dataForm.get(field.name)?.errors?.['email']">
+                    {{ getErrorMessage(field.name) }}
+                  </mat-error>
+                  <mat-error *ngIf="dataForm.get(field.name)?.errors?.['pattern']">
+                    {{ getErrorMessage(field.name) }}
+                  </mat-error>
+                  <mat-error *ngIf="hasFieldError(field.name)">
+                    {{ getFieldError(field.name) }}
+                  </mat-error>
+                  
+                  <!-- Field Hint -->
+                  <mat-hint *ngIf="field.defaultValue && !dataForm.get(field.name)?.value">
+                    Default: {{ field.defaultValue }}
+                  </mat-hint>
+                </mat-form-field>
+                
+                <!-- Field Metadata -->
+                <div class="field-metadata" *ngIf="field.confidence">
+                  <mat-chip-list>
+                    <mat-chip 
+                      [color]="field.confidence > 0.9 ? 'primary' : field.confidence > 0.7 ? 'accent' : 'warn'"
+                      selected
+                    >
+                      <mat-icon matChipAvatar>{{ field.confidence > 0.9 ? 'verified' : 'help_outline' }}</mat-icon>
+                      Confidence: {{ (field.confidence * 100).toFixed(0) }}%
+                    </mat-chip>
+                  </mat-chip-list>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Validation Summary -->
+            <div class="validation-summary" *ngIf="validationErrors.length > 0">
+              <mat-card class="error-card">
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-icon>error</mat-icon>
+                    Validation Errors
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <ul>
+                    <li *ngFor="let error of validationErrors" class="validation-error">
+                      <strong>{{ error.field }}:</strong> {{ error.message }}
+                    </li>
+                  </ul>
+                </mat-card-content>
+              </mat-card>
+            </div>
+            
+            <!-- Data Actions -->
+            <div class="data-actions">
+              <button 
+                mat-raised-button 
+                color="primary" 
+                (click)="validateData()"
+                [disabled]="isProcessing"
+              >
+                <mat-icon>check_circle</mat-icon>
+                Validate Data
+              </button>
+              
+              <button 
+                mat-raised-button 
+                color="accent" 
+                (click)="generatePreview()"
+                [disabled]="!isDataValid || isPreviewLoading"
+              >
+                <mat-icon>preview</mat-icon>
+                Generate Preview
+                <mat-spinner 
+                  *ngIf="isPreviewLoading" 
+                  diameter="20" 
+                  class="inline-spinner"
+                ></mat-spinner>
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Preview Section -->
+    <div class="preview-section">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>visibility</mat-icon>
+            PDF Preview
+          </mat-card-title>
+          <mat-card-subtitle>
+            Preview of the filled template
+          </mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <!-- PDF Viewer Controls -->
+          <div class="pdf-controls" *ngIf="previewUrl && !isPreviewLoading">
+            <div class="navigation-controls">
+              <button 
+                mat-icon-button 
+                (click)="previousPage()" 
+                [disabled]="currentPage <= 1"
+                matTooltip="Previous Page"
+              >
+                <mat-icon>chevron_left</mat-icon>
+              </button>
+              
+              <span class="page-info">
+                Page {{ currentPage }} of {{ totalPages }}
+              </span>
+              
+              <button 
+                mat-icon-button 
+                (click)="nextPage()" 
+                [disabled]="currentPage >= totalPages"
+                matTooltip="Next Page"
+              >
+                <mat-icon>chevron_right</mat-icon>
+              </button>
+            </div>
+            
+            <div class="zoom-controls">
+              <button 
+                mat-icon-button 
+                (click)="zoomOut()" 
+                [disabled]="zoomLevel <= minZoom"
+                matTooltip="Zoom Out"
+              >
+                <mat-icon>zoom_out</mat-icon>
+              </button>
+              
+              <span class="zoom-info">
+                {{ (zoomLevel * 100).toFixed(0) }}%
+              </span>
+              
+              <button 
+                mat-icon-button 
+                (click)="zoomIn()" 
+                [disabled]="zoomLevel >= maxZoom"
+                matTooltip="Zoom In"
+              >
+                <mat-icon>zoom_in</mat-icon>
+              </button>
+            </div>
+          </div>
+          
+          <!-- PDF Canvas -->
+          <div class="pdf-viewer">
+            <!-- Loading State -->
+            <div class="preview-loading" *ngIf="isPreviewLoading">
+              <mat-spinner diameter="50"></mat-spinner>
+              <p>Generating preview...</p>
+            </div>
+            
+            <!-- Error State -->
+            <div class="preview-error" *ngIf="previewError && !isPreviewLoading">
+              <mat-icon>error_outline</mat-icon>
+              <p>{{ previewError }}</p>
+              <button mat-raised-button color="primary" (click)="generatePreview()">
+                <mat-icon>refresh</mat-icon>
+                Retry
+              </button>
+            </div>
+            
+            <!-- Empty State -->
+            <div class="preview-empty" *ngIf="!previewUrl && !isPreviewLoading && !previewError">
+              <mat-icon>description</mat-icon>
+              <p>No preview available</p>
+              <p class="hint">Fill in the data and click "Generate Preview" to see the result</p>
+            </div>
+            
+            <!-- PDF Canvas -->
+            <canvas 
+              id="pdf-canvas" 
+              *ngIf="previewUrl && !isPreviewLoading && !previewError"
+              class="pdf-canvas"
+            ></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Fill Job Status -->
+  <div class="job-status" *ngIf="fillJob">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon [color]="getJobStatusColor()">{{ getJobStatusIcon() }}</mat-icon>
+          Fill Job Status
+        </mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="status-info">
+          <div class="status-item">
+            <span class="label">Status:</span>
+            <mat-chip [color]="getJobStatusColor()" selected>
+              {{ fillJob.status | titlecase }}
+            </mat-chip>
+          </div>
+          
+          <div class="status-item" *ngIf="fillJob.progress !== undefined">
+            <span class="label">Progress:</span>
+            <mat-progress-bar 
+              mode="determinate" 
+              [value]="fillJob.progress"
+              [color]="getJobStatusColor()"
+            ></mat-progress-bar>
+            <span class="progress-text">{{ fillJob.progress }}%</span>
+          </div>
+          
+          <div class="status-item" *ngIf="fillJob.createdAt">
+            <span class="label">Created:</span>
+            <span>{{ fillJob.createdAt | date:'medium' }}</span>
+          </div>
+          
+          <div class="status-item" *ngIf="fillJob.completedAt">
+            <span class="label">Completed:</span>
+            <span>{{ fillJob.completedAt | date:'medium' }}</span>
+          </div>
+        </div>
+        
+        <!-- Job Actions -->
+        <div class="job-actions">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            (click)="downloadResult()"
+            [disabled]="!canDownload()"
+          >
+            <mat-icon>download</mat-icon>
+            Download PDF
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Actions -->
+  <div class="preview-actions">
+    <button mat-button (click)="onCancel()">
+      <mat-icon>cancel</mat-icon>
+      Cancel
+    </button>
+    
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="createFillJob()"
+      [disabled]="!canCreateJob()"
+      *ngIf="mode === 'create'"
+    >
+      <mat-icon>play_arrow</mat-icon>
+      Create Fill Job
+      <mat-spinner 
+        *ngIf="isProcessing" 
+        diameter="20" 
+        class="inline-spinner"
+      ></mat-spinner>
+    </button>
+    
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="onSave()"
+      [disabled]="!fillJob"
+      *ngIf="mode === 'edit'"
+    >
+      <mat-icon>save</mat-icon>
+      Save Changes
+    </button>
+  </div>
+
+  <!-- Processing Overlay -->
+  <div class="processing-overlay" *ngIf="isProcessing">
+    <div class="processing-content">
+      <mat-spinner diameter="60"></mat-spinner>
+      <h3>Processing Fill Job</h3>
+      <p>Please wait while we fill your template...</p>
+      <mat-progress-bar 
+        mode="determinate" 
+        [value]="jobProgress"
+        class="progress-bar"
+      ></mat-progress-bar>
+      <p class="progress-text">{{ jobProgress }}% complete</p>
+    </div>
+  </div>
+</div>

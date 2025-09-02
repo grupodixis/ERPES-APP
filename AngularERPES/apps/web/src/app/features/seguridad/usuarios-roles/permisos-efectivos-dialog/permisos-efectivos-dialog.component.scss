@@ -1,0 +1,919 @@
+// ============================================================================
+// PERMISOS EFECTIVOS DIALOG STYLES
+// ============================================================================
+// Estilos para el diálogo de permisos efectivos de usuario
+// Incluye responsive design, temas y animaciones
+// ============================================================================
+
+@use '@angular/material' as mat;
+@use 'sass:map';
+
+// ============================================================================
+// VARIABLES
+// ============================================================================
+
+:host {
+  --dialog-max-width: 1200px;
+  --dialog-max-height: 80vh;
+  --header-height: 80px;
+  --actions-height: 72px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --border-radius: 8px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ============================================================================
+// CONTENEDOR PRINCIPAL
+// ============================================================================
+
+.permisos-efectivos-dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--dialog-max-width);
+  max-height: var(--dialog-max-height);
+  overflow: hidden;
+
+  // ============================================================================
+  // HEADER
+  // ============================================================================
+
+  .dialog-header {
+    flex-shrink: 0;
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid mat.get-theme-color(mat.$light-theme, outline-variant);
+    background: mat.get-theme-color(mat.$light-theme, surface-container-low);
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-md);
+    }
+
+    .title-section {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      flex: 1;
+
+      .title-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        color: mat.get-theme-color(mat.$light-theme, primary);
+      }
+
+      .title-text {
+        h2 {
+          margin: 0;
+          font-size: 1.5rem;
+          font-weight: 500;
+          color: mat.get-theme-color(mat.$light-theme, on-surface);
+        }
+
+        .subtitle {
+          margin: var(--spacing-xs) 0 0 0;
+          font-size: 0.875rem;
+          color: mat.get-theme-color(mat.$light-theme, on-surface-variant);
+
+          .email {
+            font-style: italic;
+            opacity: 0.8;
+          }
+        }
+      }
+    }
+
+    .header-actions {
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+  }
+
+  // ============================================================================
+  // ESTADOS DE CARGA Y ERROR
+  // ============================================================================
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
+    gap: var(--spacing-md);
+    min-height: 200px;
+
+    p {
+      margin: 0;
+      color: mat.get-theme-color(mat.$light-theme, on-surface-variant);
+    }
+  }
+
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
+    gap: var(--spacing-md);
+    min-height: 200px;
+    text-align: center;
+
+    .error-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: mat.get-theme-color(mat.$light-theme, error);
+    }
+
+    h3 {
+      margin: 0;
+      color: mat.get-theme-color(mat.$light-theme, on-surface);
+    }
+
+    p {
+      margin: 0;
+      color: mat.get-theme-color(mat.$light-theme, on-surface-variant);
+    }
+  }
+
+  // ============================================================================
+  // CONTENIDO PRINCIPAL
+  // ============================================================================
+
+  .dialog-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    ::ng-deep .mat-mdc-tab-group {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+
+      .mat-mdc-tab-header {
+        flex-shrink: 0;
+      }
+
+      .mat-mdc-tab-body-wrapper {
+        flex: 1;
+        overflow: hidden;
+
+        .mat-mdc-tab-body {
+          height: 100%;
+
+          .mat-mdc-tab-body-content {
+            height: 100%;
+            overflow: hidden;
+          }
+        }
+      }
+    }
+
+    .tab-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+  }
+
+  // ============================================================================
+  // FILTROS
+  // ============================================================================
+
+  .filtros-section {
+    flex-shrink: 0;
+    padding: var(--spacing-md);
+    border-bottom: 1px solid mat.get-theme-color(mat.$light-theme, outline-variant);
+    background: mat.get-theme-color(mat.$light-theme, surface-container-lowest);
+
+    .filtros-form {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      flex-wrap: wrap;
+
+      .filtro-busqueda {
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .filtro-modulo {
+        min-width: 150px;
+      }
+
+      .filtros-rapidos {
+        display: flex;
+        gap: var(--spacing-sm);
+        align-items: center;
+
+        button {
+          min-width: auto;
+          padding: 0 12px;
+
+          mat-icon {
+            margin-right: var(--spacing-xs);
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+      }
+    }
+  }
+
+  // ============================================================================
+  // CONTROLES DEL ÁRBOL
+  // ============================================================================
+
+  .tree-controls {
+    flex-shrink: 0;
+    padding: var(--spacing-md);
+    display: flex;
+    gap: var(--spacing-sm);
+    border-bottom: 1px solid mat.get-theme-color(mat.$light-theme, outline-variant);
+  }
+
+  // ============================================================================
+  // ÁRBOL DE PERMISOS
+  // ============================================================================
+
+  .tree-container {
+    flex: 1;
+    overflow: auto;
+    padding: var(--spacing-md);
+
+    ::ng-deep .mat-tree {
+      .mat-tree-node {
+        min-height: 48px;
+        padding: var(--spacing-sm) 0;
+        border-bottom: 1px solid mat.get-theme-color(mat.$light-theme, outline-variant, 0.1);
+        transition: var(--transition);
+
+        &:hover {
+          background: mat.get-theme-color(mat.$light-theme, surface-container-high, 0.5);
+        }
+
+        .mat-tree-node {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+          padding: var(--spacing-sm);
+          border-radius: var(--border-radius);
+
+          .node-icon {
+            flex-shrink: 0;
+
+            &.module-icon {
+              color: mat.get-theme-color(mat.$light-theme, primary);
+            }
+
+            &.permission-icon {
+              &.color-primary {
+                color: mat.get-theme-color(mat.$light-theme, primary);
+              }
+
+              &.color-accent {
+                color: mat.get-theme-color(mat.$light-theme, secondary);
+              }
+
+              &.color-warn {
+                color: mat.get-theme-color(mat.$light-theme, tertiary);
+              }
+
+              &.color-error {
+                color: mat.get-theme-color(mat.$light-theme, error);
+              }
+
+              &.color-default {
+                color: mat.get-theme-color(mat.$light-theme, on-surface-variant);
+              }
+            }
+          }
+
+          .node-label {
+            font-weight: 500;
+            color: mat.get-theme-color(mat.$light-theme, on-surface);
+          }
+
+          .node-description {
+            font-size: 0.875rem;
+            color: mat.get-theme-color(mat.$light-theme, on-surface-variant);
+            margin-left: var(--spacing-sm);
+          }
+
+          .node-origin,
+          .node-roles {
+            display: flex;
+            gap: var(--spacing-xs);
+            margin-left: auto;
+
+            .origin-chip {
+              background: mat.get-theme-color(mat.$light-theme, secondary-container);
+              color: mat.get-theme-color(mat.$light-theme, on-secondary-container);
+            }
+
+            .role-chip {
+              background: mat.get-theme-color(mat.$light-theme, primary-container);
+              color: mat.get-theme-color(mat.$light-theme, on-primary-container);
+            }
+          }
+        }
+      }
+
+      .module-node {
+        .mat-tree-node {
+          background: mat.get-theme-color(mat.$light-theme, surface-container-low);
+          font-weight: 600;
+        }
+      }
+
+      .permission-node {
+        .mat-tree-node {
+          margin-left: var(--spacing-lg);
+        }
+      }
+    }
+  }
+
+  // ============================================================================
+  // LISTA DE PERMISOS
+  // ============================================================================
+
+  .permisos-lista {
+    flex: 1;
+    overflow: auto;
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-xl);
+      gap: var(--spacing-md);
+      min-height: 200px;
+      text-align: center;
+
+      .empty-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        color: mat.get-theme-color(mat.$light-theme, on-surface-variant);
+        opacity: 0.6;
+      }
+
+      h3 {
+        margin: 0;
+        color: mat.get-theme-color(mat.$light-theme, on-surface);
+      }
+
+      p {
+        margin: 0;
+        color: mat.get-theme-color(mat.$light-theme, on-surface-variant);
+      }
+    }
+
+    .permisos-list {
+      .permiso-item {
+        padding: var(--spacing-md);
+        border-bottom: 1px solid mat.get-theme-color(mat.$light-theme, outline-variant, 0.1);
+        transition: var(--transition);
+
+        &:hover {
+          background: mat.get-theme-color(mat.$light-theme, surface-container-high, 0.5);
+        }
+
+        .permiso-title {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+
+          .permiso-nombre {
+            font-weight: 500;
+          }
+
+          .modulo-chip {
+            background: mat.get-theme-color(mat.$light-theme, surface-container);
+            color: mat.get-theme-color(mat.$light-theme, on-surface-variant);
+          }
+        }
+
+        .permiso-descripcion {
+          color: mat.get-theme-color(mat.$light-theme, on-surface-variant);
+          font-size: 0.875rem;
+        }
+
+        .permiso-meta {
+          display: flex;
+          gap: var(--spacing-xs);
+          margin-top: var(--spacing-sm);
+
+          .origin-chip {
+            background: mat.get-theme-color(mat.$light-theme, secondary-container);
+            color: mat.get-theme-color(mat.$light-theme, on-secondary-container);
+          }
+
+          .role-chip {
+            background: mat.get-theme-color(mat.$light-theme, primary-container);
+            color: mat.get-theme-color(mat.$light-theme, on-primary-container);
+          }
+        }
+      }
+    }
+  }
+
+  // ============================================================================
+  // ESTADÍSTICAS
+  // ============================================================================
+
+  .estadisticas-container {
+    flex: 1;
+    overflow: auto;
+    padding: var(--spacing-md);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-md);
+    align-content: start;
+
+    .estadistica-card {
+      height: fit-content;
+
+      ::ng-deep .mat-mdc-card-header {
+        .mat-mdc-card-title {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+          font-size: 1.1rem;
+
+          mat-icon {
+            color: mat.get-theme-color(mat.$light-theme, primary);
+          }
+        }
+      }
+
+      &.resumen-card {
+        .estadisticas-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: var(--spacing-md);
+
+          .estadistica-item {
+            text-align: center;
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            background: mat.get-theme-color(mat.$light-theme, surface-container-low);
+
+            .estadistica-valor {
+              font-size: 2rem;
+              font-weight: 600;
+              color: mat.get-theme-color(mat.$light-theme, primary);
+              margin-bottom: var(--spacing-xs);
+            }
+
+            .estadistica-label {
+              font-size: 0.875rem;
+              color: mat.get-theme-color(mat.$light-theme, on-surface-variant);
+            }
+          }
+        }
+      }
+
+      &.modulos-card,
+      &.roles-card {
+        .modulos-lista,
+        .roles-lista {
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-md);
+
+          .modulo-estadistica,
+          .rol-estadistica {
+            .modulo-info,
+            .rol-info {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: var(--spacing-xs);
+
+              .modulo-nombre,
+              .rol-nombre {
+                font-weight: 500;
+              }
+
+              .modulo-count,
+              .rol-count {
+                font-size: 0.875rem;
+                color: mat.get-theme-color(mat.$light-theme, on-surface-variant);
+              }
+            }
+
+            .modulo-barra,
+            .rol-barra {
+              height: 8px;
+              background: mat.get-theme-color(mat.$light-theme, surface-container);
+              border-radius: 4px;
+              overflow: hidden;
+
+              .barra-progreso {
+                height: 100%;
+                background: linear-gradient(
+                  90deg,
+                  mat.get-theme-color(mat.$light-theme, primary),
+                  mat.get-theme-color(mat.$light-theme, secondary)
+                );
+                transition: width 0.3s ease;
+              }
+            }
+          }
+        }
+      }
+
+      &.info-card {
+        .info-lista {
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-md);
+
+          .info-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius);
+            background: mat.get-theme-color(mat.$light-theme, surface-container-low);
+
+            mat-icon {
+              color: mat.get-theme-color(mat.$light-theme, primary);
+            }
+
+            span {
+              color: mat.get-theme-color(mat.$light-theme, on-surface);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // ============================================================================
+  // ACCIONES
+  // ============================================================================
+
+  .dialog-actions {
+    flex-shrink: 0;
+    padding: var(--spacing-lg);
+    border-top: 1px solid mat.get-theme-color(mat.$light-theme, outline-variant);
+    background: mat.get-theme-color(mat.$light-theme, surface-container-low);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-md);
+
+    .actions-left,
+    .actions-right {
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+  }
+}
+
+// ============================================================================
+// TEMA OSCURO
+// ============================================================================
+
+@media (prefers-color-scheme: dark) {
+  .permisos-efectivos-dialog {
+    .dialog-header {
+      border-bottom-color: mat.get-theme-color(mat.$dark-theme, outline-variant);
+      background: mat.get-theme-color(mat.$dark-theme, surface-container-low);
+
+      .title-section {
+        .title-icon {
+          color: mat.get-theme-color(mat.$dark-theme, primary);
+        }
+
+        .title-text {
+          h2 {
+            color: mat.get-theme-color(mat.$dark-theme, on-surface);
+          }
+
+          .subtitle {
+            color: mat.get-theme-color(mat.$dark-theme, on-surface-variant);
+          }
+        }
+      }
+    }
+
+    .loading-container,
+    .error-container {
+      p {
+        color: mat.get-theme-color(mat.$dark-theme, on-surface-variant);
+      }
+
+      h3 {
+        color: mat.get-theme-color(mat.$dark-theme, on-surface);
+      }
+    }
+
+    .error-container {
+      .error-icon {
+        color: mat.get-theme-color(mat.$dark-theme, error);
+      }
+    }
+
+    .filtros-section {
+      border-bottom-color: mat.get-theme-color(mat.$dark-theme, outline-variant);
+      background: mat.get-theme-color(mat.$dark-theme, surface-container-lowest);
+    }
+
+    .tree-controls {
+      border-bottom-color: mat.get-theme-color(mat.$dark-theme, outline-variant);
+    }
+
+    .tree-container {
+      ::ng-deep .mat-tree {
+        .mat-tree-node {
+          border-bottom-color: mat.get-theme-color(mat.$dark-theme, outline-variant, 0.1);
+
+          &:hover {
+            background: mat.get-theme-color(mat.$dark-theme, surface-container-high, 0.5);
+          }
+
+          .mat-tree-node {
+            .node-icon {
+              &.module-icon {
+                color: mat.get-theme-color(mat.$dark-theme, primary);
+              }
+
+              &.permission-icon {
+                &.color-primary {
+                  color: mat.get-theme-color(mat.$dark-theme, primary);
+                }
+
+                &.color-accent {
+                  color: mat.get-theme-color(mat.$dark-theme, secondary);
+                }
+
+                &.color-warn {
+                  color: mat.get-theme-color(mat.$dark-theme, tertiary);
+                }
+
+                &.color-error {
+                  color: mat.get-theme-color(mat.$dark-theme, error);
+                }
+
+                &.color-default {
+                  color: mat.get-theme-color(mat.$dark-theme, on-surface-variant);
+                }
+              }
+            }
+
+            .node-label {
+              color: mat.get-theme-color(mat.$dark-theme, on-surface);
+            }
+
+            .node-description {
+              color: mat.get-theme-color(mat.$dark-theme, on-surface-variant);
+            }
+
+            .node-origin,
+            .node-roles {
+              .origin-chip {
+                background: mat.get-theme-color(mat.$dark-theme, secondary-container);
+                color: mat.get-theme-color(mat.$dark-theme, on-secondary-container);
+              }
+
+              .role-chip {
+                background: mat.get-theme-color(mat.$dark-theme, primary-container);
+                color: mat.get-theme-color(mat.$dark-theme, on-primary-container);
+              }
+            }
+          }
+        }
+
+        .module-node {
+          .mat-tree-node {
+            background: mat.get-theme-color(mat.$dark-theme, surface-container-low);
+          }
+        }
+      }
+    }
+
+    .dialog-actions {
+      border-top-color: mat.get-theme-color(mat.$dark-theme, outline-variant);
+      background: mat.get-theme-color(mat.$dark-theme, surface-container-low);
+    }
+  }
+}
+
+// ============================================================================
+// RESPONSIVE DESIGN
+// ============================================================================
+
+@media (max-width: 768px) {
+  :host {
+    --dialog-max-width: 100vw;
+    --dialog-max-height: 100vh;
+  }
+
+  .permisos-efectivos-dialog {
+    .dialog-header {
+      padding: var(--spacing-md);
+
+      .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+      }
+
+      .title-section {
+        .title-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+        }
+
+        .title-text {
+          h2 {
+            font-size: 1.25rem;
+          }
+        }
+      }
+    }
+
+    .filtros-section {
+      .filtros-form {
+        flex-direction: column;
+        align-items: stretch;
+
+        .filtro-busqueda,
+        .filtro-modulo {
+          min-width: auto;
+        }
+
+        .filtros-rapidos {
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+      }
+    }
+
+    .tree-controls {
+      flex-direction: column;
+      gap: var(--spacing-sm);
+
+      button {
+        width: 100%;
+      }
+    }
+
+    .estadisticas-container {
+      grid-template-columns: 1fr;
+
+      .estadistica-card {
+        &.resumen-card {
+          .estadisticas-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      }
+    }
+
+    .dialog-actions {
+      flex-direction: column;
+      gap: var(--spacing-sm);
+
+      .actions-left,
+      .actions-right {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .permisos-efectivos-dialog {
+    .dialog-header {
+      .title-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+      }
+    }
+
+    .tree-container {
+      padding: var(--spacing-sm);
+
+      ::ng-deep .mat-tree {
+        .permission-node {
+          .mat-tree-node {
+            margin-left: var(--spacing-md);
+          }
+        }
+      }
+    }
+
+    .dialog-actions {
+      .actions-left,
+      .actions-right {
+        flex-direction: column;
+
+        button {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+// ============================================================================
+// PRINT STYLES
+// ============================================================================
+
+@media print {
+  .permisos-efectivos-dialog {
+    .dialog-header {
+      .header-actions {
+        display: none;
+      }
+    }
+
+    .dialog-actions {
+      display: none;
+    }
+
+    .filtros-section {
+      display: none;
+    }
+
+    .tree-controls {
+      display: none;
+    }
+
+    ::ng-deep .mat-mdc-tab-header {
+      display: none;
+    }
+  }
+}
+
+// ============================================================================
+// ANIMACIONES
+// ============================================================================
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.permisos-efectivos-dialog {
+  animation: fadeIn 0.3s ease-out;
+
+  .estadistica-card {
+    animation: slideIn 0.3s ease-out;
+
+    &:nth-child(2) {
+      animation-delay: 0.1s;
+    }
+
+    &:nth-child(3) {
+      animation-delay: 0.2s;
+    }
+
+    &:nth-child(4) {
+      animation-delay: 0.3s;
+    }
+  }
+
+  .permiso-item {
+    animation: slideIn 0.2s ease-out;
+  }
+
+  ::ng-deep .mat-tree-node {
+    animation: slideIn 0.2s ease-out;
+  }
+}

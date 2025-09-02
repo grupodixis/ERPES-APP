@@ -1,0 +1,463 @@
+<!-- ============================================================================ -->
+<!-- PERMISOS EFECTIVOS DIALOG TEMPLATE -->
+<!-- ============================================================================ -->
+<!-- Diálogo para mostrar los permisos efectivos de un usuario -->
+<!-- Incluye vistas de árbol, lista y estadísticas con filtros -->
+<!-- ============================================================================ -->
+
+<div class="permisos-efectivos-dialog">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <div class="title-section">
+        <mat-icon class="title-icon">security</mat-icon>
+        <div class="title-text">
+          <h2 mat-dialog-title>Permisos Efectivos</h2>
+          @if (usuario(); as user) {
+            <p class="subtitle">
+              {{ user.nombre }} {{ user.apellidos }}
+              <span class="email">({{ user.email }})</span>
+            </p>
+          }
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <button 
+          mat-icon-button 
+          (click)="recargar()" 
+          [disabled]="loading()"
+          matTooltip="Recargar permisos">
+          <mat-icon>refresh</mat-icon>
+        </button>
+        
+        <button 
+          mat-icon-button 
+          (click)="cerrar()"
+          matTooltip="Cerrar">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Cargando permisos efectivos...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (error(); as errorMsg) {
+    <div class="error-container">
+      <mat-icon class="error-icon">error</mat-icon>
+      <h3>Error al cargar permisos</h3>
+      <p>{{ errorMsg }}</p>
+      <button mat-raised-button color="primary" (click)="recargar()">
+        <mat-icon>refresh</mat-icon>
+        Reintentar
+      </button>
+    </div>
+  }
+
+  <!-- Content -->
+  @else if (permisosEfectivos(); as permisos) {
+    <div class="dialog-content">
+      <!-- Tabs de Vista -->
+      <mat-tab-group 
+        [selectedIndex]="vistaActual() === 'arbol' ? 0 : vistaActual() === 'lista' ? 1 : 2"
+        (selectedTabChange)="cambiarVista($event.index === 0 ? 'arbol' : $event.index === 1 ? 'lista' : 'estadisticas')">
+        
+        <!-- Vista de Árbol -->
+        <mat-tab label="Vista de Árbol">
+          <div class="tab-content">
+            <!-- Filtros -->
+            <div class="filtros-section">
+              <form [formGroup]="filtrosForm" class="filtros-form">
+                <mat-form-field appearance="outline" class="filtro-busqueda">
+                  <mat-label>Buscar permisos</mat-label>
+                  <input matInput formControlName="busqueda" placeholder="Nombre, descripción o módulo...">
+                  <mat-icon matSuffix>search</mat-icon>
+                </mat-form-field>
+                
+                <mat-form-field appearance="outline" class="filtro-modulo">
+                  <mat-label>Módulo</mat-label>
+                  <mat-select formControlName="modulo">
+                    <mat-option value="">Todos los módulos</mat-option>
+                    @for (modulo of modulosDisponibles(); track modulo) {
+                      <mat-option [value]="modulo">{{ modulo }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                
+                <div class="filtros-rapidos">
+                  <button 
+                    mat-stroked-button 
+                    size="small"
+                    (click)="aplicarFiltroRapido('lectura')">
+                    <mat-icon>visibility</mat-icon>
+                    Lectura
+                  </button>
+                  
+                  <button 
+                    mat-stroked-button 
+                    size="small"
+                    (click)="aplicarFiltroRapido('escritura')">
+                    <mat-icon>edit</mat-icon>
+                    Escritura
+                  </button>
+                  
+                  <button 
+                    mat-stroked-button 
+                    size="small"
+                    (click)="aplicarFiltroRapido('admin')">
+                    <mat-icon>admin_panel_settings</mat-icon>
+                    Admin
+                  </button>
+                  
+                  <button 
+                    mat-icon-button 
+                    (click)="limpiarFiltros()"
+                    matTooltip="Limpiar filtros">
+                    <mat-icon>clear</mat-icon>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Controles del Árbol -->
+            <div class="tree-controls">
+              <button mat-stroked-button (click)="expandirTodo()">
+                <mat-icon>expand_more</mat-icon>
+                Expandir Todo
+              </button>
+              
+              <button mat-stroked-button (click)="contraerTodo()">
+                <mat-icon>expand_less</mat-icon>
+                Contraer Todo
+              </button>
+            </div>
+
+            <!-- Árbol de Permisos -->
+            <div class="tree-container">
+              <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+                <!-- Nodo de Módulo -->
+                <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle class="tree-node module-node">
+                  <li class="mat-tree-node">
+                    <button mat-icon-button disabled></button>
+                    <mat-icon class="node-icon module-icon">folder</mat-icon>
+                    <span class="node-label">{{ node.nombre }}</span>
+                    @if (node.descripcion) {
+                      <span class="node-description">{{ node.descripcion }}</span>
+                    }
+                  </li>
+                </mat-tree-node>
+
+                <!-- Nodo Expandible -->
+                <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodeToggle class="tree-node expandable-node">
+                  <li class="mat-tree-node">
+                    <button mat-icon-button matTreeNodeToggle
+                            [attr.aria-label]="'Toggle ' + node.nombre">
+                      <mat-icon class="mat-icon-rtl-mirror">
+                        {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+                      </mat-icon>
+                    </button>
+                    
+                    <mat-icon class="node-icon module-icon">{{ node.tipo === 'modulo' ? 'folder' : 'security' }}</mat-icon>
+                    
+                    <span class="node-label">{{ node.nombre }}</span>
+                    
+                    @if (node.descripcion) {
+                      <span class="node-description">{{ node.descripcion }}</span>
+                    }
+                    
+                    @if (node.roles && node.roles.length > 0) {
+                      <div class="node-roles">
+                        @for (rol of node.roles; track rol) {
+                          <mat-chip class="role-chip">{{ rol }}</mat-chip>
+                        }
+                      </div>
+                    }
+                  </li>
+                </mat-tree-node>
+
+                <!-- Nodo de Permiso -->
+                <mat-tree-node *matTreeNodeDef="let node; when: !hasChild" class="tree-node permission-node">
+                  <li class="mat-tree-node">
+                    <button mat-icon-button disabled></button>
+                    
+                    <mat-icon 
+                      class="node-icon permission-icon"
+                      [ngClass]="'color-' + obtenerColorPermiso(node.nombre)">
+                      {{ obtenerIconoPermiso(node.nombre) }}
+                    </mat-icon>
+                    
+                    <span class="node-label">{{ node.nombre }}</span>
+                    
+                    @if (node.descripcion) {
+                      <span class="node-description">{{ node.descripcion }}</span>
+                    }
+                    
+                    @if (node.origen && node.origen.length > 0) {
+                      <div class="node-origin">
+                        @for (origen of node.origen; track origen) {
+                          <mat-chip class="origin-chip" size="small">{{ origen }}</mat-chip>
+                        }
+                      </div>
+                    }
+                    
+                    @if (node.roles && node.roles.length > 0) {
+                      <div class="node-roles">
+                        @for (rol of node.roles; track rol) {
+                          <mat-chip class="role-chip" size="small">{{ rol }}</mat-chip>
+                        }
+                      </div>
+                    }
+                  </li>
+                </mat-tree-node>
+              </mat-tree>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Vista de Lista -->
+        <mat-tab label="Vista de Lista">
+          <div class="tab-content">
+            <!-- Filtros (reutilizados) -->
+            <div class="filtros-section">
+              <form [formGroup]="filtrosForm" class="filtros-form">
+                <mat-form-field appearance="outline" class="filtro-busqueda">
+                  <mat-label>Buscar permisos</mat-label>
+                  <input matInput formControlName="busqueda" placeholder="Nombre, descripción o módulo...">
+                  <mat-icon matSuffix>search</mat-icon>
+                </mat-form-field>
+                
+                <mat-form-field appearance="outline" class="filtro-modulo">
+                  <mat-label>Módulo</mat-label>
+                  <mat-select formControlName="modulo">
+                    <mat-option value="">Todos los módulos</mat-option>
+                    @for (modulo of modulosDisponibles(); track modulo) {
+                      <mat-option [value]="modulo">{{ modulo }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                
+                <button 
+                  mat-icon-button 
+                  (click)="limpiarFiltros()"
+                  matTooltip="Limpiar filtros">
+                  <mat-icon>clear</mat-icon>
+                </button>
+              </form>
+            </div>
+
+            <!-- Lista de Permisos -->
+            <div class="permisos-lista">
+              @if (permisosFiltrados().length === 0) {
+                <div class="empty-state">
+                  <mat-icon class="empty-icon">search_off</mat-icon>
+                  <h3>No se encontraron permisos</h3>
+                  <p>Intenta ajustar los filtros de búsqueda</p>
+                </div>
+              } @else {
+                <mat-list class="permisos-list">
+                  @for (permiso of permisosFiltrados(); track permiso.id) {
+                    <mat-list-item class="permiso-item">
+                      <mat-icon 
+                        matListItemIcon 
+                        [ngClass]="'color-' + obtenerColorPermiso(permiso.nombre)">
+                        {{ obtenerIconoPermiso(permiso.nombre) }}
+                      </mat-icon>
+                      
+                      <div matListItemTitle class="permiso-title">
+                        <span class="permiso-nombre">{{ permiso.nombre }}</span>
+                        <mat-chip class="modulo-chip" size="small">{{ permiso.modulo }}</mat-chip>
+                      </div>
+                      
+                      @if (permiso.descripcion) {
+                        <div matListItemLine class="permiso-descripcion">
+                          {{ permiso.descripcion }}
+                        </div>
+                      }
+                      
+                      <div class="permiso-meta">
+                        <mat-chip class="origin-chip" size="small">Rol</mat-chip>
+                        <mat-chip class="role-chip" size="small">Administrador</mat-chip>
+                      </div>
+                    </mat-list-item>
+                    
+                    <mat-divider></mat-divider>
+                  }
+                </mat-list>
+              }
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Vista de Estadísticas -->
+        <mat-tab label="Estadísticas">
+          <div class="tab-content">
+            <div class="estadisticas-container">
+              <!-- Resumen General -->
+              <mat-card class="estadistica-card resumen-card">
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-icon>analytics</mat-icon>
+                    Resumen General
+                  </mat-card-title>
+                </mat-card-header>
+                
+                <mat-card-content>
+                  <div class="estadisticas-grid">
+                    <div class="estadistica-item">
+                      <div class="estadistica-valor">{{ estadisticas().totalPermisos }}</div>
+                      <div class="estadistica-label">Total Permisos</div>
+                    </div>
+                    
+                    <div class="estadistica-item">
+                      <div class="estadistica-valor">{{ estadisticas().modulosConPermisos }}</div>
+                      <div class="estadistica-label">Módulos</div>
+                    </div>
+                    
+                    <div class="estadistica-item">
+                      <div class="estadistica-valor">{{ estadisticas().rolesActivos }}</div>
+                      <div class="estadistica-label">Roles Activos</div>
+                    </div>
+                    
+                    <div class="estadistica-item">
+                      <div class="estadistica-valor">{{ permisos.esAdmin ? 'Sí' : 'No' }}</div>
+                      <div class="estadistica-label">Es Administrador</div>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+              <!-- Permisos por Módulo -->
+              <mat-card class="estadistica-card modulos-card">
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-icon>folder</mat-icon>
+                    Permisos por Módulo
+                  </mat-card-title>
+                </mat-card-header>
+                
+                <mat-card-content>
+                  <div class="modulos-lista">
+                    @for (modulo of Object.keys(estadisticas().permisosPorModulo); track modulo) {
+                      <div class="modulo-estadistica">
+                        <div class="modulo-info">
+                          <span class="modulo-nombre">{{ modulo }}</span>
+                          <span class="modulo-count">{{ estadisticas().permisosPorModulo[modulo] }} permisos</span>
+                        </div>
+                        
+                        <div class="modulo-barra">
+                          <div 
+                            class="barra-progreso"
+                            [style.width.%]="(estadisticas().permisosPorModulo[modulo] / estadisticas().totalPermisos) * 100">
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+              <!-- Permisos por Rol -->
+              <mat-card class="estadistica-card roles-card">
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-icon>group</mat-icon>
+                    Permisos por Rol
+                  </mat-card-title>
+                </mat-card-header>
+                
+                <mat-card-content>
+                  <div class="roles-lista">
+                    @for (rol of Object.keys(estadisticas().permisosPorRol); track rol) {
+                      @if (estadisticas().permisosPorRol[rol] > 0) {
+                        <div class="rol-estadistica">
+                          <div class="rol-info">
+                            <span class="rol-nombre">{{ rol }}</span>
+                            <span class="rol-count">{{ estadisticas().permisosPorRol[rol] }} permisos</span>
+                          </div>
+                          
+                          <div class="rol-barra">
+                            <div 
+                              class="barra-progreso"
+                              [style.width.%]="(estadisticas().permisosPorRol[rol] / estadisticas().totalPermisos) * 100">
+                            </div>
+                          </div>
+                        </div>
+                      }
+                    }
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+              <!-- Información Adicional -->
+              <mat-card class="estadistica-card info-card">
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-icon>info</mat-icon>
+                    Información Adicional
+                  </mat-card-title>
+                </mat-card-header>
+                
+                <mat-card-content>
+                  <div class="info-lista">
+                    <div class="info-item">
+                      <mat-icon>schedule</mat-icon>
+                      <span>Última actualización: {{ formatearFecha(new Date()) }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                      <mat-icon>security</mat-icon>
+                      <span>Nivel de acceso: {{ permisos.esAdmin ? 'Administrador' : 'Usuario' }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                      <mat-icon>verified_user</mat-icon>
+                      <span>Estado: Activo</span>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+
+    <!-- Actions -->
+    <div class="dialog-actions">
+      <div class="actions-left">
+        <button 
+          mat-stroked-button 
+          (click)="exportarCSV()"
+          [disabled]="loading()">
+          <mat-icon>file_download</mat-icon>
+          Exportar CSV
+        </button>
+        
+        <button 
+          mat-stroked-button 
+          (click)="exportarPermisos()"
+          [disabled]="loading()">
+          <mat-icon>download</mat-icon>
+          Exportar JSON
+        </button>
+      </div>
+      
+      <div class="actions-right">
+        <button 
+          mat-raised-button 
+          color="primary"
+          (click)="cerrar()">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  }
+</div>

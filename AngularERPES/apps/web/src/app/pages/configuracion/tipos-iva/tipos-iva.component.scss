@@ -1,0 +1,440 @@
+// Variables
+$primary-color: #1976d2;
+$accent-color: #ff4081;
+$warn-color: #f44336;
+$success-color: #4caf50;
+$background-color: #fafafa;
+$card-background: #ffffff;
+$text-primary: rgba(0, 0, 0, 0.87);
+$text-secondary: rgba(0, 0, 0, 0.6);
+$border-color: rgba(0, 0, 0, 0.12);
+$shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+// Mixins
+@mixin card-style {
+  background: $card-background;
+  border-radius: 8px;
+  box-shadow: $shadow;
+  margin-bottom: 24px;
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin responsive-grid($columns: 1, $gap: 16px) {
+  display: grid;
+  grid-template-columns: repeat($columns, 1fr);
+  gap: $gap;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Estilos principales
+.tipos-iva-container {
+  padding: 24px;
+  background-color: $background-color;
+  min-height: 100vh;
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
+
+// Header
+.header {
+  margin-bottom: 32px;
+  
+  h1 {
+    margin: 0 0 8px 0;
+    color: $text-primary;
+    font-size: 2rem;
+    font-weight: 400;
+  }
+  
+  p {
+    margin: 0;
+    color: $text-secondary;
+    font-size: 1rem;
+  }
+}
+
+// Estados de carga y error
+.loading-container {
+  @include flex-center;
+  flex-direction: column;
+  padding: 48px;
+  
+  p {
+    margin-top: 16px;
+    color: $text-secondary;
+  }
+}
+
+.error-container {
+  @include card-style;
+  @include flex-center;
+  flex-direction: column;
+  padding: 32px;
+  text-align: center;
+  
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: $warn-color;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    margin: 0 0 16px 0;
+    color: $text-primary;
+    font-size: 1.1rem;
+  }
+}
+
+// Contenido principal
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// Tarjeta de filtros
+.filter-card {
+  @include card-style;
+  
+  .filter-form {
+    .filter-row {
+      @include responsive-grid(4, 16px);
+      margin-bottom: 16px;
+    }
+    
+    .filter-actions {
+      display: flex;
+      gap: 12px;
+      
+      @media (max-width: 768px) {
+        flex-direction: column;
+        
+        button {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+// Tarjeta de formulario
+.form-card {
+  @include card-style;
+  
+  .tipo-iva-form {
+    .form-row {
+      @include responsive-grid(3, 16px);
+      margin-bottom: 16px;
+      
+      &:has(.full-width) {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .full-width {
+      grid-column: 1 / -1;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      
+      @media (max-width: 768px) {
+        flex-direction: column;
+        
+        button {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+// Tarjeta de tabla
+.table-card {
+  @include card-style;
+  
+  .table-container {
+    overflow-x: auto;
+    
+    .tipos-iva-table {
+      width: 100%;
+      
+      // Estilos de celdas específicas
+      .codigo-cell {
+        .codigo-badge {
+          background-color: $primary-color;
+          color: white;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 0.875rem;
+          font-weight: 500;
+          font-family: 'Courier New', monospace;
+        }
+      }
+      
+      .nombre-cell {
+        .nombre-info {
+          display: flex;
+          flex-direction: column;
+          
+          .nombre-principal {
+            font-weight: 500;
+            color: $text-primary;
+          }
+          
+          .descripcion-secundaria {
+            font-size: 0.875rem;
+            color: $text-secondary;
+            margin-top: 2px;
+          }
+        }
+      }
+      
+      .porcentaje-cell {
+        .porcentaje-badge {
+          background-color: $success-color;
+          color: white;
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: 0.875rem;
+          font-weight: 500;
+          
+          &.porcentaje-cero {
+            background-color: $text-secondary;
+          }
+        }
+      }
+      
+      .descripcion-cell {
+        max-width: 200px;
+        
+        span {
+          display: block;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+      
+      .estado-cell {
+        .estado-badge {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: 0.875rem;
+          font-weight: 500;
+          
+          &.activo {
+            background-color: rgba($success-color, 0.1);
+            color: $success-color;
+          }
+          
+          &.inactivo {
+            background-color: rgba($warn-color, 0.1);
+            color: $warn-color;
+          }
+          
+          mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+          }
+        }
+      }
+      
+      .acciones-cell {
+        width: 120px;
+        
+        button {
+          margin-right: 8px;
+          
+          &:last-child {
+            margin-right: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Mensaje sin datos
+.no-data {
+  @include flex-center;
+  flex-direction: column;
+  padding: 48px;
+  text-align: center;
+  
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: $text-secondary;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    margin: 0;
+    color: $text-secondary;
+    
+    &.no-data-subtitle {
+      font-size: 0.875rem;
+      margin-top: 8px;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 1200px) {
+  .tipos-iva-table {
+    .descripcion-cell {
+      display: none;
+    }
+  }
+  
+  .tipos-iva-container {
+    .displayedColumns {
+      // Ocultar columna descripción en pantallas medianas
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    text-align: center;
+    
+    h1 {
+      font-size: 1.5rem;
+    }
+  }
+  
+  .tipos-iva-table {
+    font-size: 0.875rem;
+    
+    .codigo-cell,
+    .porcentaje-cell {
+      .codigo-badge,
+      .porcentaje-badge {
+        font-size: 0.75rem;
+        padding: 2px 6px;
+      }
+    }
+    
+    .acciones-cell {
+      width: 80px;
+      
+      button {
+        margin-right: 4px;
+        
+        mat-icon {
+          font-size: 18px;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .tipos-iva-container {
+    padding: 12px;
+  }
+  
+  .content {
+    gap: 16px;
+  }
+  
+  .filter-card,
+  .form-card,
+  .table-card {
+    margin-bottom: 16px;
+  }
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .tipos-iva-container {
+    background-color: #121212;
+    color: rgba(255, 255, 255, 0.87);
+  }
+  
+  .filter-card,
+  .form-card,
+  .table-card {
+    background-color: #1e1e1e;
+  }
+  
+  .header {
+    h1 {
+      color: rgba(255, 255, 255, 0.87);
+    }
+    
+    p {
+      color: rgba(255, 255, 255, 0.6);
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .tipos-iva-container {
+    background: white;
+    padding: 0;
+  }
+  
+  .filter-card,
+  .form-card {
+    display: none;
+  }
+  
+  .table-card {
+    box-shadow: none;
+    margin: 0;
+  }
+  
+  .acciones-cell {
+    display: none;
+  }
+}
+
+// Animaciones
+.mat-mdc-row {
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: rgba($primary-color, 0.04);
+  }
+}
+
+.mat-mdc-button,
+.mat-mdc-icon-button {
+  transition: all 0.2s ease;
+}
+
+// Accesibilidad
+.mat-mdc-form-field {
+  .mat-mdc-form-field-error {
+    font-size: 0.75rem;
+  }
+}
+
+// Focus styles
+.mat-mdc-button:focus,
+.mat-mdc-icon-button:focus {
+  outline: 2px solid $primary-color;
+  outline-offset: 2px;
+}

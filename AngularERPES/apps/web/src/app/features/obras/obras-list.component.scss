@@ -1,0 +1,278 @@
+.obras-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  
+  .filter-card {
+    margin-bottom: 24px;
+    
+    mat-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      
+      .header-actions {
+        display: flex;
+        gap: 12px;
+      }
+    }
+    
+    .filters-form {
+      .filters-row {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        flex-wrap: wrap;
+        
+        mat-form-field {
+          min-width: 200px;
+          
+          &:first-child {
+            flex: 1;
+            min-width: 300px;
+          }
+        }
+        
+        button {
+          margin-top: 8px;
+        }
+      }
+    }
+  }
+  
+  .table-card {
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+      
+      mat-spinner {
+        margin-bottom: 16px;
+      }
+      
+      p {
+        color: #666;
+        margin: 0;
+      }
+    }
+    
+    .table-container {
+      overflow-x: auto;
+      
+      .obras-table {
+        width: 100%;
+        
+        th {
+          font-weight: 600;
+          color: #333;
+          background-color: #f5f5f5;
+        }
+        
+        td {
+          padding: 12px 8px;
+          vertical-align: middle;
+        }
+        
+        .obra-info {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          
+          .obra-nombre {
+            font-weight: 500;
+            color: #333;
+          }
+          
+          .obra-cliente {
+            font-size: 12px;
+            color: #666;
+          }
+        }
+        
+        .fechas-info {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          font-size: 12px;
+          
+          .fecha-inicio {
+            color: #2e7d32;
+          }
+          
+          .fecha-fin {
+            color: #d32f2f;
+          }
+        }
+        
+        .acciones {
+          display: flex;
+          gap: 4px;
+          
+          button {
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            
+            mat-icon {
+              font-size: 18px;
+              width: 18px;
+              height: 18px;
+            }
+          }
+        }
+        
+        .no-data {
+          color: #999;
+          font-style: italic;
+        }
+      }
+      
+      .no-data {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 48px;
+        text-align: center;
+        
+        mat-icon {
+          font-size: 48px;
+          width: 48px;
+          height: 48px;
+          color: #ccc;
+          margin-bottom: 16px;
+        }
+        
+        p {
+          color: #666;
+          margin: 0 0 16px 0;
+          font-size: 16px;
+        }
+      }
+    }
+  }
+}
+
+// Estados de obra
+.estado-planificacion {
+  background-color: #e3f2fd !important;
+  color: #1976d2 !important;
+}
+
+.estado-encurso {
+  background-color: #e8f5e8 !important;
+  color: #2e7d32 !important;
+}
+
+.estado-suspendida {
+  background-color: #fff3e0 !important;
+  color: #f57c00 !important;
+}
+
+.estado-finalizada {
+  background-color: #f3e5f5 !important;
+  color: #7b1fa2 !important;
+}
+
+.estado-cancelada {
+  background-color: #ffebee !important;
+  color: #d32f2f !important;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .obras-container {
+    padding: 16px;
+    
+    .filter-card {
+      mat-card-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+        
+        .header-actions {
+          justify-content: center;
+        }
+      }
+      
+      .filters-form {
+        .filters-row {
+          flex-direction: column;
+          align-items: stretch;
+          
+          mat-form-field {
+            min-width: unset;
+            width: 100%;
+            
+            &:first-child {
+              min-width: unset;
+            }
+          }
+          
+          button {
+            margin-top: 0;
+            align-self: center;
+          }
+        }
+      }
+    }
+    
+    .table-card {
+      .table-container {
+        .obras-table {
+          font-size: 14px;
+          
+          th, td {
+            padding: 8px 4px;
+          }
+          
+          .acciones {
+            flex-direction: column;
+            gap: 2px;
+            
+            button {
+              width: 28px;
+              height: 28px;
+              line-height: 28px;
+              
+              mat-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .obras-container {
+    padding: 12px;
+    
+    .table-card {
+      .table-container {
+        .obras-table {
+          .obra-info {
+            .obra-nombre {
+              font-size: 14px;
+            }
+            
+            .obra-cliente {
+              font-size: 11px;
+            }
+          }
+          
+          .fechas-info {
+            font-size: 11px;
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,666 @@
+<!-- ============================================================================ -->
+<!-- Componente de Auditoría - Template Principal -->
+<!-- ============================================================================ -->
+
+<div class="auditoria-container">
+  <!-- Header con título y acciones principales -->
+  <div class="auditoria-header">
+    <div class="header-title">
+      <mat-icon>security</mat-icon>
+      <h1>Auditoría del Sistema</h1>
+      <mat-chip-set *ngIf="totalEventos() > 0">
+        <mat-chip [color]="'primary'" selected>
+          {{ totalEventos() }} eventos
+        </mat-chip>
+      </mat-chip-set>
+    </div>
+
+    <div class="header-actions">
+      <!-- Auto-refresh toggle -->
+      <mat-slide-toggle 
+        [formControl]="configuracionForm.get('autoRefresh')!"
+        [matTooltip]="autoRefreshActivo() ? 'Auto-actualización activa' : 'Auto-actualización inactiva'">
+        <mat-icon>refresh</mat-icon>
+      </mat-slide-toggle>
+
+      <!-- Botón de recarga manual -->
+      <button 
+        mat-icon-button 
+        (click)="recargarDatos()"
+        [disabled]="cargando()"
+        matTooltip="Recargar datos">
+        <mat-icon [class.spinning]="cargando()">refresh</mat-icon>
+      </button>
+
+      <!-- Menú de exportación -->
+      <button mat-button [matMenuTriggerFor]="menuExportacion">
+        <mat-icon>download</mat-icon>
+        Exportar
+      </button>
+      <mat-menu #menuExportacion="matMenu">
+        <button 
+          mat-menu-item 
+          *ngFor="let formato of formatosExportacion" 
+          (click)="exportarEventos(formato.valor as any)">
+          <mat-icon>{{ formato.icono }}</mat-icon>
+          <span>{{ formato.etiqueta }}</span>
+        </button>
+      </mat-menu>
+
+      <!-- Menú de análisis -->
+      <button mat-button [matMenuTriggerFor]="menuAnalisis">
+        <mat-icon>analytics</mat-icon>
+        Análisis
+      </button>
+      <mat-menu #menuAnalisis="matMenu">
+        <button mat-menu-item (click)="analizarPatrones()">
+          <mat-icon>pattern</mat-icon>
+          <span>Detectar Patrones</span>
+        </button>
+        <button mat-menu-item (click)="generarReporte('seguridad')">
+          <mat-icon>security</mat-icon>
+          <span>Reporte de Seguridad</span>
+        </button>
+        <button mat-menu-item (click)="generarReporte('actividad')">
+          <mat-icon>timeline</mat-icon>
+          <span>Reporte de Actividad</span>
+        </button>
+        <button mat-menu-item (click)="generarReporte('completo')">
+          <mat-icon>description</mat-icon>
+          <span>Reporte Completo</span>
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+
+  <!-- Filtros y configuración -->
+  <mat-card class="filtros-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>filter_list</mat-icon>
+        Filtros y Configuración
+      </mat-card-title>
+      <div class="header-spacer"></div>
+      <button 
+        mat-icon-button 
+        (click)="limpiarFiltros()"
+        matTooltip="Limpiar filtros">
+        <mat-icon>clear</mat-icon>
+      </button>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="filtrosForm" class="filtros-form">
+        <!-- Filtros rápidos -->
+        <div class="filtros-rapidos">
+          <mat-form-field appearance="outline">
+            <mat-label>Filtro rápido</mat-label>
+            <mat-select [formControl]="configuracionForm.get('filtroRapido')!">
+              <mat-option value="">Personalizado</mat-option>
+              <mat-option 
+                *ngFor="let filtro of filtrosRapidos" 
+                [value]="filtro.valor">
+                {{ filtro.etiqueta }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Rango de fechas -->
+        <div class="filtros-fechas">
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha inicio</mat-label>
+            <input 
+              matInput 
+              [matDatepicker]="pickerInicio"
+              formControlName="fechaInicio">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+            <mat-datepicker #pickerInicio></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha fin</mat-label>
+            <input 
+              matInput 
+              [matDatepicker]="pickerFin"
+              formControlName="fechaFin">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFin></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <!-- Filtros por categorías -->
+        <div class="filtros-categorias">
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo</mat-label>
+            <mat-select formControlName="tipo">
+              <mat-option value="">Todos</mat-option>
+              <mat-option 
+                *ngFor="let tipo of tiposUnicos()" 
+                [value]="tipo">
+                {{ tipo | titlecase }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Severidad</mat-label>
+            <mat-select formControlName="severidad">
+              <mat-option value="">Todas</mat-option>
+              <mat-option 
+                *ngFor="let severidad of severidadesUnicas()" 
+                [value]="severidad">
+                <mat-icon [color]="obtenerColorSeveridad(severidad)">{{ obtenerIconoSeveridad(severidad) }}</mat-icon>
+                {{ severidad | titlecase }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Módulo</mat-label>
+            <mat-select formControlName="modulo">
+              <mat-option value="">Todos</mat-option>
+              <mat-option 
+                *ngFor="let modulo of modulosUnicos()" 
+                [value]="modulo">
+                {{ modulo | titlecase }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Usuario</mat-label>
+            <mat-select formControlName="usuarioId">
+              <mat-option [value]="null">Todos</mat-option>
+              <mat-option 
+                *ngFor="let usuario of usuarios()" 
+                [value]="usuario.id">
+                {{ usuario.nombre }} {{ usuario.apellidos }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Filtros adicionales -->
+        <div class="filtros-adicionales">
+          <mat-form-field appearance="outline">
+            <mat-label>Buscar</mat-label>
+            <input 
+              matInput 
+              formControlName="busqueda"
+              placeholder="Buscar en descripción, acción, recurso...">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>IP</mat-label>
+            <mat-select formControlName="ip">
+              <mat-option value="">Todas</mat-option>
+              <mat-option 
+                *ngFor="let ip of ipsUnicas()" 
+                [value]="ip">
+                {{ ip }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Selector de vista -->
+  <mat-card class="vista-selector">
+    <mat-card-content>
+      <mat-button-toggle-group 
+        [value]="vistaActual()"
+        (change)="cambiarVista($event.value)"
+        class="vista-toggle-group">
+        <mat-button-toggle value="eventos">
+          <mat-icon>list</mat-icon>
+          Eventos
+        </mat-button-toggle>
+        <mat-button-toggle value="timeline">
+          <mat-icon>timeline</mat-icon>
+          Timeline
+        </mat-button-toggle>
+        <mat-button-toggle value="estadisticas">
+          <mat-icon>bar_chart</mat-icon>
+          Estadísticas
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+
+      <!-- Configuraciones adicionales -->
+      <div class="configuraciones-vista">
+        <mat-slide-toggle 
+          [formControl]="configuracionForm.get('mostrarDetalles')!"
+          *ngIf="vistaActual() === 'eventos'">
+          Mostrar detalles
+        </mat-slide-toggle>
+
+        <mat-slide-toggle 
+          [formControl]="configuracionForm.get('agruparPorFecha')!"
+          *ngIf="vistaActual() === 'timeline'">
+          Agrupar por fecha
+        </mat-slide-toggle>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Estado de carga -->
+  <div *ngIf="cargando()" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando eventos de auditoría...</p>
+  </div>
+
+  <!-- Estado de error -->
+  <mat-card *ngIf="error()" class="error-card">
+    <mat-card-content>
+      <div class="error-content">
+        <mat-icon color="warn">error</mat-icon>
+        <div>
+          <h3>Error al cargar datos</h3>
+          <p>{{ error() }}</p>
+          <button mat-raised-button color="primary" (click)="recargarDatos()">
+            <mat-icon>refresh</mat-icon>
+            Reintentar
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Contenido principal -->
+  <div *ngIf="!cargando() && !error()" class="contenido-principal">
+    
+    <!-- Vista de Eventos -->
+    <div *ngIf="vistaActual() === 'eventos'" class="vista-eventos">
+      
+      <!-- Toolbar de selección -->
+      <mat-card *ngIf="modoSeleccion()" class="seleccion-toolbar">
+        <mat-card-content>
+          <div class="seleccion-info">
+            <mat-icon>check_circle</mat-icon>
+            <span>{{ eventosSeleccionados().length }} eventos seleccionados</span>
+          </div>
+          <div class="seleccion-acciones">
+            <button mat-button (click)="limpiarSeleccion()">
+              <mat-icon>clear</mat-icon>
+              Limpiar selección
+            </button>
+            <button mat-button (click)="alternarModoSeleccion()">
+              <mat-icon>close</mat-icon>
+              Salir del modo selección
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Tabla de eventos -->
+      <mat-card class="tabla-eventos">
+        <mat-card-content>
+          
+          <!-- Estado vacío -->
+          <div *ngIf="totalEventos() === 0" class="empty-state">
+            <mat-icon>event_note</mat-icon>
+            <h3>No hay eventos de auditoría</h3>
+            <p>No se encontraron eventos que coincidan con los filtros aplicados.</p>
+            <button mat-raised-button color="primary" (click)="limpiarFiltros()">
+              <mat-icon>clear</mat-icon>
+              Limpiar filtros
+            </button>
+          </div>
+
+          <!-- Tabla con datos -->
+          <div *ngIf="totalEventos() > 0" class="tabla-container">
+            <table mat-table [dataSource]="eventosPaginados()" class="eventos-table">
+              
+              <!-- Columna de selección -->
+              <ng-container matColumnDef="seleccion">
+                <th mat-header-cell *matHeaderCellDef>
+                  <mat-checkbox 
+                    [checked]="todosMarcados()"
+                    [indeterminate]="hayEventosSeleccionados() && !todosMarcados()"
+                    (change)="alternarSeleccionTodos()">
+                  </mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let evento">
+                  <mat-checkbox 
+                    [checked]="eventosSeleccionados().includes(evento.id)"
+                    (change)="alternarSeleccionEvento(evento.id)">
+                  </mat-checkbox>
+                </td>
+              </ng-container>
+
+              <!-- Columna de fecha -->
+              <ng-container matColumnDef="fecha">
+                <th mat-header-cell *matHeaderCellDef 
+                    [class.sorted]="ordenamiento().campo === 'fecha'"
+                    (click)="cambiarOrdenamiento('fecha')">
+                  Fecha
+                  <mat-icon *ngIf="ordenamiento().campo === 'fecha'">
+                    {{ ordenamiento().direccion === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                  </mat-icon>
+                </th>
+                <td mat-cell *matCellDef="let evento">
+                  <div class="fecha-cell">
+                    <span class="fecha-principal">{{ formatearFecha(evento.fecha) }}</span>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Columna de tipo -->
+              <ng-container matColumnDef="tipo">
+                <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                <td mat-cell *matCellDef="let evento">
+                  <mat-chip [color]="obtenerColorSeveridad(evento.severidad)" selected>
+                    <mat-icon>{{ obtenerIconoTipo(evento.tipo) }}</mat-icon>
+                    {{ evento.tipo | titlecase }}
+                  </mat-chip>
+                </td>
+              </ng-container>
+
+              <!-- Columna de acción -->
+              <ng-container matColumnDef="accion">
+                <th mat-header-cell *matHeaderCellDef>Acción</th>
+                <td mat-cell *matCellDef="let evento">
+                  <span class="accion-text">{{ evento.accion | titlecase }}</span>
+                </td>
+              </ng-container>
+
+              <!-- Columna de recurso -->
+              <ng-container matColumnDef="recurso">
+                <th mat-header-cell *matHeaderCellDef>Recurso</th>
+                <td mat-cell *matCellDef="let evento">
+                  <span class="recurso-text">{{ evento.recurso }}</span>
+                </td>
+              </ng-container>
+
+              <!-- Columna de usuario -->
+              <ng-container matColumnDef="usuario">
+                <th mat-header-cell *matHeaderCellDef>Usuario</th>
+                <td mat-cell *matCellDef="let evento">
+                  <div class="usuario-cell" *ngIf="evento.usuarioNombre; else sinUsuario">
+                    <mat-icon>person</mat-icon>
+                    <span>{{ evento.usuarioNombre }}</span>
+                  </div>
+                  <ng-template #sinUsuario>
+                    <span class="sin-usuario">Sistema</span>
+                  </ng-template>
+                </td>
+              </ng-container>
+
+              <!-- Columna de severidad -->
+              <ng-container matColumnDef="severidad">
+                <th mat-header-cell *matHeaderCellDef>Severidad</th>
+                <td mat-cell *matCellDef="let evento">
+                  <mat-icon 
+                    [color]="obtenerColorSeveridad(evento.severidad)"
+                    [matTooltip]="evento.severidad | titlecase">
+                    {{ obtenerIconoSeveridad(evento.severidad) }}
+                  </mat-icon>
+                </td>
+              </ng-container>
+
+              <!-- Columna de descripción -->
+              <ng-container matColumnDef="descripcion">
+                <th mat-header-cell *matHeaderCellDef>Descripción</th>
+                <td mat-cell *matCellDef="let evento">
+                  <div class="descripcion-cell">
+                    <span class="descripcion-text">{{ evento.descripcion }}</span>
+                    <div *ngIf="configuracionForm.get('mostrarDetalles')?.value && evento.detalles" 
+                         class="detalles-adicionales">
+                      <mat-chip-set>
+                        <mat-chip *ngIf="evento.ip">
+                          <mat-icon>computer</mat-icon>
+                          {{ evento.ip }}
+                        </mat-chip>
+                        <mat-chip>
+                          <mat-icon>business</mat-icon>
+                          {{ evento.modulo | titlecase }}
+                        </mat-chip>
+                      </mat-chip-set>
+                    </div>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Columna de acciones -->
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                <td mat-cell *matCellDef="let evento">
+                  <button 
+                    mat-icon-button 
+                    (click)="verDetallesEvento(evento)"
+                    matTooltip="Ver detalles">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="columnasEventos"></tr>
+              <tr mat-row *matRowDef="let row; columns: columnasEventos;" 
+                  [class.selected]="eventosSeleccionados().includes(row.id)"></tr>
+            </table>
+          </div>
+
+          <!-- Paginación -->
+          <mat-paginator 
+            *ngIf="totalEventos() > 0"
+            [length]="totalEventos()"
+            [pageSize]="tamañoPagina()"
+            [pageIndex]="paginaActual()"
+            [pageSizeOptions]="[10, 25, 50, 100]"
+            (page)="cambiarPagina($event.pageIndex); cambiarTamañoPagina($event.pageSize)"
+            showFirstLastButtons>
+          </mat-paginator>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Vista de Timeline -->
+    <div *ngIf="vistaActual() === 'timeline'" class="vista-timeline">
+      <mat-card class="timeline-card">
+        <mat-card-content>
+          
+          <!-- Estado vacío -->
+          <div *ngIf="timeline().length === 0" class="empty-state">
+            <mat-icon>timeline</mat-icon>
+            <h3>No hay eventos en el timeline</h3>
+            <p>No se encontraron eventos para mostrar en el timeline.</p>
+          </div>
+
+          <!-- Timeline con eventos -->
+          <div *ngIf="timeline().length > 0" class="timeline-container">
+            <div class="timeline-item" 
+                 *ngFor="let item of timeline(); trackBy: trackByTimelineId"
+                 [class]="'timeline-' + item.severidad">
+              
+              <div class="timeline-marker">
+                <mat-icon [color]="item.color">{{ item.icono }}</mat-icon>
+              </div>
+              
+              <div class="timeline-content">
+                <div class="timeline-header">
+                  <h4>{{ item.titulo }}</h4>
+                  <span class="timeline-fecha">{{ formatearFecha(item.fecha) }}</span>
+                </div>
+                
+                <p class="timeline-descripcion">{{ item.descripcion }}</p>
+                
+                <div class="timeline-meta" *ngIf="item.usuario">
+                  <mat-chip>
+                    <mat-icon>person</mat-icon>
+                    {{ item.usuario }}
+                  </mat-chip>
+                  <mat-chip>
+                    <mat-icon>category</mat-icon>
+                    {{ item.tipo | titlecase }}
+                  </mat-chip>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Vista de Estadísticas -->
+    <div *ngIf="vistaActual() === 'estadisticas'" class="vista-estadisticas">
+      
+      <!-- Resumen general -->
+      <div class="estadisticas-resumen">
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-content">
+              <mat-icon color="primary">event_note</mat-icon>
+              <div class="stat-info">
+                <h3>{{ estadisticas().totalEventos }}</h3>
+                <p>Total de Eventos</p>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-content">
+              <mat-icon color="warn">error</mat-icon>
+              <div class="stat-info">
+                <h3>{{ estadisticas().tendencias.erroresSistema }}</h3>
+                <p>Errores del Sistema</p>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-content">
+              <mat-icon color="accent">security</mat-icon>
+              <div class="stat-info">
+                <h3>{{ estadisticas().tendencias.loginsFallidos }}</h3>
+                <p>Logins Fallidos</p>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-content">
+              <mat-icon color="primary">admin_panel_settings</mat-icon>
+              <div class="stat-info">
+                <h3>{{ estadisticas().tendencias.cambiosPermisos }}</h3>
+                <p>Cambios de Permisos</p>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Gráficos y detalles -->
+      <div class="estadisticas-detalle">
+        
+        <!-- Eventos por tipo -->
+        <mat-card class="chart-card">
+          <mat-card-header>
+            <mat-card-title>Eventos por Tipo</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="chart-placeholder">
+              <div *ngFor="let item of estadisticas().eventosPorTipo | keyvalue" 
+                   class="chart-item">
+                <span class="chart-label">{{ item.key | titlecase }}</span>
+                <div class="chart-bar">
+                  <div class="chart-fill" 
+                       [style.width.%]="(item.value / estadisticas().totalEventos) * 100">
+                  </div>
+                </div>
+                <span class="chart-value">{{ item.value }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Eventos por severidad -->
+        <mat-card class="chart-card">
+          <mat-card-header>
+            <mat-card-title>Eventos por Severidad</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="chart-placeholder">
+              <div *ngFor="let item of estadisticas().eventosPorSeveridad | keyvalue" 
+                   class="chart-item">
+                <mat-icon [color]="obtenerColorSeveridad(item.key)">
+                  {{ obtenerIconoSeveridad(item.key) }}
+                </mat-icon>
+                <span class="chart-label">{{ item.key | titlecase }}</span>
+                <div class="chart-bar">
+                  <div class="chart-fill" 
+                       [style.width.%]="(item.value / estadisticas().totalEventos) * 100"
+                       [class]="'fill-' + item.key">
+                  </div>
+                </div>
+                <span class="chart-value">{{ item.value }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Usuarios más activos -->
+        <mat-card class="chart-card">
+          <mat-card-header>
+            <mat-card-title>Usuarios Más Activos</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="usuarios-activos">
+              <div *ngFor="let usuario of estadisticas().usuariosMasActivos.slice(0, 5)" 
+                   class="usuario-activo">
+                <mat-icon>person</mat-icon>
+                <span class="usuario-nombre">{{ usuario.nombre }}</span>
+                <mat-chip>{{ usuario.eventos }} eventos</mat-chip>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Eventos por módulo -->
+        <mat-card class="chart-card">
+          <mat-card-header>
+            <mat-card-title>Eventos por Módulo</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="chart-placeholder">
+              <div *ngFor="let item of estadisticas().eventosPorModulo | keyvalue" 
+                   class="chart-item">
+                <span class="chart-label">{{ item.key | titlecase }}</span>
+                <div class="chart-bar">
+                  <div class="chart-fill" 
+                       [style.width.%]="(item.value / estadisticas().totalEventos) * 100">
+                  </div>
+                </div>
+                <span class="chart-value">{{ item.value }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón flotante para modo selección -->
+  <button 
+    *ngIf="vistaActual() === 'eventos' && totalEventos() > 0 && !modoSeleccion()"
+    mat-fab 
+    class="fab-seleccion"
+    (click)="alternarModoSeleccion()"
+    matTooltip="Activar modo selección">
+    <mat-icon>check_circle</mat-icon>
+  </button>
+
+  <!-- Indicador de cambios pendientes -->
+  <div *ngIf="hayEventosSeleccionados()" class="cambios-pendientes">
+    <mat-icon>info</mat-icon>
+    <span>{{ eventosSeleccionados().length }} eventos seleccionados</span>
+  </div>
+</div>
