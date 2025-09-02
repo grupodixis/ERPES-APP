@@ -1,0 +1,1558 @@
+.presupuesto-editor-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-height: calc(100vh - 120px);
+  background-color: #f5f5f5;
+}
+
+// ===== TOOLBAR =====
+.editor-toolbar {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  min-height: 64px;
+  margin-bottom: 0;
+
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .toolbar-title {
+      font-size: 20px;
+      font-weight: 600; // Increased weight for better readability
+      color: #212121; // Darker color for better contrast
+    }
+
+    mat-chip {
+      font-size: 12px;
+      height: 24px;
+    }
+  }
+
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .inline-spinner {
+      margin-right: 8px;
+    }
+  }
+  
+  // Estilos específicos para la grilla en modo oscuro
+  .presupuesto-grid {
+    background-color: #1e1e1e;
+    border-color: #404040;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    
+    .grid-header {
+      background-color: #2d2d2d;
+      border-bottom-color: #404040;
+      color: #e0e0e0;
+      
+      .header-cell {
+        background-color: #2d2d2d;
+        border-right-color: #404040;
+        color: #e0e0e0;
+      }
+    }
+    
+    .grid-row {
+      background-color: #1e1e1e;
+      border-bottom-color: #404040;
+      
+      &:hover {
+        background-color: #2a2a2a;
+      }
+      
+      &.selected {
+        background-color: #1a365d;
+        border-color: #3182ce;
+      }
+      
+      &.capitulo {
+        background-color: #2a2a2a;
+        color: #e0e0e0;
+        
+        .grid-cell {
+          border-right-color: #505050;
+        }
+      }
+      
+      &.partida {
+        background-color: #1e1e1e;
+        color: #b0b0b0;
+        
+        .nivel-col {
+          background-color: #333333;
+        }
+      }
+    }
+    
+    .grid-cell {
+      border-right-color: #404040;
+      color: #e0e0e0;
+      
+      &.nivel-col {
+        background-color: #333333;
+        color: #b0b0b0;
+      }
+      
+      &.codigo-col {
+        color: #4fc3f7;
+      }
+      
+      &.nombre-col {
+        color: #e0e0e0;
+      }
+      
+      &.total-col {
+        color: #66bb6a;
+      }
+      
+      .cell-content {
+        color: #ffffff !important; // Blanco puro para máximo contraste en modo oscuro
+        font-weight: 500; // Peso medio para mejor legibilidad
+        
+        &.total-amount {
+          color: #81c784 !important; // Verde más claro para mejor contraste en oscuro
+          font-weight: 600;
+        }
+      }
+      
+      // Asegurar que las celdas tengan el texto blanco en modo oscuro
+      .grid-cell {
+        .cell-content {
+          color: #ffffff !important;
+        }
+      }
+      
+      .cell-input,
+      .cell-textarea {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+        border-color: #4fc3f7;
+        box-shadow: 0 2px 4px rgba(79, 195, 247, 0.2);
+        
+        &:focus {
+          border-color: #29b6f6;
+          box-shadow: 0 2px 8px rgba(79, 195, 247, 0.3);
+        }
+      }
+    }
+    
+    .grid-footer {
+      background-color: #1b4332;
+      border-top-color: #66bb6a;
+      color: #a7f3d0;
+      
+      .grid-cell {
+        border-right-color: #2d5a3d;
+        
+        &.total-label {
+          color: #a7f3d0;
+        }
+        
+        &.total-amount {
+          color: #d1fae5;
+        }
+      }
+    }
+    
+    .grid-row:not(.grid-footer) .grid-cell.codigo-col:hover,
+    .grid-row:not(.grid-footer) .grid-cell.nombre-col:hover {
+      background-color: #1a365d;
+      border-color: #4fc3f7;
+    }
+    
+    .action-btn {
+      color: #e0e0e0;
+      
+      &.delete-btn {
+        color: #f87171;
+        
+        &:hover {
+          background-color: #3f1f1f;
+        }
+      }
+      
+      &:hover {
+        background-color: #404040;
+      }
+    }
+  }
+}
+
+// ===== GRILLA TIPO EXCEL =====
+.presupuesto-grid {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  background-color: #ffffff;
+  overflow: hidden;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  // Encabezados de columnas
+  .grid-header {
+    display: grid;
+    grid-template-columns: 120px 1fr 100px 120px 120px 200px;
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #d0d0d0;
+    font-weight: 600;
+    color: #212529;
+
+    .header-cell {
+      padding: 12px 8px;
+      border-right: 1px solid #d0d0d0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      background-color: #f8f9fa;
+
+      &:last-child {
+        border-right: none;
+      }
+    }
+  }
+
+  // Filas de datos
+  .grid-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 100px 120px 120px 200px;
+    border-bottom: 1px solid #dee2e6;
+    transition: background-color 0.2s ease;
+    background-color: #ffffff;
+
+    &:hover {
+      background-color: #f8f9fa;
+    }
+
+    &.selected {
+      background-color: #e7f3ff;
+      border-color: #0d6efd;
+    }
+
+    &.capitulo {
+      background-color: #f8f9fa;
+      font-weight: 500;
+      color: #212529;
+
+      .grid-cell {
+        border-right-color: #d0d0d0;
+      }
+    }
+
+    &.partida {
+      background-color: #ffffff;
+      color: #495057;
+      
+      .nivel-col {
+        background-color: #f1f3f4;
+      }
+    }
+  }
+
+  // Celdas individuales
+  .grid-cell {
+    padding: 8px;
+    border-right: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    min-height: 40px;
+    position: relative;
+    cursor: pointer;
+    color: #212529;
+
+    &:last-child {
+      border-right: none;
+    }
+
+    &.capitulo-empty {
+      background-color: transparent;
+      cursor: default;
+      
+      .cell-content {
+        display: none;
+      }
+    }
+
+    &.codigo-col {
+      font-family: 'Roboto Mono', monospace;
+      font-weight: 500;
+      color: #0d6efd;
+      position: relative;
+      
+      .expand-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        margin-right: 8px;
+        cursor: pointer;
+        border-radius: 50%;
+        transition: background-color 0.2s ease;
+        
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+
+    &.unidades-col {
+      justify-content: center;
+      font-family: 'Roboto Mono', monospace;
+      font-weight: 500;
+      color: #495057;
+    }
+
+    &.precio-col {
+      justify-content: flex-end;
+      font-family: 'Roboto Mono', monospace;
+      font-weight: 500;
+      color: #495057;
+    }
+
+    &.nombre-col {
+      padding-right: 12px;
+      color: #212529;
+    }
+
+    &.total-col {
+      justify-content: flex-end;
+      font-weight: 600;
+      font-family: 'Roboto Mono', monospace;
+      color: #198754;
+    }
+
+    &.actions-col {
+      justify-content: center;
+      gap: 4px;
+      cursor: default;
+      
+      .action-span {
+        display: inline-block;
+        padding: 4px 8px;
+        margin: 2px;
+        background-color: #333;
+        color: #ffffff;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background-color: #555;
+          transform: translateY(-1px);
+        }
+        
+        &.create-partida {
+          background-color: #4caf50;
+          
+          &:hover {
+            background-color: #66bb6a;
+          }
+        }
+        
+        &.create-capitulo {
+          background-color: #2196f3;
+          
+          &:hover {
+            background-color: #42a5f5;
+          }
+        }
+        
+        &.delete-item {
+          background-color: #f44336;
+          
+          &:hover {
+            background-color: #ef5350;
+          }
+        }
+      }
+      
+      .expand-toggle {
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+      }
+    }
+
+    // Contenido de celda
+    .cell-content {
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #000000; // Texto en negro
+      font-weight: 500; // Peso medio para mejor legibilidad
+
+      &.total-amount {
+        color: #000000; // También en negro para consistencia
+        font-weight: 600;
+      }
+    }
+
+    // Inputs de edición
+    .cell-input,
+    .cell-textarea {
+      width: 100%;
+      border: 2px solid #0d6efd;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background-color: #ffffff;
+      color: #212529;
+      outline: none;
+      box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+
+      &:focus {
+        border-color: #0b5ed7;
+        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+      }
+    }
+
+    .cell-textarea {
+      resize: vertical;
+      min-height: 36px;
+      font-family: inherit;
+    }
+  }
+
+  // Botones de acción
+  .action-btn {
+    font-size: 11px;
+    padding: 4px 8px;
+    min-width: auto;
+    height: 28px;
+    line-height: 1;
+    border-radius: 4px;
+    text-transform: none;
+
+    &.delete-btn {
+      color: #d32f2f;
+
+      &:hover {
+        background-color: #ffebee;
+      }
+    }
+  }
+
+  // Fila de totales
+  .grid-footer {
+    display: grid;
+    grid-template-columns: 120px 1fr 100px 120px 120px 200px;
+    background-color: #d1e7dd;
+    border-top: 2px solid #198754;
+    font-weight: 600;
+    color: #0f5132;
+
+    .grid-cell {
+      border-right-color: #a3cfbb;
+      cursor: default;
+
+      &.total-label {
+        justify-content: flex-end;
+        padding-right: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #0f5132;
+      }
+
+      &.total-amount {
+        font-size: 16px;
+        font-weight: 700;
+        color: #0a3622;
+      }
+    }
+  }
+
+  // Estados de hover para celdas editables
+  .grid-row:not(.grid-footer) .grid-cell.codigo-col:hover,
+  .grid-row:not(.grid-footer) .grid-cell.nombre-col:hover {
+    background-color: #e7f3ff;
+    border-color: #6ea8fe;
+    cursor: text;
+  }
+
+  // Responsive design
+  @media (max-width: 1200px) {
+    .grid-header,
+    .grid-row,
+    .grid-footer {
+      grid-template-columns: 100px 1fr 80px 100px 100px 150px;
+    }
+
+    .grid-cell {
+      padding: 6px;
+      font-size: 13px;
+    }
+
+    .action-btn {
+      font-size: 10px;
+      padding: 2px 6px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .grid-header,
+    .grid-row,
+    .grid-footer {
+      grid-template-columns: 80px 1fr 60px 80px 80px 120px;
+    }
+
+    .grid-cell {
+      padding: 4px;
+      font-size: 12px;
+    }
+  }
+}
+
+// ===== CONTENIDO PRINCIPAL =====
+.editor-content {
+  flex: 1;
+  display: flex;
+  gap: 24px;
+  overflow: hidden;
+}
+
+// ===== PANEL IZQUIERDO =====
+.left-panel {
+  flex: 0 0 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+
+  .form-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    
+    mat-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .changes-indicator {
+        animation: pulse 2s infinite;
+      }
+    }
+
+    mat-card-content {
+      padding-top: 16px;
+    }
+  }
+
+  .totals-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    
+    .totals-grid {
+      display: grid;
+      gap: 12px;
+
+      .total-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+
+        &.total-final {
+          border-bottom: 2px solid #1976d2;
+          font-weight: 600;
+          font-size: 16px;
+          margin-top: 8px;
+          padding-top: 16px;
+
+          .total-label {
+            color: #1976d2;
+          }
+
+          .total-value {
+            color: #1976d2;
+          }
+        }
+
+        .total-label {
+          color: #666;
+          font-weight: 500;
+        }
+
+        .total-value {
+          font-weight: 600;
+          color: #333;
+        }
+      }
+    }
+  }
+}
+
+// ===== FORMULARIO =====
+.form-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.form-field-full {
+  width: 100%;
+}
+
+.form-field-half {
+  flex: 1;
+}
+
+mat-form-field {
+  margin-bottom: 16px;
+}
+
+// ===== PANEL DERECHO =====
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .tree-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: white;
+    padding: 16px;
+
+    .tree-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      
+      h3 {
+        margin: 0;
+        color: #333;
+        font-size: 18px;
+        font-weight: 500;
+      }
+    }
+    
+    .tree-content {
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+        
+        thead {
+           background: #f5f5f5;
+           
+           th {
+             padding: 12px 8px;
+             border-right: 1px solid #e0e0e0;
+             text-align: center;
+             font-size: 14px;
+             color: #333;
+             font-weight: 600;
+             
+             &:last-child {
+               border-right: none;
+             }
+           }
+         }
+        
+        tbody {
+          .table-row {
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+            
+            &:hover {
+              background-color: #f9f9f9;
+            }
+            
+            &.selected {
+              background-color: #e3f2fd;
+            }
+            
+            &.capitulo {
+                 background-color: #f8f9fa;
+                 font-weight: 500;
+                 
+                 .table-cell {
+                   color: #222;
+                   
+                   &.cantidad-col,
+                   &.precio-col,
+                   &.dto1-col,
+                   &.dto3-col,
+                   &.iva-col {
+                     background-color: #f0f0f0;
+                     color: #666;
+                   }
+                 }
+               }
+            
+            &.totals-row {
+                 background-color: #f5f5f5;
+                 border-top: 2px solid #ddd;
+                 font-weight: 600;
+                 
+                 .table-cell {
+                   padding: 12px 8px;
+                   color: #222;
+                   
+                   &.total-col {
+                     color: #1b5e20;
+                     font-size: 16px;
+                   }
+                 }
+               }
+            
+            .table-cell {
+               padding: 8px;
+               border-right: 1px solid #f0f0f0;
+               text-align: left;
+               font-size: 14px;
+               vertical-align: middle;
+               color: #333;
+               
+               &:last-child {
+                 border-right: none;
+               }
+              
+              &.codigo-col {
+                width: 80px;
+                
+                .expand-toggle {
+                  display: inline-block;
+                  margin-right: 8px;
+                  cursor: pointer;
+                  
+                  mat-icon {
+                    font-size: 18px;
+                    width: 18px;
+                    height: 18px;
+                  }
+                }
+              }
+              
+              &.articulo-col {
+                width: 100px;
+              }
+              
+              &.descripcion-col {
+                min-width: 200px;
+              }
+              
+              &.cantidad-col,
+              &.precio-col,
+              &.dto1-col,
+              &.dto3-col {
+                width: 100px;
+                text-align: right;
+              }
+              
+              &.total-col {
+                width: 120px;
+                text-align: right;
+                font-weight: 500;
+                
+                .total-amount {
+                  color: #2e7d32;
+                }
+              }
+              
+              &.iva-col {
+                width: 80px;
+                text-align: center;
+              }
+              
+              &.noimp-col {
+                width: 80px;
+                text-align: center;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    mat-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+
+      .tree-actions {
+        display: flex;
+        gap: 8px;
+      }
+    }
+
+    mat-card-content {
+      flex: 1;
+      overflow: hidden;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}
+
+// ===== ÁRBOL =====
+.presupuesto-tree {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+
+  .tree-node {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    margin: 2px 0;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+
+    &:hover {
+      background-color: #f5f5f5;
+      border-color: #e0e0e0;
+
+      .node-actions {
+        opacity: 1;
+      }
+    }
+
+    &.selected {
+      background-color: #e3f2fd;
+      border-color: #1976d2;
+
+      .node-actions {
+        opacity: 1;
+      }
+    }
+
+    &.expandable {
+      .node-content {
+        button[matTreeNodeToggle] {
+          margin-right: 8px;
+        }
+      }
+    }
+
+    .node-content {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      gap: 12px;
+      min-width: 0;
+
+      .node-icon {
+        flex-shrink: 0;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+
+      .node-info {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        position: relative;
+        
+        &:has(.inline-edit-field) {
+          flex-direction: row;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .node-code {
+          font-size: 12px;
+          color: #666;
+          font-weight: 500;
+        }
+
+        .node-name {
+          font-size: 14px;
+          color: #333;
+          font-weight: 400;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        // Estilos para edición inline
+        .inline-edit-field {
+          margin: 0;
+          
+          &.code-field {
+            width: 80px;
+            margin-right: 8px;
+            
+            ::ng-deep .mat-mdc-form-field-wrapper {
+              padding-bottom: 0;
+            }
+            
+            ::ng-deep .mat-mdc-text-field-wrapper {
+              height: 32px;
+              
+              .mat-mdc-form-field-input-control {
+                font-size: 12px;
+                padding: 4px 8px;
+              }
+            }
+          }
+          
+          &.name-field {
+            flex: 1;
+            min-width: 120px;
+            
+            ::ng-deep .mat-mdc-form-field-wrapper {
+              padding-bottom: 0;
+            }
+            
+            ::ng-deep .mat-mdc-text-field-wrapper {
+              height: 32px;
+              
+              .mat-mdc-form-field-input-control {
+                font-size: 14px;
+                padding: 4px 8px;
+              }
+            }
+          }
+          
+          ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+            display: none;
+          }
+        }
+        
+        .edit-actions {
+          display: flex;
+          gap: 4px;
+          margin-left: 8px;
+          
+          .save-button {
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            
+            ::ng-deep .mat-mdc-button-persistent-ripple {
+              border-radius: 50%;
+            }
+            
+            mat-icon {
+              font-size: 16px;
+              width: 16px;
+              height: 16px;
+            }
+          }
+          
+          .cancel-button {
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            color: #666;
+            
+            &:hover {
+              color: #f44336;
+              background-color: rgba(244, 67, 54, 0.1);
+            }
+            
+            ::ng-deep .mat-mdc-button-persistent-ripple {
+              border-radius: 50%;
+            }
+            
+            mat-icon {
+              font-size: 16px;
+              width: 16px;
+              height: 16px;
+            }
+          }
+        }
+      }
+
+      .node-total {
+        flex-shrink: 0;
+        font-weight: 600;
+        color: #1976d2;
+        font-size: 14px;
+      }
+    }
+
+    .node-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+
+      .action-button {
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+  }
+}
+
+// ===== ESTADOS VACÍOS Y CARGA =====
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: #666;
+
+  mat-spinner {
+    margin-bottom: 16px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.empty-tree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: #666;
+  text-align: center;
+
+  .empty-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    color: #ccc;
+  }
+
+  p {
+    margin: 0 0 24px 0;
+    font-size: 16px;
+  }
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+// ===== MENÚS =====
+.delete-action {
+  color: #f44336 !important;
+
+  mat-icon {
+    color: #f44336 !important;
+  }
+}
+
+// ===== ANIMACIONES =====
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+// ===== SNACKBAR PERSONALIZADO =====
+:host ::ng-deep {
+  .success-snackbar {
+    background-color: #4caf50 !important;
+    color: white !important;
+  }
+
+  .error-snackbar {
+    background-color: #f44336 !important;
+    color: white !important;
+  }
+
+  .info-snackbar {
+    background-color: #2196f3 !important;
+    color: white !important;
+  }
+}
+
+// ===== RESPONSIVE =====
+@media (max-width: 1200px) {
+  .editor-content {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .left-panel {
+    flex: none;
+    order: 2;
+  }
+
+  .right-panel {
+    flex: none;
+    order: 1;
+    min-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .editor-toolbar {
+    padding: 0 8px;
+    min-height: 56px;
+
+    .toolbar-left {
+      gap: 8px;
+
+      .toolbar-title {
+        font-size: 16px;
+      }
+    }
+
+    .toolbar-right {
+      gap: 4px;
+
+      button {
+        min-width: auto;
+        padding: 0 8px;
+
+        span {
+          display: none;
+        }
+      }
+    }
+  }
+
+  .editor-content {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .left-panel {
+    flex: none;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .form-field-half {
+    width: 100%;
+  }
+
+  .presupuesto-tree {
+    padding: 8px;
+
+    .tree-node {
+      padding: 6px 8px;
+
+      .node-content {
+        gap: 8px;
+
+        .node-info {
+          .node-name {
+            font-size: 13px;
+          }
+
+          .node-code {
+            font-size: 11px;
+          }
+        }
+
+        .node-total {
+          font-size: 13px;
+        }
+      }
+
+      .node-actions {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+// ===== ACCESIBILIDAD =====
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// ===== BREADCRUMB =====
+.breadcrumb-nav {
+  padding: 16px 24px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0;
+  
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 14px;
+    
+    .breadcrumb-item {
+      display: flex;
+      align-items: center;
+      
+      .breadcrumb-link {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        color: var(--mat-primary-color, #1976d2);
+        text-decoration: none;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+        
+        &:hover {
+          background-color: var(--mat-primary-50, rgba(25, 118, 210, 0.1));
+        }
+        
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+      }
+      
+      .breadcrumb-separator {
+        margin: 0 8px;
+        color: var(--mat-text-secondary, #666);
+        font-weight: 300;
+      }
+      
+      .breadcrumb-current {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        color: var(--mat-text-primary, #333);
+        font-weight: 500;
+        
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+  }
+}
+
+// Dark theme breadcrumb
+.dark-theme {
+  .breadcrumb-nav {
+    background-color: var(--mat-toolbar-container-background-color, #424242);
+    border-bottom-color: var(--mat-divider-color, #616161);
+    
+    .breadcrumb {
+      .breadcrumb-item {
+        .breadcrumb-link {
+          color: var(--mat-primary-200, #90caf9);
+          
+          &:hover {
+            background-color: var(--mat-primary-900, rgba(144, 202, 249, 0.1));
+          }
+        }
+        
+        .breadcrumb-separator {
+          color: var(--mat-text-secondary, #aaa);
+        }
+        
+        .breadcrumb-current {
+          color: var(--mat-text-primary, #fff);
+        }
+      }
+    }
+  }
+}
+
+// ===== MODO OSCURO =====
+@media (prefers-color-scheme: dark) {
+  .presupuesto-editor-container {
+    background-color: #121212; // Darker background for better contrast
+  }
+
+  .editor-toolbar {
+    background-color: #1e1e1e; // Darker background
+    border-bottom-color: #424242; // Lighter border
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); // Enhanced shadow
+
+    .toolbar-title {
+      color: #ffffff; // Pure white for maximum contrast
+    }
+  }
+
+  .left-panel,
+  .right-panel {
+    mat-card {
+      background-color: #1e1e1e; // Darker background
+      color: #ffffff; // Pure white text
+      border: 1px solid #333333; // Subtle border
+    }
+  }
+
+  // Estilos específicos para la grilla en modo oscuro
+  .presupuesto-grid {
+    background-color: #1e1e1e !important; // Fondo oscuro
+    border-color: #404040;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    
+    .grid-header {
+      background-color: #2d2d2d;
+      border-bottom-color: #404040;
+      color: #e0e0e0;
+      
+      .header-cell {
+        background-color: #2d2d2d;
+        border-right-color: #404040;
+        color: #e0e0e0;
+      }
+    }
+    
+    .grid-row {
+      background-color: #1e1e1e !important; // Fondo oscuro para filas
+      border-bottom-color: #404040;
+      color: #ffffff !important; // Texto blanco
+      
+      &:hover {
+        background-color: #2d2d2d !important;
+      }
+      
+      &.selected {
+        background-color: #1a365d;
+        border-color: #3182ce;
+      }
+      
+      &.capitulo {
+        background-color: #2a2a2a !important;
+        color: #ffffff !important;
+        
+        .grid-cell {
+          border-right-color: #505050;
+          color: #ffffff !important;
+        }
+      }
+      
+      &.partida {
+        background-color: #1e1e1e !important;
+        color: #ffffff !important;
+        
+        .nivel-col {
+          background-color: #333333;
+        }
+      }
+    }
+    
+    .grid-cell {
+      border-right-color: #404040;
+      color: #ffffff !important; // Texto blanco para todas las celdas
+      
+      &.nivel-col {
+        background-color: #333333;
+        color: #ffffff !important;
+      }
+      
+      &.codigo-col {
+        color: #ffffff !important;
+      }
+      
+      &.nombre-col {
+        color: #ffffff !important;
+      }
+      
+      &.total-col {
+        color: #ffffff !important;
+      }
+      
+      .cell-content {
+        color: #ffffff !important; // Texto blanco para el contenido
+        font-weight: 500;
+        
+        &.total-amount {
+          color: #81c784 !important; // Verde claro para totales
+          font-weight: 600;
+        }
+      }
+      
+      .cell-input,
+      .cell-textarea {
+        background-color: #2d2d2d;
+        color: #ffffff;
+        box-shadow: 0 2px 4px rgba(79, 195, 247, 0.2);
+        
+        &:focus {
+          border-color: #29b6f6;
+          box-shadow: 0 2px 8px rgba(79, 195, 247, 0.3);
+        }
+      }
+    }
+    
+    .grid-footer {
+      background-color: #1b4332;
+      border-top-color: #66bb6a;
+      color: #a7f3d0;
+      
+      .grid-cell {
+        border-right-color: #2d5a3d;
+        
+        &.total-label {
+          color: #a7f3d0;
+        }
+        
+        &.total-amount {
+          color: #d1fae5;
+        }
+      }
+    }
+    
+    .grid-row:not(.grid-footer) .grid-cell.codigo-col:hover,
+    .grid-row:not(.grid-footer) .grid-cell.nombre-col:hover {
+      background-color: #1a365d;
+      border-color: #4fc3f7;
+    }
+    
+    .action-btn {
+      color: #e0e0e0;
+      
+      &.delete-btn {
+        color: #f87171;
+        
+        &:hover {
+          background-color: #3f1f1f;
+        }
+      }
+      
+      &:hover {
+        background-color: #404040;
+      }
+    }
+  }
+
+  .presupuesto-tree {
+    background-color: #1e1e1e;
+    
+    .tree-node {
+      color: #ffffff;
+      
+      &:hover {
+        background-color: #2d2d2d; // Lighter hover state
+        border-color: #424242; // Lighter border
+      }
+
+      &.selected {
+        background-color: #1976d2; // Brighter blue for selection
+        border-color: #42a5f5; // Lighter blue border
+        color: #ffffff;
+      }
+
+      .node-content {
+        .node-info {
+          .node-code {
+            color: #e0e0e0; // Better contrast than #bbb
+          }
+
+          .node-name {
+            color: #ffffff; // Pure white
+          }
+        }
+        
+        .node-total {
+          color: #81d4fa; // Light blue for totals
+        }
+      }
+    }
+  }
+
+  .empty-tree {
+    color: #e0e0e0; // Better contrast
+
+    .empty-icon {
+      color: #9e9e9e; // Lighter gray for better visibility
+    }
+  }
+
+  .loading-container {
+    color: #e0e0e0; // Better contrast
+  }
+  
+  // Form field improvements for dark mode
+  .form-card {
+    mat-form-field {
+      .mat-mdc-form-field-label {
+        color: #e0e0e0 !important;
+      }
+      
+      .mat-mdc-input-element {
+        color: #ffffff !important;
+      }
+    }
+  }
+  
+  // Totals card improvements
+  .totals-card {
+    .total-item {
+      .total-label {
+        color: #e0e0e0;
+      }
+      
+      .total-value {
+        color: #ffffff;
+        font-weight: 600;
+      }
+    }
+  }
+}

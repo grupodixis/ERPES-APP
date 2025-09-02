@@ -1,0 +1,683 @@
+.mapping-rules-editor {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  width: 100%;
+  min-width: 800px;
+
+  .editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--mat-divider-color);
+    background: var(--mat-app-background);
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--mat-text-primary);
+    }
+  }
+
+  .template-field-info {
+    padding: 16px 24px;
+    background: var(--mat-surface);
+
+    mat-card {
+      margin: 0;
+
+      .field-details {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        > div {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 0.9rem;
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+            color: var(--mat-text-secondary);
+          }
+
+          &.field-name {
+            font-weight: 500;
+            color: var(--mat-text-primary);
+          }
+
+          &.field-value {
+            font-family: 'Courier New', monospace;
+            background: var(--mat-grey-100);
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: var(--mat-text-primary);
+          }
+
+          &.field-position,
+          &.field-confidence {
+            color: var(--mat-text-secondary);
+            font-size: 0.8rem;
+          }
+        }
+      }
+    }
+  }
+
+  .editor-content {
+    flex: 1;
+    overflow: hidden;
+    padding: 0;
+
+    mat-tab-group {
+      height: 100%;
+
+      ::ng-deep {
+        .mat-mdc-tab-body-wrapper {
+          flex: 1;
+          overflow: hidden;
+        }
+
+        .mat-mdc-tab-body {
+          height: 100%;
+          overflow: auto;
+        }
+      }
+    }
+
+    .tab-content {
+      padding: 24px;
+      height: 100%;
+      overflow: auto;
+    }
+  }
+
+  // Configuration Tab Styles
+  .mapping-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .full-width {
+      width: 100%;
+    }
+
+    .erp-field-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: var(--mat-text-secondary);
+      }
+
+      .field-label {
+        font-weight: 500;
+        color: var(--mat-text-primary);
+      }
+
+      .field-name {
+        color: var(--mat-text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .required-chip {
+        margin-left: auto;
+        background: var(--mat-warn-main);
+        color: var(--mat-warn-contrast);
+        font-size: 0.7rem;
+        height: 20px;
+        line-height: 20px;
+      }
+    }
+
+    .selected-field-info {
+      mat-card {
+        background: var(--mat-primary-50);
+        border: 1px solid var(--mat-primary-200);
+
+        .field-info-row {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+
+          mat-icon {
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+            color: var(--mat-primary-main);
+          }
+
+          .field-details {
+            flex: 1;
+
+            .field-label {
+              font-size: 1.1rem;
+              font-weight: 500;
+              color: var(--mat-text-primary);
+              margin-bottom: 4px;
+            }
+
+            .field-meta {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              font-size: 0.9rem;
+              color: var(--mat-text-secondary);
+
+              .field-type {
+                background: var(--mat-grey-200);
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 0.8rem;
+              }
+
+              .field-module {
+                font-style: italic;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .mapping-options {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--mat-grey-50);
+      border-radius: 8px;
+    }
+  }
+
+  // Transformations Tab Styles
+  .transformations-section {
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+
+      h3 {
+        margin: 0;
+        color: var(--mat-text-primary);
+      }
+    }
+
+    .transformations-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      .transformation-item {
+        border: 1px solid var(--mat-divider-color);
+        border-radius: 8px;
+        padding: 16px;
+        background: var(--mat-surface);
+
+        .transformation-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 12px;
+
+          mat-icon {
+            color: var(--mat-primary-main);
+          }
+
+          .transformation-name {
+            flex: 1;
+            font-weight: 500;
+            color: var(--mat-text-primary);
+          }
+
+          .transformation-actions {
+            display: flex;
+            gap: 4px;
+
+            button {
+              width: 32px;
+              height: 32px;
+              line-height: 32px;
+
+              mat-icon {
+                font-size: 18px;
+                width: 18px;
+                height: 18px;
+              }
+            }
+          }
+        }
+
+        .transformation-params {
+          .param-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+
+            mat-form-field {
+              flex: 1;
+              min-width: 200px;
+            }
+          }
+        }
+      }
+    }
+
+    .no-transformations {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--mat-text-secondary);
+
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+      }
+
+      p {
+        margin: 8px 0;
+
+        &.hint {
+          font-size: 0.9rem;
+          font-style: italic;
+        }
+      }
+    }
+  }
+
+  .preview-section {
+    margin-top: 24px;
+    padding: 16px;
+    background: var(--mat-grey-50);
+    border-radius: 8px;
+
+    h4 {
+      margin: 0 0 16px 0;
+      color: var(--mat-text-primary);
+    }
+
+    .preview-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+
+      .preview-input,
+      .preview-output {
+        flex: 1;
+        min-width: 200px;
+
+        label {
+          display: block;
+          font-size: 0.9rem;
+          color: var(--mat-text-secondary);
+          margin-bottom: 4px;
+        }
+
+        .value {
+          display: block;
+          padding: 8px 12px;
+          background: var(--mat-surface);
+          border: 1px solid var(--mat-divider-color);
+          border-radius: 4px;
+          font-family: 'Courier New', monospace;
+          color: var(--mat-text-primary);
+
+          &.changed {
+            background: var(--mat-primary-50);
+            border-color: var(--mat-primary-main);
+            color: var(--mat-primary-main);
+            font-weight: 500;
+          }
+        }
+      }
+
+      .arrow {
+        color: var(--mat-text-secondary);
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+
+  // Presets Tab Styles
+  .create-preset-section {
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  .presets-section {
+    h3 {
+      margin: 0 0 16px 0;
+      color: var(--mat-text-primary);
+    }
+
+    .presets-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 16px;
+
+      .preset-item {
+        transition: all 0.2s ease;
+        cursor: pointer;
+
+        &:hover {
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transform: translateY(-2px);
+        }
+
+        &.applicable {
+          border-color: var(--mat-primary-main);
+        }
+
+        .preset-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          .global-chip {
+            background: var(--mat-accent-main);
+            color: var(--mat-accent-contrast);
+            font-size: 0.7rem;
+            height: 20px;
+            line-height: 20px;
+          }
+        }
+
+        .preset-transformations {
+          margin: 12px 0;
+
+          mat-chip-list {
+            mat-chip {
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              font-size: 0.8rem;
+
+              mat-icon {
+                font-size: 14px;
+                width: 14px;
+                height: 14px;
+              }
+            }
+          }
+        }
+
+        .preset-meta {
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.8rem;
+          color: var(--mat-text-secondary);
+          margin-top: 8px;
+        }
+
+        mat-card-actions {
+          display: flex;
+          justify-content: space-between;
+        }
+      }
+    }
+
+    .no-presets {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--mat-text-secondary);
+
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+      }
+
+      p {
+        margin: 8px 0;
+
+        &.hint {
+          font-size: 0.9rem;
+          font-style: italic;
+        }
+      }
+    }
+  }
+
+  // Validation Errors
+  .validation-errors {
+    margin-top: 16px;
+
+    .error-card {
+      border-left: 4px solid var(--mat-warn-main);
+      background: var(--mat-warn-50);
+
+      mat-card-header {
+        mat-card-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: var(--mat-warn-main);
+        }
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 20px;
+
+        .validation-error {
+          color: var(--mat-warn-main);
+          margin: 4px 0;
+        }
+      }
+    }
+  }
+
+  // Actions
+  .editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--mat-divider-color);
+    background: var(--mat-app-background);
+
+    button {
+      min-width: 100px;
+    }
+  }
+
+  // Loading Overlay
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+}
+
+// Create Preset Dialog
+.create-preset-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .dialog-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .dialog-content {
+    position: relative;
+    background: var(--mat-surface);
+    border-radius: 8px;
+    padding: 24px;
+    min-width: 400px;
+    max-width: 500px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+
+    h3 {
+      margin: 0 0 16px 0;
+      color: var(--mat-text-primary);
+    }
+
+    .preset-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
+
+      .full-width {
+        width: 100%;
+      }
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .mapping-rules-editor {
+    min-width: 100%;
+    max-height: 100vh;
+
+    .template-field-info,
+    .tab-content {
+      padding: 16px;
+    }
+
+    .presets-section .presets-list {
+      grid-template-columns: 1fr;
+    }
+
+    .preview-container {
+      flex-direction: column;
+      align-items: stretch;
+
+      .arrow {
+        transform: rotate(90deg);
+        align-self: center;
+      }
+    }
+  }
+
+  .create-preset-dialog .dialog-content {
+    min-width: 90vw;
+    margin: 16px;
+  }
+}
+
+// Dark Theme Support
+@media (prefers-color-scheme: dark) {
+  .mapping-rules-editor {
+    .template-field-info mat-card {
+      background: var(--mat-grey-800);
+    }
+
+    .mapping-form {
+      .selected-field-info mat-card {
+        background: var(--mat-primary-900);
+        border-color: var(--mat-primary-700);
+      }
+
+      .mapping-options {
+        background: var(--mat-grey-800);
+      }
+    }
+
+    .transformations-section {
+      .transformation-item {
+        background: var(--mat-grey-800);
+        border-color: var(--mat-grey-700);
+      }
+    }
+
+    .preview-section {
+      background: var(--mat-grey-800);
+    }
+
+    .validation-errors .error-card {
+      background: var(--mat-warn-900);
+    }
+  }
+
+  .create-preset-dialog .dialog-content {
+    background: var(--mat-grey-800);
+  }
+}
+
+// Material Design Overrides
+::ng-deep {
+  .mapping-rules-editor {
+    .mat-mdc-dialog-container {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .mat-mdc-tab-group {
+      .mat-mdc-tab-header {
+        border-bottom: 1px solid var(--mat-divider-color);
+      }
+
+      .mat-mdc-tab {
+        min-width: 120px;
+      }
+    }
+
+    .mat-mdc-form-field {
+      .mat-mdc-form-field-subscript-wrapper {
+        margin-top: 4px;
+      }
+    }
+
+    .mat-mdc-chip-set {
+      .mat-mdc-chip {
+        margin: 2px;
+      }
+    }
+
+    .mat-mdc-card {
+      .mat-mdc-card-header {
+        padding-bottom: 8px;
+      }
+
+      .mat-mdc-card-content {
+        padding-top: 0;
+      }
+    }
+  }
+}

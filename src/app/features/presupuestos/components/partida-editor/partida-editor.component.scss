@@ -1,0 +1,487 @@
+.partida-editor-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  width: 100%;
+  min-width: 600px;
+  max-width: 800px;
+}
+
+// ===== HEADER =====
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #fafafa;
+
+  .dialog-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+    color: #333;
+
+    .title-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      color: #1976d2;
+    }
+
+    .changes-indicator {
+      font-size: 11px;
+      height: 24px;
+      animation: pulse 2s infinite;
+
+      mat-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+      }
+    }
+  }
+
+  .close-button {
+    color: #666;
+
+    &:hover {
+      color: #333;
+      background-color: #f0f0f0;
+    }
+  }
+}
+
+// ===== LOADING =====
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: #666;
+
+  mat-spinner {
+    margin-bottom: 16px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+// ===== CONTENT =====
+.dialog-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.partida-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+// ===== TABS =====
+.form-tabs {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  ::ng-deep {
+    .mat-mdc-tab-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mat-mdc-tab-body-wrapper {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .mat-mdc-tab-body {
+      overflow-y: auto;
+    }
+
+    .mat-mdc-tab-body-content {
+      overflow: visible;
+    }
+  }
+}
+
+.tab-content {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// ===== FORM FIELDS =====
+.form-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.form-field-full {
+  width: 100%;
+}
+
+.form-field-half {
+  flex: 1;
+}
+
+mat-form-field {
+  margin-bottom: 8px;
+}
+
+.toggle-field {
+  margin: 16px 0;
+}
+
+// ===== OPTIONS =====
+.option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .option-name {
+    font-weight: 500;
+    color: #333;
+  }
+
+  .option-description {
+    font-size: 12px;
+    color: #666;
+  }
+
+  .option-symbol {
+    font-size: 12px;
+    color: #1976d2;
+    font-weight: 500;
+  }
+}
+
+// ===== IVA SECTION =====
+.iva-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+
+  .iva-field {
+    max-width: 200px;
+  }
+}
+
+// ===== IMPORTES SUMMARY =====
+.importes-summary {
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  margin-top: 16px;
+
+  h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .importe-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e9ecef;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &.total {
+      margin-top: 8px;
+      padding-top: 16px;
+      font-weight: 600;
+      font-size: 16px;
+      color: #1976d2;
+    }
+
+    .importe-label {
+      color: #666;
+      font-weight: 500;
+    }
+
+    .importe-value {
+      font-weight: 600;
+      color: #333;
+    }
+  }
+}
+
+// ===== ACTIONS =====
+.dialog-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #fafafa;
+
+  .actions-left {
+    display: flex;
+    gap: 8px;
+  }
+
+  .actions-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .inline-spinner {
+      margin-right: 4px;
+    }
+  }
+}
+
+// ===== ANIMATIONS =====
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+// ===== SNACKBAR STYLES =====
+:host ::ng-deep {
+  .success-snackbar {
+    background-color: #4caf50 !important;
+    color: white !important;
+  }
+
+  .error-snackbar {
+    background-color: #f44336 !important;
+    color: white !important;
+  }
+}
+
+// ===== RESPONSIVE =====
+@media (max-width: 768px) {
+  .partida-editor-dialog {
+    min-width: auto;
+    max-width: 100vw;
+    max-height: 100vh;
+  }
+
+  .dialog-header {
+    padding: 12px 16px;
+
+    .dialog-title {
+      font-size: 18px;
+      gap: 8px;
+
+      .title-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+
+  .tab-content {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .form-field-half {
+    width: 100%;
+  }
+
+  .dialog-actions {
+    padding: 12px 16px;
+    flex-direction: column;
+    gap: 12px;
+
+    .actions-left,
+    .actions-right {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .actions-right {
+      order: -1;
+    }
+  }
+
+  .importes-summary {
+    padding: 12px;
+
+    h4 {
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .importe-row {
+      padding: 6px 0;
+      font-size: 14px;
+
+      &.total {
+        font-size: 15px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .dialog-header {
+    .dialog-title {
+      font-size: 16px;
+
+      .changes-indicator {
+        display: none;
+      }
+    }
+  }
+
+  .tab-content {
+    padding: 12px;
+  }
+
+  .iva-section,
+  .importes-summary {
+    padding: 12px;
+    margin-top: 12px;
+  }
+}
+
+// ===== ACCESIBILIDAD =====
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// ===== MODO OSCURO =====
+@media (prefers-color-scheme: dark) {
+  .dialog-header {
+    background-color: #424242;
+    border-bottom-color: #616161;
+
+    .dialog-title {
+      color: #fff;
+
+      .title-icon {
+        color: #64b5f6;
+      }
+    }
+
+    .close-button {
+      color: #bbb;
+
+      &:hover {
+        color: #fff;
+        background-color: #616161;
+      }
+    }
+  }
+
+  .dialog-actions {
+    background-color: #424242;
+    border-top-color: #616161;
+  }
+
+  .tab-content {
+    background-color: #303030;
+    color: #fff;
+  }
+
+  .iva-section,
+  .importes-summary {
+    background-color: #424242;
+    border-color: #616161;
+
+    h4 {
+      color: #fff;
+    }
+
+    .importe-row {
+      border-bottom-color: #616161;
+
+      .importe-label {
+        color: #bbb;
+      }
+
+      .importe-value {
+        color: #fff;
+      }
+
+      &.total {
+        color: #64b5f6;
+      }
+    }
+  }
+
+  .loading-container {
+    color: #bbb;
+  }
+}
+
+// ===== VALIDACIONES =====
+mat-form-field {
+  &.ng-invalid.ng-touched {
+    ::ng-deep {
+      .mat-mdc-form-field-outline {
+        color: #f44336;
+      }
+
+      .mat-mdc-form-field-label {
+        color: #f44336;
+      }
+    }
+  }
+}
+
+// ===== FOCUS STATES =====
+button:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+mat-form-field:focus-within {
+  ::ng-deep {
+    .mat-mdc-form-field-outline {
+      color: #1976d2;
+    }
+  }
+}

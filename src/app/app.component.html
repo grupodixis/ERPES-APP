@@ -1,0 +1,850 @@
+<mat-sidenav-container class="app-container">
+  <!-- Sidebar - Solo mostrar si está autenticado -->
+  @if (authStore.isLoggedIn()) {
+    <mat-sidenav
+      #sidenav
+      class="app-sidenav"
+      [class.collapsed]="sidenavCollapsed()"
+      [mode]="sidenavMode()"
+      [opened]="sidenavOpened()"
+      [fixedInViewport]="true"
+      [disableClose]="false"
+      [autoFocus]="false">
+
+    <!-- Sidebar Header -->
+    <div class="sidenav-header">
+      @if (sidenavMode() === 'side') {
+        <button
+          mat-icon-button
+          class="sidenav-toggle"
+          (click)="toggleSidenav()"
+          >
+          <mat-icon>{{ sidenavCollapsed() ? 'menu' : 'menu_open' }}</mat-icon>
+        </button>
+      }
+    </div>
+
+    <!-- Navigation Menu -->
+    <mat-nav-list class="sidenav-menu">
+      <!-- Dashboard -->
+      <a mat-list-item
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        class="nav-item">
+        <mat-icon matListItemIcon class="nav-icon">dashboard</mat-icon>
+        @if (!sidenavCollapsed()) {
+          <span matListItemTitle class="nav-text">Dashboard</span>
+        }
+      </a>
+
+
+
+      <!-- Maestros -->
+      <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().maestros">
+        <mat-expansion-panel-header class="nav-group-header" (click)="toggleMaestros()">
+          <mat-panel-title class="nav-group-title">
+            <mat-icon class="nav-icon">library_books</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span class="nav-text">Maestros</span>
+            }
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="nav-subitems">
+          <a mat-list-item
+            routerLink="/terceros"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">people</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Clientes</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/proveedores"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">business</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Proveedores</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/operarios"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">engineering</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Operarios</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/series-documentales"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">description</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Series Documentales</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/unidades-medida"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">straighten</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Unidades Medida</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/formas-pago"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">payment</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Formas Pago</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/condiciones-pago"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">schedule</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Condiciones Pago</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/tipos-iva"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">percent</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Tipos IVA</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/descuentos"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">local_offer</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Descuentos</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/maquinaria"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">build</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Maquinaria</span>
+            }
+          </a>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Producción -->
+      <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().produccion">
+        <mat-expansion-panel-header class="nav-group-header" (click)="toggleProduccion()">
+          <mat-panel-title class="nav-group-title">
+            <mat-icon class="nav-icon">precision_manufacturing</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span class="nav-text">Producción</span>
+            }
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="nav-subitems">
+          <a mat-list-item
+            routerLink="/obras"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">construction</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Obras</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/capitulos"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">list_alt</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Capítulos</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/partidas"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">format_list_numbered</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Partidas</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/trabajos-realizar"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">assignment</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Trabajos a Realizar</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/escandallo"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">analytics</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Escandallo</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/partes-diarios"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">today</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Partes Diarios</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/planificacion"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">schedule</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Planificación Operarios</span>
+            }
+          </a>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Compras -->
+      <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().compras">
+        <mat-expansion-panel-header class="nav-group-header" (click)="toggleCompras()">
+          <mat-panel-title class="nav-group-title">
+            <mat-icon class="nav-icon">shopping_cart</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span class="nav-text">Compras</span>
+            }
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="nav-subitems">
+          <a mat-list-item
+            routerLink="/presupuestos-proveedor"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">request_quote</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Presupuestos Proveedor</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/pedidos-proveedores"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">shopping_bag</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Pedidos Proveedores</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/entradas"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">input</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Entradas</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/facturas-compra"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">receipt</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Facturas Compra</span>
+            }
+          </a>
+          
+
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Ventas -->
+      <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().ventas">
+        <mat-expansion-panel-header class="nav-group-header" (click)="toggleVentas()">
+          <mat-panel-title class="nav-group-title">
+            <mat-icon class="nav-icon">point_of_sale</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span class="nav-text">Ventas</span>
+            }
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="nav-subitems">
+          <a mat-list-item
+            routerLink="/presupuestos"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">calculate</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Presupuestos</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/pedidos-cliente"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">shopping_basket</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Pedidos Cliente</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/albaranes"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">local_shipping</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Albaranes</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/ventas"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">receipt_long</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Facturas</span>
+            }
+          </a>
+          
+
+          
+          <a mat-list-item
+            routerLink="/certificaciones"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">verified</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Certificaciones</span>
+            }
+          </a>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Finanzas -->
+      <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().finanzas">
+        <mat-expansion-panel-header class="nav-group-header" (click)="toggleFinanzas()">
+          <mat-panel-title class="nav-group-title">
+            <mat-icon class="nav-icon">account_balance</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span class="nav-text">Finanzas</span>
+            }
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="nav-subitems">
+          <mat-expansion-panel-header class="nav-group-header" (click)="toggleCobros()">
+            <mat-panel-title class="nav-group-title">
+              <mat-icon class="nav-icon">account_balance_wallet</mat-icon>
+              @if (!sidenavCollapsed()) {
+                <span class="nav-text">Cobros</span>
+              }
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          
+          <mat-expansion-panel-header class="nav-group-header" (click)="togglePagos()">
+            <mat-panel-title class="nav-group-title">
+              <mat-icon class="nav-icon">payments</mat-icon>
+              @if (!sidenavCollapsed()) {
+                <span class="nav-text">Pagos</span>
+              }
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          
+          <a mat-list-item
+            routerLink="/vencimientos"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">event</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Vencimientos</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/remesas"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">send</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Remesas</span>
+            }
+          </a>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Logística -->
+      <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().logistica">
+        <mat-expansion-panel-header class="nav-group-header" (click)="toggleLogistica()">
+          <mat-panel-title class="nav-group-title">
+            <mat-icon class="nav-icon">local_shipping</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span class="nav-text">Logística</span>
+            }
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="nav-subitems">
+          <a mat-list-item
+            routerLink="/articulos"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">inventory_2</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Artículos</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/depositos"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">store</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Depósitos</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/ubicaciones"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">place</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Ubicaciones</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/movimientos-stock"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">swap_horiz</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Movimientos Stock</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/inventario"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">warehouse</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Inventarios</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/movimientos-internos"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">transform</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Movimientos Internos</span>
+            }
+          </a>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Contabilidad -->
+      <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().contabilidad">
+        <mat-expansion-panel-header class="nav-group-header" (click)="toggleContabilidad()">
+          <mat-panel-title class="nav-group-title">
+            <mat-icon class="nav-icon">account_balance</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span class="nav-text">Contabilidad</span>
+            }
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="nav-subitems">
+          <a mat-list-item
+            routerLink="/ejercicios-contables"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">calendar_today</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Ejercicios Contables</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/contabilidad"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">book</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Asientos Contables</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/cuentas-contables"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">account_tree</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Cuentas Contables</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/auditoria"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">fact_check</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Auditoría</span>
+            }
+          </a>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Configuración -->
+      <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().configuracion">
+        <mat-expansion-panel-header class="nav-group-header" (click)="toggleConfiguracion()">
+          <mat-panel-title class="nav-group-title">
+            <mat-icon class="nav-icon">settings</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span class="nav-text">Configuración</span>
+            }
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="nav-subitems">
+          <a mat-list-item
+            routerLink="/configuracion"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">business</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Empresas</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/monedas"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">monetization_on</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Monedas</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/tipos-cambio"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">currency_exchange</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Tipos Cambio</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/centros-coste"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">account_balance_wallet</mat-icon>
+            @if (!sidenavCollapsed()) {
+               <span matListItemTitle class="nav-text">Centros Coste</span>
+             }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/seguridad"
+            routerLinkActive="active"
+            class="nav-subitem"
+            *hasPermission="'usuarios:read'">
+            <mat-icon matListItemIcon class="nav-subicon">security</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Usuarios</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/roles"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">admin_panel_settings</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Roles</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/permisos"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">lock</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Permisos</span>
+            }
+          </a>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Calidad -->
+      <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().calidad">
+        <mat-expansion-panel-header class="nav-group-header" (click)="toggleCalidad()">
+          <mat-panel-title class="nav-group-title">
+            <mat-icon class="nav-icon">verified</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span class="nav-text">Calidad</span>
+            }
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="nav-subitems">
+          <a mat-list-item
+            routerLink="/controles-calidad"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">checklist</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Controles Calidad</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/inspecciones"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">search</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Inspecciones</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/no-conformidades"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">report_problem</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">No Conformidades</span>
+            }
+          </a>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- RRHH -->
+      <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().rrhh">
+        <mat-expansion-panel-header class="nav-group-header" (click)="toggleRrhh()">
+          <mat-panel-title class="nav-group-title">
+            <mat-icon class="nav-icon">work</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span class="nav-text">RRHH</span>
+            }
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="nav-subitems">
+          <a mat-list-item
+            routerLink="/rrhh"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">engineering</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Operarios</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/categorias-operario"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">category</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Categorías Operario</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/contratos-laborales"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">description</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Contratos Laborales</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/solicitudes-vacaciones"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">beach_access</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Solicitudes Vacaciones</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/bajas-medicas"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">local_hospital</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Bajas Médicas</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/cursos-formacion"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">school</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Cursos Formación</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/marcas-reloj"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">access_time</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Marcas Reloj</span>
+            }
+          </a>
+          
+          <a mat-list-item
+            routerLink="/dms"
+            routerLinkActive="active"
+            class="nav-subitem">
+            <mat-icon matListItemIcon class="nav-subicon">folder</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">DMS</span>
+            }
+          </a>
+        </div>
+      </mat-expansion-panel>
+    </mat-nav-list>
+
+    <!-- Sidebar Footer -->
+    <div class="sidenav-footer">
+      <mat-divider></mat-divider>
+      <div class="user-info">
+        <mat-icon class="user-avatar">account_circle</mat-icon>
+        @if (!sidenavCollapsed()) {
+          <div class="user-details">
+            <span class="user-name">{{ authStore.user()?.nombre || 'Usuario' }}</span>
+            <span class="user-role">{{ authStore.user()?.roles?.[0]?.nombre || 'Rol' }}</span>
+          </div>
+        }
+      </div>
+    </div>
+    </mat-sidenav>
+  }
+
+  <!-- Main Content -->
+  <mat-sidenav-content class="app-content">
+    <!-- Top Toolbar - Solo mostrar si está autenticado -->
+    @if (authStore.isLoggedIn()) {
+      <mat-toolbar class="app-toolbar" color="primary">
+      <div class="toolbar-left">
+        @if (sidenavMode() === 'over') {
+          <button
+            mat-icon-button
+            class="menu-button"
+            (click)="toggleSidenav()"
+            >
+            <mat-icon>menu</mat-icon>
+          </button>
+        }
+
+        <!-- Logo Container -->
+        <div class="logo-container">
+          <mat-icon class="logo-icon">business</mat-icon>
+          <span class="logo-text">ERP ES</span>
+        </div>
+
+        @if (!sidenavCollapsed()) {
+          <div class="breadcrumb">
+            <span class="breadcrumb-text">{{ getCurrentPageTitle() }}</span>
+          </div>
+        }
+      </div>
+
+
+
+      <div class="toolbar-right">
+        <!-- Theme Toggle -->
+        <button
+          mat-icon-button
+          class="theme-toggle"
+          (click)="toggleTheme()"
+          matTooltip="Cambiar tema">
+          <mat-icon>{{ isDarkTheme() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
+
+        <!-- User Menu -->
+        <button
+          mat-icon-button
+          [matMenuTriggerFor]="userMenu"
+          class="user-menu-button">
+          <mat-icon>account_circle</mat-icon>
+        </button>
+        <mat-menu #userMenu="matMenu" class="user-menu">
+          <button mat-menu-item routerLink="/perfil">
+            <mat-icon>person</mat-icon>
+            <span>Perfil</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Cerrar Sesión</span>
+          </button>
+        </mat-menu>
+      </div>
+      </mat-toolbar>
+    }
+
+    <!-- Page Content -->
+    <div class="page-content" [class.login-page]="!authStore.isLoggedIn()">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

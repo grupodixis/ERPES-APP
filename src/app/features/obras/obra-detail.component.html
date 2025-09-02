@@ -1,0 +1,331 @@
+<div class="obra-detail-container" *ngIf="!cargando">
+  <!-- Header con información básica -->
+  <mat-card class="header-card">
+    <mat-card-header>
+      <div class="header-content">
+        <div class="obra-info">
+          <h1>{{ obra?.nombre }}</h1>
+          <p class="obra-codigo">{{ obra?.codigo }}</p>
+          <mat-chip [class]="getEstadoClass(obra?.estado || '')">
+            {{ getEstadoLabel(obra?.estado || '') }}
+          </mat-chip>
+        </div>
+        <div class="header-actions">
+          <button mat-raised-button color="primary" (click)="toggleEdicion()" *ngIf="!editando">
+            <mat-icon>edit</mat-icon>
+            Editar
+          </button>
+          <button mat-raised-button color="primary" (click)="guardarCambios()" *ngIf="editando" [disabled]="!obraForm.valid">
+            <mat-icon>save</mat-icon>
+            Guardar
+          </button>
+          <button mat-stroked-button (click)="toggleEdicion()" *ngIf="editando">
+            <mat-icon>cancel</mat-icon>
+            Cancelar
+          </button>
+          <button mat-stroked-button (click)="volver()">
+            <mat-icon>arrow_back</mat-icon>
+            Volver
+          </button>
+        </div>
+      </div>
+    </mat-card-header>
+  </mat-card>
+
+  <!-- Tabs principales -->
+  <mat-card class="content-card">
+    <mat-tab-group [(selectedIndex)]="tabSeleccionada">
+      <!-- Tab: Información General -->
+      <mat-tab label="Información General">
+        <div class="tab-content">
+          <form [formGroup]="obraForm" class="obra-form">
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Código</mat-label>
+                <input matInput formControlName="codigo" [readonly]="!editando">
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Estado</mat-label>
+                <mat-select formControlName="estado" [disabled]="!editando">
+                  <mat-option *ngFor="let estado of estadosObra" [value]="estado">
+                    {{ getEstadoLabel(estado) }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Nombre de la Obra</mat-label>
+                <input matInput formControlName="nombre" [readonly]="!editando">
+              </mat-form-field>
+            </div>
+            
+
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Fecha Inicio Real</mat-label>
+                <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicio" [readonly]="!editando">
+                <mat-datepicker-toggle matSuffix [for]="pickerInicio" [disabled]="!editando"></mat-datepicker-toggle>
+                <mat-datepicker #pickerInicio></mat-datepicker>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Fecha Fin Prevista</mat-label>
+                <input matInput [matDatepicker]="pickerFin" formControlName="fechaFinPrevista" [readonly]="!editando">
+                <mat-datepicker-toggle matSuffix [for]="pickerFin" [disabled]="!editando"></mat-datepicker-toggle>
+                <mat-datepicker #pickerFin></mat-datepicker>
+              </mat-form-field>
+            </div>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Presupuesto Objetivo</mat-label>
+                <input matInput type="number" formControlName="presupuestoTotal" [readonly]="!editando">
+                <span matSuffix>€</span>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Cliente</mat-label>
+                <mat-select formControlName="clienteId" [disabled]="!editando">
+                  <mat-option value="1">Cliente A</mat-option>
+                  <mat-option value="2">Cliente B</mat-option>
+                  <mat-option value="3">Cliente C</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            
+
+          </form>
+        </div>
+      </mat-tab>
+
+      <!-- Tab: Estructura Jerárquica -->
+      <mat-tab label="Estructura">
+        <div class="tab-content">
+          <div class="estructura-header">
+            <h3>Estructura de la Obra</h3>
+            <button mat-raised-button color="primary" (click)="agregarCapitulo()">
+              <mat-icon>add</mat-icon>
+              Nuevo Capítulo
+            </button>
+          </div>
+          
+          <!-- Árbol jerárquico -->
+          <div class="estructura-tree" *ngIf="treeData.length > 0">
+            <mat-accordion multi="true">
+              <!-- Capítulos -->
+              <mat-expansion-panel *ngFor="let capitulo of treeData" class="capitulo-panel">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <mat-icon class="nivel-icon">folder</mat-icon>
+                    {{ capitulo.nombre }}
+                  </mat-panel-title>
+                  <mat-panel-description>
+                    <mat-chip [class]="getEstadoClass(capitulo.data.estado)">
+                      {{ getEstadoLabel(capitulo.data.estado) }}
+                    </mat-chip>
+                    <span class="total-capitulo">
+                          {{ calcularTotalCapitulo(capitulo.id) | currency: 'EUR' }}
+                        </span>
+                  </mat-panel-description>
+                </mat-expansion-panel-header>
+                
+                <div class="capitulo-content">
+                  <div class="capitulo-actions">
+                    <button mat-icon-button color="primary" (click)="editarCapituloFromNode(capitulo)" matTooltip="Editar capítulo">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button color="primary" (click)="agregarPartida(capitulo.id)" matTooltip="Agregar partida">
+                      <mat-icon>add</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="eliminarCapitulo(capitulo.id)" matTooltip="Eliminar capítulo">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                  
+                  <!-- Partidas del capítulo -->
+                  <mat-accordion multi="true" class="partidas-accordion" *ngIf="capitulo.children && capitulo.children.length > 0">
+                    <mat-expansion-panel *ngFor="let partida of capitulo.children" class="partida-panel">
+                      <mat-expansion-panel-header>
+                        <mat-panel-title>
+                          <mat-icon class="nivel-icon partida-icon">description</mat-icon>
+                          {{ partida.nombre }}
+                        </mat-panel-title>
+                        <mat-panel-description>
+                          <mat-chip [class]="getEstadoClass(partida.data.estado)">
+                          {{ getEstadoLabel(partida.data.estado) }}
+                        </mat-chip>
+                        <span class="cantidad-partida">
+                          {{ getPartidaCantidad(partida) }} ud.
+                        </span>
+                          <span class="total-partida">
+                            {{ calcularTotalPartidaFromNode(partida) | currency: 'EUR' }}
+                          </span>
+                        </mat-panel-description>
+                      </mat-expansion-panel-header>
+                      
+                      <div class="partida-content">
+                        <div class="partida-actions">
+                          <button mat-icon-button color="primary" (click)="editarPartidaFromNode(partida)" matTooltip="Editar partida">
+                            <mat-icon>edit</mat-icon>
+                          </button>
+                          <button mat-icon-button color="primary" (click)="agregarOrdenTrabajo(partida.id)" matTooltip="Agregar orden de trabajo">
+                            <mat-icon>add</mat-icon>
+                          </button>
+                          <button mat-icon-button color="warn" (click)="eliminarPartida(partida.id)" matTooltip="Eliminar partida">
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </div>
+                        
+                        <!-- Órdenes de trabajo de la partida -->
+                        <div class="ordenes-list" *ngIf="partida.children && partida.children.length > 0">
+                          <div *ngFor="let orden of partida.children" class="orden-item">
+                            <div class="orden-info">
+                              <mat-icon class="nivel-icon orden-icon">assignment</mat-icon>
+                              <div class="orden-details">
+                                <span class="orden-nombre">{{ orden.nombre }}</span>
+                                <div class="orden-meta">
+                                  <mat-chip [class]="getEstadoClass(orden.data.estado)">
+                            {{ getEstadoLabel(orden.data.estado) }}
+                          </mat-chip>
+                          <span class="orden-fechas" *ngIf="getOrdenFechaInicio(orden)">
+                            {{ getOrdenFechaInicio(orden) | date:'dd/MM/yyyy' }}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="orden-actions">
+                              <button mat-icon-button color="primary" (click)="editarOrdenTrabajoFromNode(orden)" matTooltip="Editar orden">
+                                <mat-icon>edit</mat-icon>
+                              </button>
+                              <button mat-icon-button color="warn" (click)="eliminarOrdenTrabajo(orden.id)" matTooltip="Eliminar orden">
+                                <mat-icon>delete</mat-icon>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div *ngIf="!partida.children || partida.children.length === 0" class="no-ordenes">
+                          <p>No hay órdenes de trabajo</p>
+                          <button mat-stroked-button (click)="agregarOrdenTrabajo(partida.id)">
+                            <mat-icon>add</mat-icon>
+                            Agregar primera orden
+                          </button>
+                        </div>
+                      </div>
+                    </mat-expansion-panel>
+                  </mat-accordion>
+                  
+                  <div *ngIf="!capitulo.children || capitulo.children.length === 0" class="no-partidas">
+                    <p>No hay partidas en este capítulo</p>
+                    <button mat-stroked-button (click)="agregarPartida(capitulo.id)">
+                      <mat-icon>add</mat-icon>
+                      Agregar primera partida
+                    </button>
+                  </div>
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
+          </div>
+          
+          <div *ngIf="treeData.length === 0" class="no-estructura">
+            <mat-icon>construction</mat-icon>
+            <p>No hay capítulos definidos</p>
+            <button mat-raised-button color="primary" (click)="agregarCapitulo()">
+              <mat-icon>add</mat-icon>
+              Crear primer capítulo
+            </button>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Tab: Resumen Financiero -->
+      <mat-tab label="Resumen">
+        <div class="tab-content">
+          <div class="resumen-grid">
+            <mat-card class="resumen-card">
+              <mat-card-header>
+                <mat-card-title>Presupuesto</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="metric-value">{{ obra?.presupuestoObjetivo | currency: 'EUR' }}</div>
+                <div class="metric-label">Total Presupuestado</div>
+              </mat-card-content>
+            </mat-card>
+            
+            <mat-card class="resumen-card">
+              <mat-card-header>
+                <mat-card-title>Costo Real</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="metric-value">{{ 0 | currency: 'EUR' }}</div>
+                <div class="metric-label">Total Ejecutado</div>
+              </mat-card-content>
+            </mat-card>
+            
+            <mat-card class="resumen-card">
+              <mat-card-header>
+                <mat-card-title>Diferencia</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="metric-value" [class.negative]="0 > (obra?.presupuestoObjetivo || 0)">
+                  {{ ((obra?.presupuestoObjetivo || 0) - 0) | currency: 'EUR' }}
+                </div>
+                <div class="metric-label">Diferencia</div>
+              </mat-card-content>
+            </mat-card>
+            
+            <mat-card class="resumen-card">
+              <mat-card-header>
+                <mat-card-title>Progreso</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="metric-value">
+                  {{ (0 / (obra?.presupuestoObjetivo || 1) * 100) | number:'1.1-1' }}%
+                </div>
+                <div class="metric-label">Ejecutado</div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+          
+          <!-- Información adicional -->
+          <div class="info-adicional">
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>Información del Cliente</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="cliente-info">
+                  <p><strong>Nombre:</strong> {{ obra?.cliente }}</p>
+                </div>
+              </mat-card-content>
+            </mat-card>
+            
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>Fechas Importantes</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="fechas-info">
+                  <p><strong>Inicio:</strong> {{ obra?.fechaInicioReal || obra?.fechaInicioPrevista | date:'dd/MM/yyyy' }}</p>
+                  <p><strong>Fin Previsto:</strong> {{ obra?.fechaFinPrevista | date:'dd/MM/yyyy' }}</p>
+                  <p *ngIf="obra?.fechaFinReal"><strong>Fin Real:</strong> {{ obra?.fechaFinReal | date:'dd/MM/yyyy' }}</p>
+                  <p><strong>Creación:</strong> {{ obra?.createdAt | date:'dd/MM/yyyy' }}</p>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card>
+</div>
+
+<!-- Loading -->
+<div *ngIf="cargando" class="loading-container">
+  <mat-spinner diameter="50"></mat-spinner>
+  <p>Cargando información de la obra...</p>
+</div>

@@ -1,0 +1,310 @@
+<!-- ============================================================================ -->
+<!-- ASIGNACION MASIVA DIALOG TEMPLATE -->
+<!-- ============================================================================ -->
+<!-- Template para el diálogo de asignación masiva de permisos -->
+<!-- ============================================================================ -->
+
+<div class="asignacion-masiva-dialog">
+  <!-- Header -->
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>assignment</mat-icon>
+      Asignación Masiva de Permisos
+    </h2>
+    <button 
+      mat-icon-button 
+      mat-dialog-close
+      aria-label="Cerrar diálogo"
+      class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Content -->
+  <mat-dialog-content class="dialog-content">
+    <form [formGroup]="form" class="asignacion-form">
+      
+      <!-- Selección de Rol Destino -->
+      <div class="form-section">
+        <h3>Rol Destino</h3>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Seleccionar rol</mat-label>
+          <mat-select 
+            formControlName="rolId"
+            aria-label="Seleccionar rol destino">
+            <mat-option *ngFor="let rol of roles" [value]="rol.id">
+              <div class="rol-option">
+                <span class="rol-nombre">{{ rol.nombre }}</span>
+                <span class="rol-descripcion">{{ rol.descripcion }}</span>
+              </div>
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('rolId')?.hasError('required')">
+            Debe seleccionar un rol
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Tipo de Asignación -->
+      <div class="form-section">
+        <h3>Tipo de Asignación</h3>
+        <mat-radio-group 
+          formControlName="tipoAsignacion"
+          (change)="onTipoAsignacionChange($event.value)"
+          class="tipo-asignacion-group">
+          
+          <mat-radio-button value="template" class="tipo-option">
+            <div class="tipo-content">
+              <div class="tipo-header">
+                <mat-icon>description</mat-icon>
+                <span class="tipo-titulo">Usar Template</span>
+              </div>
+              <p class="tipo-descripcion">
+                Asignar permisos basados en un template predefinido
+              </p>
+            </div>
+          </mat-radio-button>
+
+          <mat-radio-button value="copiar" class="tipo-option">
+            <div class="tipo-content">
+              <div class="tipo-header">
+                <mat-icon>content_copy</mat-icon>
+                <span class="tipo-titulo">Copiar de Rol</span>
+              </div>
+              <p class="tipo-descripcion">
+                Copiar todos los permisos de un rol existente
+              </p>
+            </div>
+          </mat-radio-button>
+
+          <mat-radio-button value="manual" class="tipo-option">
+            <div class="tipo-content">
+              <div class="tipo-header">
+                <mat-icon>tune</mat-icon>
+                <span class="tipo-titulo">Selección Manual</span>
+              </div>
+              <p class="tipo-descripcion">
+                Seleccionar permisos individualmente
+              </p>
+            </div>
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+      <!-- Configuración según tipo -->
+      <div class="form-section configuracion-tipo">
+        
+        <!-- Template Selection -->
+        <div *ngIf="form.get('tipoAsignacion')?.value === 'template'" class="template-section">
+          <h4>Seleccionar Template</h4>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Template de permisos</mat-label>
+            <mat-select 
+              formControlName="templateId"
+              aria-label="Seleccionar template">
+              <mat-option *ngFor="let template of templates" [value]="template.id">
+                <div class="template-option">
+                  <span class="template-nombre">{{ template.nombre }}</span>
+                  <span class="template-descripcion">{{ template.descripcion }}</span>
+                  <span class="template-permisos">{{ template.permisoIds.length }} permisos</span>
+                </div>
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="form.get('templateId')?.hasError('required')">
+              Debe seleccionar un template
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Role Copy Selection -->
+        <div *ngIf="form.get('tipoAsignacion')?.value === 'copiar'" class="copiar-section">
+          <h4>Rol Origen</h4>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Copiar permisos de</mat-label>
+            <mat-select 
+              formControlName="rolOrigenId"
+              aria-label="Seleccionar rol origen">
+              <mat-option 
+                *ngFor="let rol of roles" 
+                [value]="rol.id"
+                [disabled]="rol.id === form.get('rolId')?.value">
+                <div class="rol-option">
+                  <span class="rol-nombre">{{ rol.nombre }}</span>
+                  <span class="rol-descripcion">{{ rol.descripcion }}</span>
+                  <span class="rol-permisos">{{ rol.permisos?.length || 0 }} permisos</span>
+                </div>
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="form.get('rolOrigenId')?.hasError('required')">
+              Debe seleccionar un rol origen
+            </mat-error>
+            <mat-error *ngIf="form.get('rolOrigenId')?.hasError('sameRole')">
+              No puede copiar de sí mismo
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Manual Selection -->
+        <div *ngIf="form.get('tipoAsignacion')?.value === 'manual'" class="manual-section">
+          <h4>Selección Manual de Permisos</h4>
+          
+          <!-- Filtros -->
+          <div class="permisos-filtros">
+            <mat-form-field appearance="outline" class="filtro-modulo">
+              <mat-label>Filtrar por módulo</mat-label>
+              <mat-select [(value)]="filtroModulo" aria-label="Filtrar por módulo">
+                <mat-option value="">Todos los módulos</mat-option>
+                <mat-option *ngFor="let modulo of getModulosUnicos()" [value]="modulo">
+                  {{ modulo | titlecase }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filtro-busqueda">
+              <mat-label>Buscar permiso</mat-label>
+              <input 
+                matInput 
+                [(ngModel)]="busquedaPermiso"
+                [ngModelOptions]="{standalone: true}"
+                placeholder="Nombre o descripción"
+                aria-label="Buscar permiso">
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Acciones de selección -->
+          <div class="seleccion-acciones">
+            <button 
+              type="button"
+              mat-stroked-button 
+              (click)="seleccionarTodos()"
+              class="btn-seleccionar-todos">
+              <mat-icon>select_all</mat-icon>
+              Seleccionar Todos
+            </button>
+            <button 
+              type="button"
+              mat-stroked-button 
+              (click)="deseleccionarTodos()"
+              class="btn-deseleccionar-todos">
+              <mat-icon>deselect</mat-icon>
+              Deseleccionar Todos
+            </button>
+          </div>
+
+          <!-- Lista de permisos -->
+          <div class="permisos-lista">
+            <div *ngFor="let modulo of getModulosUnicos()" class="modulo-grupo">
+              <div class="modulo-header">
+                <h5>{{ modulo | titlecase }}</h5>
+                <div class="modulo-acciones">
+                  <button 
+                    type="button"
+                    mat-icon-button 
+                    (click)="seleccionarTodosModulo(modulo)"
+                    matTooltip="Seleccionar todos en {{ modulo }}"
+                    class="btn-modulo-todos">
+                    <mat-icon>add_circle</mat-icon>
+                  </button>
+                  <button 
+                    type="button"
+                    mat-icon-button 
+                    (click)="deseleccionarTodosModulo(modulo)"
+                    matTooltip="Deseleccionar todos en {{ modulo }}"
+                    class="btn-modulo-ninguno">
+                    <mat-icon>remove_circle</mat-icon>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="permisos-modulo">
+                <mat-checkbox 
+                  *ngFor="let permiso of getPermisosFiltrados() | filter: {modulo: modulo}"
+                  [checked]="isPermisoSeleccionado(permiso.id)"
+                  (change)="togglePermiso(permiso.id)"
+                  class="permiso-checkbox">
+                  <div class="permiso-info">
+                    <span class="permiso-nombre">{{ permiso.nombre }}</span>
+                    <span class="permiso-descripcion">{{ permiso.descripcion }}</span>
+                    <span class="permiso-accion">{{ permiso.accion | titlecase }}</span>
+                  </div>
+                </mat-checkbox>
+              </div>
+            </div>
+          </div>
+
+          <mat-error *ngIf="form.get('permisosSeleccionados')?.hasError('required')" class="error-permisos">
+            Debe seleccionar al menos un permiso
+          </mat-error>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div *ngIf="form.valid && preview" class="form-section preview-section">
+        <h3>Vista Previa</h3>
+        <div class="preview-content">
+          
+          <!-- Estadísticas -->
+          <div class="preview-stats">
+            <div class="stat-item">
+              <span class="stat-label">Total de permisos:</span>
+              <span class="stat-value">{{ preview.total }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Nuevos:</span>
+              <span class="stat-value nuevos">{{ preview.nuevos }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Ya existentes:</span>
+              <span class="stat-value existentes">{{ preview.existentes }}</span>
+            </div>
+          </div>
+
+          <!-- Permisos por módulo -->
+          <div class="preview-modulos">
+            <div *ngFor="let modulo of preview.porModulo | keyvalue" class="modulo-preview">
+              <h5>{{ modulo.key | titlecase }}</h5>
+              <div class="permisos-preview">
+                <mat-chip-list>
+                  <mat-chip 
+                    *ngFor="let permisoId of modulo.value"
+                    [class.nuevo]="!tienePermisoActualmente(permisoId)"
+                    [class.existente]="tienePermisoActualmente(permisoId)">
+                    {{ getNombrePermiso(permisoId) }}
+                  </mat-chip>
+                </mat-chip-list>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <!-- Actions -->
+  <mat-dialog-actions class="dialog-actions">
+    <button 
+      mat-stroked-button 
+      (click)="onCancelar()"
+      class="btn-cancelar">
+      <mat-icon>cancel</mat-icon>
+      Cancelar
+    </button>
+    
+    <button 
+      mat-flat-button 
+      color="primary"
+      [disabled]="!form.valid"
+      (click)="onConfirmar()"
+      class="btn-confirmar">
+      <mat-icon>check</mat-icon>
+      Asignar Permisos
+    </button>
+  </mat-dialog-actions>
+</div>
+
+<!-- Loading Overlay -->
+<div *ngIf="cargando" class="loading-overlay">
+  <mat-spinner diameter="40"></mat-spinner>
+  <p>Procesando asignación...</p>
+</div>

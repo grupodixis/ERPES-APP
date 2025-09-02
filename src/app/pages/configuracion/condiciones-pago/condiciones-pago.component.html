@@ -1,0 +1,301 @@
+<div class="condiciones-pago-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>
+      <mat-icon>payment</mat-icon>
+      Condiciones de Pago
+    </h1>
+    <p class="subtitle">Gestión de condiciones de pago y términos de facturación</p>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="cargando()" class="loading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando condiciones de pago...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error()" class="error-message">
+    <mat-icon>error</mat-icon>
+    <span>{{ error() }}</span>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!cargando()" class="content">
+    <!-- Filters Section -->
+    <mat-card class="filters-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>filter_list</mat-icon>
+          Filtros
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="filtroForm" class="filters-form">
+          <div class="filters-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Buscar</mat-label>
+              <input matInput formControlName="search" placeholder="Código, nombre o descripción">
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo</mat-label>
+              <mat-select formControlName="tipo">
+                <mat-option value="">Todos</mat-option>
+                <mat-option *ngFor="let tipo of tiposCondicion" [value]="tipo.value">
+                  {{ tipo.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Estado</mat-label>
+              <mat-select formControlName="activa">
+                <mat-option value="">Todos</mat-option>
+                <mat-option *ngFor="let opcion of opcionesActiva" [value]="opcion.value">
+                  {{ opcion.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="filters-actions">
+            <button mat-raised-button color="primary" type="button" (click)="aplicarFiltros()">
+              <mat-icon>search</mat-icon>
+              Aplicar Filtros
+            </button>
+            <button mat-button type="button" (click)="limpiarFiltros()">
+              <mat-icon>clear</mat-icon>
+              Limpiar
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Form Section -->
+    <mat-card class="form-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>{{ modoEdicion() ? 'edit' : 'add' }}</mat-icon>
+          {{ modoEdicion() ? 'Editar' : 'Nueva' }} Condición de Pago
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="condicionForm" class="condicion-form">
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Código *</mat-label>
+              <input matInput formControlName="codigo" [readonly]="modoEdicion()" placeholder="Ej: 30D, CONTADO">
+              <mat-error *ngIf="condicionForm.get('codigo')?.invalid && condicionForm.get('codigo')?.touched">
+                {{ getErrorMessage('codigo') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Nombre *</mat-label>
+              <input matInput formControlName="nombre" placeholder="Ej: 30 días">
+              <mat-error *ngIf="condicionForm.get('nombre')?.invalid && condicionForm.get('nombre')?.touched">
+                {{ getErrorMessage('nombre') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo *</mat-label>
+              <mat-select formControlName="tipo">
+                <mat-option *ngFor="let tipo of tiposCondicion" [value]="tipo.value">
+                  {{ tipo.label }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="condicionForm.get('tipo')?.invalid && condicionForm.get('tipo')?.touched">
+                {{ getErrorMessage('tipo') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Descripción</mat-label>
+              <textarea matInput formControlName="descripcion" rows="2" placeholder="Descripción opcional"></textarea>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Días de Vencimiento *</mat-label>
+              <input matInput type="number" formControlName="diasVencimiento" min="0" max="365">
+              <mat-error *ngIf="condicionForm.get('diasVencimiento')?.invalid && condicionForm.get('diasVencimiento')?.touched">
+                {{ getErrorMessage('diasVencimiento') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Día Fijo del Mes</mat-label>
+              <input matInput type="number" formControlName="diaFijo" min="1" max="31" placeholder="1-31">
+              <mat-error *ngIf="condicionForm.get('diaFijo')?.invalid && condicionForm.get('diaFijo')?.touched">
+                {{ getErrorMessage('diaFijo') }}
+              </mat-error>
+            </mat-form-field>
+
+            <div class="checkbox-field">
+              <mat-checkbox formControlName="finMes">Fin de Mes</mat-checkbox>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Descuento Pronto Pago (%)</mat-label>
+              <input matInput type="number" formControlName="descuentoProntoPago" min="0" max="100" step="0.1">
+              <mat-error *ngIf="condicionForm.get('descuentoProntoPago')?.invalid && condicionForm.get('descuentoProntoPago')?.touched">
+                {{ getErrorMessage('descuentoProntoPago') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Días para Descuento</mat-label>
+              <input matInput type="number" formControlName="diasDescuento" min="0" max="365">
+              <mat-error *ngIf="condicionForm.get('diasDescuento')?.invalid && condicionForm.get('diasDescuento')?.touched">
+                {{ getErrorMessage('diasDescuento') }}
+              </mat-error>
+            </mat-form-field>
+
+            <div class="checkbox-field">
+              <mat-checkbox formControlName="activa">Activa</mat-checkbox>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button mat-raised-button color="primary" type="button" (click)="guardarCondicion()" 
+                    [disabled]="condicionForm.invalid || cargando()">
+              <mat-icon>save</mat-icon>
+              {{ modoEdicion() ? 'Actualizar' : 'Crear' }}
+            </button>
+            <button mat-button type="button" (click)="cancelarEdicion()" [disabled]="cargando()">
+              <mat-icon>cancel</mat-icon>
+              Cancelar
+            </button>
+            <button mat-button type="button" (click)="nuevaCondicion()" [disabled]="cargando()">
+              <mat-icon>add</mat-icon>
+              Nueva
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Data Section -->
+    <mat-card class="data-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>list</mat-icon>
+          Lista de Condiciones de Pago
+          <span class="count">({{ condicionesPago().length }})</span>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngIf="condicionesPago().length === 0" class="no-data">
+          <mat-icon>info</mat-icon>
+          <p>No se encontraron condiciones de pago</p>
+        </div>
+
+        <div *ngIf="condicionesPago().length > 0" class="table-container">
+          <table mat-table [dataSource]="condicionesPago()" class="condiciones-table">
+            <!-- Código Column -->
+            <ng-container matColumnDef="codigo">
+              <th mat-header-cell *matHeaderCellDef>Código</th>
+              <td mat-cell *matCellDef="let condicion">
+                <span class="codigo">{{ condicion.codigo }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Nombre Column -->
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef>Nombre</th>
+              <td mat-cell *matCellDef="let condicion">
+                <div class="nombre-cell">
+                  <span class="nombre">{{ condicion.nombre }}</span>
+                  <span *ngIf="condicion.descripcion" class="descripcion">{{ condicion.descripcion }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Tipo Column -->
+            <ng-container matColumnDef="tipo">
+              <th mat-header-cell *matHeaderCellDef>Tipo</th>
+              <td mat-cell *matCellDef="let condicion">
+                <span class="tipo-badge" [class]="'tipo-' + condicion.tipo">
+                  {{ getTipoLabel(condicion.tipo) }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Días Vencimiento Column -->
+            <ng-container matColumnDef="diasVencimiento">
+              <th mat-header-cell *matHeaderCellDef>Vencimiento</th>
+              <td mat-cell *matCellDef="let condicion">
+                <div class="vencimiento-cell">
+                  <span class="dias">{{ condicion.diasVencimiento }} días</span>
+                  <span *ngIf="condicion.finMes" class="fin-mes">+ Fin de mes</span>
+                  <span *ngIf="condicion.diaFijo" class="dia-fijo">Día {{ condicion.diaFijo }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Fin de Mes Column -->
+            <ng-container matColumnDef="finMes">
+              <th mat-header-cell *matHeaderCellDef>Fin de Mes</th>
+              <td mat-cell *matCellDef="let condicion">
+                <mat-icon class="boolean-icon" [class.active]="condicion.finMes">
+                  {{ condicion.finMes ? 'check_circle' : 'cancel' }}
+                </mat-icon>
+              </td>
+            </ng-container>
+
+            <!-- Descuento Column -->
+            <ng-container matColumnDef="descuentoProntoPago">
+              <th mat-header-cell *matHeaderCellDef>Descuento</th>
+              <td mat-cell *matCellDef="let condicion">
+                <div *ngIf="condicion.descuentoProntoPago" class="descuento-cell">
+                  <span class="porcentaje">{{ formatearDescuento(condicion.descuentoProntoPago) }}</span>
+                  <span class="dias-descuento">en {{ condicion.diasDescuento }} días</span>
+                </div>
+                <span *ngIf="!condicion.descuentoProntoPago" class="no-descuento">-</span>
+              </td>
+            </ng-container>
+
+            <!-- Activa Column -->
+            <ng-container matColumnDef="activa">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let condicion">
+                <span class="estado-badge" [class]="condicion.activa ? 'activa' : 'inactiva'">
+                  {{ condicion.activa ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Acciones Column -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let condicion">
+                <div class="acciones">
+                  <button mat-icon-button color="primary" (click)="editarCondicion(condicion)" 
+                          [disabled]="cargando()" matTooltip="Editar">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" (click)="eliminarCondicion(condicion)" 
+                          [disabled]="cargando()" matTooltip="Eliminar">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

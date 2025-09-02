@@ -1,0 +1,412 @@
+// Variables
+$primary-color: #1976d2;
+$accent-color: #ff4081;
+$warn-color: #f44336;
+$success-color: #4caf50;
+$background-color: #fafafa;
+$card-background: #ffffff;
+$text-primary: rgba(0, 0, 0, 0.87);
+$text-secondary: rgba(0, 0, 0, 0.54);
+$border-color: rgba(0, 0, 0, 0.12);
+$shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+// Mixins
+@mixin card-style {
+  background: $card-background;
+  border-radius: 8px;
+  box-shadow: $shadow;
+  margin-bottom: 24px;
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin responsive-grid($columns: 1, $gap: 16px) {
+  display: grid;
+  grid-template-columns: repeat($columns, 1fr);
+  gap: $gap;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Main container
+.formas-pago-container {
+  padding: 24px;
+  background-color: $background-color;
+  min-height: 100vh;
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
+
+// Header
+.header {
+  margin-bottom: 32px;
+  
+  h1 {
+    margin: 0 0 8px 0;
+    color: $text-primary;
+    font-size: 2rem;
+    font-weight: 400;
+  }
+  
+  .subtitle {
+    margin: 0;
+    color: $text-secondary;
+    font-size: 1rem;
+  }
+}
+
+// Loading state
+.loading {
+  @include flex-center;
+  flex-direction: column;
+  padding: 48px;
+  
+  p {
+    margin-top: 16px;
+    color: $text-secondary;
+  }
+}
+
+// Error message
+.error-message {
+  @include card-style;
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background-color: #ffebee;
+  border-left: 4px solid $warn-color;
+  color: $warn-color;
+  
+  mat-icon:first-child {
+    margin-right: 12px;
+  }
+  
+  span {
+    flex: 1;
+  }
+  
+  button {
+    margin-left: 8px;
+  }
+}
+
+// Content
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+// Cards
+.filters-card,
+.form-card,
+.table-card {
+  @include card-style;
+}
+
+// Filters
+.filters-form {
+  .filters-row {
+    @include responsive-grid(4, 16px);
+    margin-bottom: 16px;
+  }
+  
+  .filter-field {
+    width: 100%;
+  }
+  
+  .filters-actions {
+    display: flex;
+    gap: 12px;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      
+      button {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// Form
+.forma-pago-form {
+  .form-row {
+    @include responsive-grid(3, 16px);
+    margin-bottom: 16px;
+    
+    &:has(.full-width) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .form-field {
+    width: 100%;
+    
+    &.full-width {
+      grid-column: 1 / -1;
+    }
+  }
+  
+  .checkbox-field {
+    display: flex;
+    align-items: center;
+    height: 56px;
+    
+    mat-checkbox {
+      width: 100%;
+    }
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      
+      button {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// Table
+.table-container {
+  overflow-x: auto;
+  
+  .formas-table {
+    width: 100%;
+    
+    .mat-mdc-header-cell {
+      font-weight: 600;
+      color: $text-primary;
+    }
+    
+    .mat-mdc-cell {
+      padding: 12px 8px;
+    }
+  }
+}
+
+// Table cell styles
+.codigo-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #e3f2fd;
+  color: $primary-color;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.nombre-cell {
+  strong {
+    display: block;
+    color: $text-primary;
+  }
+  
+  small {
+    display: block;
+    color: $text-secondary;
+    font-size: 0.75rem;
+    margin-top: 2px;
+  }
+}
+
+.tipo-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  
+  &.tipo-efectivo {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+  }
+  
+  &.tipo-transferencia {
+    background-color: #e3f2fd;
+    color: #1565c0;
+  }
+  
+  &.tipo-cheque {
+    background-color: #fff3e0;
+    color: #ef6c00;
+  }
+  
+  &.tipo-tarjeta {
+    background-color: #fce4ec;
+    color: #c2185b;
+  }
+  
+  &.tipo-otro {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+  }
+}
+
+.status-icon {
+  &.active {
+    color: $success-color;
+  }
+  
+  &:not(.active) {
+    color: $text-secondary;
+  }
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  
+  &.active {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+  }
+  
+  &:not(.active) {
+    background-color: #ffebee;
+    color: #c62828;
+  }
+}
+
+.no-data {
+  color: $text-secondary;
+  font-style: italic;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 4px;
+  
+  button {
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+  }
+}
+
+// Empty state
+.empty-state {
+  @include flex-center;
+  flex-direction: column;
+  padding: 48px 24px;
+  text-align: center;
+  
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: $text-secondary;
+    margin-bottom: 16px;
+  }
+  
+  h3 {
+    margin: 0 0 8px 0;
+    color: $text-primary;
+  }
+  
+  p {
+    margin: 0 0 24px 0;
+    color: $text-secondary;
+    max-width: 400px;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .formas-table {
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+      padding: 8px 4px;
+      font-size: 0.875rem;
+    }
+    
+    // Hide less important columns on mobile
+    .mat-column-descripcion,
+    .mat-column-diasVencimiento {
+      display: none;
+    }
+  }
+  
+  .codigo-badge {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+  }
+  
+  .tipo-badge,
+  .status-badge {
+    font-size: 0.625rem;
+    padding: 2px 8px;
+  }
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .formas-pago-container {
+    background-color: #121212;
+    color: rgba(255, 255, 255, 0.87);
+  }
+  
+  .filters-card,
+  .form-card,
+  .table-card {
+    background-color: #1e1e1e;
+  }
+  
+  .codigo-badge {
+    background-color: #1a237e;
+    color: #90caf9;
+  }
+  
+  .error-message {
+    background-color: #3e2723;
+    border-left-color: #ff5722;
+    color: #ff8a65;
+  }
+}
+
+// Animation classes
+.mat-mdc-row {
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
+// Focus styles
+.mat-mdc-button:focus,
+.mat-mdc-icon-button:focus {
+  outline: 2px solid $primary-color;
+  outline-offset: 2px;
+}
+
+// Loading overlay
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  @include flex-center;
+  z-index: 10;
+}

@@ -1,0 +1,477 @@
+// Variables
+$primary-color: #1976d2;
+$accent-color: #ff4081;
+$warn-color: #f44336;
+$success-color: #4caf50;
+$background-color: #f5f5f5;
+$card-background: #ffffff;
+$text-primary: #212121;
+$text-secondary: #757575;
+$border-color: #e0e0e0;
+$shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+// Mixins
+@mixin card-style {
+  background: $card-background;
+  border-radius: 8px;
+  box-shadow: $shadow;
+  margin-bottom: 24px;
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@mixin responsive-grid($columns: 1fr) {
+  display: grid;
+  grid-template-columns: $columns;
+  gap: 16px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Main container
+.condiciones-pago-container {
+  padding: 24px;
+  background-color: $background-color;
+  min-height: 100vh;
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
+
+// Header
+.header {
+  margin-bottom: 32px;
+  
+  h1 {
+    @include flex-center;
+    color: $text-primary;
+    font-size: 2rem;
+    font-weight: 500;
+    margin: 0 0 8px 0;
+    
+    mat-icon {
+      font-size: 2rem;
+      width: 2rem;
+      height: 2rem;
+      color: $primary-color;
+    }
+  }
+  
+  .subtitle {
+    color: $text-secondary;
+    font-size: 1rem;
+    margin: 0;
+    margin-left: 40px;
+  }
+}
+
+// Loading state
+.loading {
+  @include flex-center;
+  flex-direction: column;
+  padding: 48px;
+  text-align: center;
+  
+  p {
+    margin-top: 16px;
+    color: $text-secondary;
+  }
+}
+
+// Error message
+.error-message {
+  @include flex-center;
+  @include card-style;
+  padding: 16px;
+  background-color: #ffebee;
+  border-left: 4px solid $warn-color;
+  color: $warn-color;
+  
+  mat-icon {
+    color: $warn-color;
+  }
+}
+
+// Content
+.content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+// Cards
+.filters-card,
+.form-card,
+.data-card {
+  @include card-style;
+  
+  mat-card-header {
+    margin-bottom: 16px;
+    
+    mat-card-title {
+      @include flex-center;
+      color: $text-primary;
+      font-size: 1.25rem;
+      
+      mat-icon {
+        color: $primary-color;
+      }
+      
+      .count {
+        color: $text-secondary;
+        font-size: 0.875rem;
+        font-weight: normal;
+      }
+    }
+  }
+}
+
+// Filters
+.filters-form {
+  .filters-row {
+    @include responsive-grid(1fr 200px 200px);
+    
+    mat-form-field {
+      width: 100%;
+    }
+  }
+  
+  .filters-actions {
+    @include flex-center;
+    justify-content: flex-start;
+    margin-top: 16px;
+    
+    button {
+      margin-right: 12px;
+      
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+  }
+}
+
+// Form
+.condicion-form {
+  .form-row {
+    @include responsive-grid(1fr 1fr 1fr);
+    
+    &:has(.checkbox-field) {
+      align-items: center;
+    }
+    
+    mat-form-field {
+      width: 100%;
+    }
+    
+    .checkbox-field {
+      display: flex;
+      align-items: center;
+      height: 56px; // Match form field height
+      
+      mat-checkbox {
+        margin-left: 8px;
+      }
+    }
+  }
+  
+  .form-actions {
+    @include flex-center;
+    justify-content: flex-start;
+    margin-top: 24px;
+    
+    button {
+      margin-right: 12px;
+      
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+  }
+}
+
+// Table
+.table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid $border-color;
+}
+
+.condiciones-table {
+  width: 100%;
+  
+  th {
+    background-color: #fafafa;
+    color: $text-primary;
+    font-weight: 600;
+    border-bottom: 2px solid $border-color;
+  }
+  
+  td {
+    border-bottom: 1px solid $border-color;
+    
+    &:last-child {
+      width: 120px;
+    }
+  }
+  
+  tr:hover {
+    background-color: #f9f9f9;
+  }
+}
+
+// Table cell content
+.codigo {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: $primary-color;
+  background-color: #e3f2fd;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.nombre-cell {
+  .nombre {
+    display: block;
+    font-weight: 500;
+    color: $text-primary;
+  }
+  
+  .descripcion {
+    display: block;
+    font-size: 0.875rem;
+    color: $text-secondary;
+    margin-top: 2px;
+  }
+}
+
+.tipo-badge {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  
+  &.tipo-contado {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+  }
+  
+  &.tipo-credito {
+    background-color: #fff3e0;
+    color: #f57c00;
+  }
+  
+  &.tipo-mixto {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+  }
+}
+
+.vencimiento-cell {
+  .dias {
+    display: block;
+    font-weight: 500;
+    color: $text-primary;
+  }
+  
+  .fin-mes,
+  .dia-fijo {
+    display: block;
+    font-size: 0.75rem;
+    color: $text-secondary;
+    margin-top: 2px;
+  }
+}
+
+.boolean-icon {
+  &.active {
+    color: $success-color;
+  }
+  
+  &:not(.active) {
+    color: $text-secondary;
+  }
+}
+
+.descuento-cell {
+  .porcentaje {
+    display: block;
+    font-weight: 600;
+    color: $success-color;
+  }
+  
+  .dias-descuento {
+    display: block;
+    font-size: 0.75rem;
+    color: $text-secondary;
+    margin-top: 2px;
+  }
+}
+
+.no-descuento {
+  color: $text-secondary;
+  font-style: italic;
+}
+
+.estado-badge {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  
+  &.activa {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+  }
+  
+  &.inactiva {
+    background-color: #ffebee;
+    color: #c62828;
+  }
+}
+
+.acciones {
+  @include flex-center;
+  justify-content: center;
+  
+  button {
+    margin: 0 2px;
+  }
+}
+
+// No data state
+.no-data {
+  @include flex-center;
+  flex-direction: column;
+  padding: 48px;
+  text-align: center;
+  color: $text-secondary;
+  
+  mat-icon {
+    font-size: 3rem;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 1.125rem;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .header {
+    h1 {
+      font-size: 1.5rem;
+      
+      mat-icon {
+        font-size: 1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+    }
+    
+    .subtitle {
+      margin-left: 32px;
+      font-size: 0.875rem;
+    }
+  }
+  
+  .filters-form .filters-actions,
+  .condicion-form .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+    
+    button {
+      margin: 4px 0;
+      width: 100%;
+    }
+  }
+  
+  .condiciones-table {
+    font-size: 0.875rem;
+    
+    th,
+    td {
+      padding: 8px 4px;
+    }
+  }
+  
+  .acciones {
+    flex-direction: column;
+    
+    button {
+      margin: 2px 0;
+    }
+  }
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .condiciones-pago-container {
+    background-color: #121212;
+    color: #ffffff;
+  }
+  
+  .filters-card,
+  .form-card,
+  .data-card {
+    background-color: #1e1e1e;
+  }
+  
+  .header h1,
+  .filters-card mat-card-title,
+  .form-card mat-card-title,
+  .data-card mat-card-title {
+    color: #ffffff;
+  }
+  
+  .header .subtitle {
+    color: #b0b0b0;
+  }
+  
+  .condiciones-table {
+    th {
+      background-color: #2a2a2a;
+      color: #ffffff;
+    }
+    
+    tr:hover {
+      background-color: #2a2a2a;
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .condiciones-pago-container {
+    background: white;
+    padding: 0;
+  }
+  
+  .filters-card,
+  .form-card {
+    display: none;
+  }
+  
+  .data-card {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+  
+  .acciones {
+    display: none;
+  }
+}

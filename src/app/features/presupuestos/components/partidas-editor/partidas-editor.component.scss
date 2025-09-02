@@ -1,0 +1,258 @@
+.partidas-editor-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-card {
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    mat-form-field {
+      flex: 1;
+      min-width: 200px;
+    }
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 16px;
+    
+    @media (max-width: 480px) {
+      flex-direction: column;
+      
+      button {
+        width: 100%;
+      }
+    }
+  }
+}
+
+.table-card {
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+    
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    
+    h3 {
+      margin: 0 0 8px 0;
+      font-weight: 400;
+    }
+    
+    p {
+      margin: 0;
+      font-size: 14px;
+    }
+  }
+  
+  table {
+    width: 100%;
+    
+    th {
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .mat-column-codigo {
+      width: 120px;
+    }
+    
+    .mat-column-nombre {
+      min-width: 200px;
+    }
+    
+    .mat-column-unidades,
+    .mat-column-precioUnitario,
+    .mat-column-totalConIva {
+      width: 120px;
+      text-align: right;
+    }
+    
+    .mat-column-acciones {
+      width: 100px;
+      text-align: center;
+    }
+    
+    .currency-cell {
+      font-family: 'Roboto Mono', monospace;
+      font-weight: 500;
+    }
+    
+    .actions-cell {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      
+      button {
+        min-width: 32px;
+        width: 32px;
+        height: 32px;
+        
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+  }
+}
+
+// Breadcrumb styles
+.breadcrumb-nav {
+  padding: 8px 16px;
+  background-color: var(--mat-toolbar-container-background-color, #f5f5f5);
+  border-bottom: 1px solid var(--mat-divider-color, #e0e0e0);
+  
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 14px;
+    
+    .breadcrumb-item {
+      display: flex;
+      align-items: center;
+      
+      .breadcrumb-link {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        color: var(--mat-primary-color, #1976d2);
+        text-decoration: none;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+        
+        &:hover {
+          background-color: var(--mat-primary-50, rgba(25, 118, 210, 0.1));
+        }
+        
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+      }
+      
+      .breadcrumb-separator {
+        margin: 0 8px;
+        color: var(--mat-text-secondary, #666);
+        font-weight: 300;
+      }
+      
+      .breadcrumb-current {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        color: var(--mat-text-primary, #333);
+        font-weight: 500;
+        
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+  }
+}
+
+// Global snackbar styles
+::ng-deep {
+  .success-snackbar {
+    background-color: #4caf50 !important;
+    color: white !important;
+  }
+  
+  .error-snackbar {
+    background-color: #f44336 !important;
+    color: white !important;
+  }
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .breadcrumb-nav {
+    background-color: var(--mat-toolbar-container-background-color, #424242);
+    border-bottom-color: var(--mat-divider-color, #616161);
+    
+    .breadcrumb {
+      .breadcrumb-item {
+        .breadcrumb-link {
+          color: var(--mat-primary-200, #90caf9);
+          
+          &:hover {
+            background-color: var(--mat-primary-900, rgba(144, 202, 249, 0.1));
+          }
+        }
+        
+        .breadcrumb-separator {
+          color: var(--mat-text-secondary, #aaa);
+        }
+        
+        .breadcrumb-current {
+          color: var(--mat-text-primary, #fff);
+        }
+      }
+    }
+  }
+
+  .partidas-editor-container {
+    background-color: #121212;
+    color: #ffffff;
+  }
+  
+  .form-card,
+  .table-card {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    border: 1px solid #333333;
+  }
+  
+  .empty-state {
+    color: #e0e0e0;
+    
+    h3 {
+      color: #ffffff;
+    }
+  }
+  
+  table {
+    th {
+      color: #e0e0e0;
+    }
+  }
+}

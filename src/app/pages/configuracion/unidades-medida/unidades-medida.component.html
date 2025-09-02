@@ -1,0 +1,273 @@
+<div class="unidades-medida-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>Unidades de Medida</h1>
+    <p>Gestión de unidades de medida del sistema</p>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div class="loading-container" *ngIf="loading()">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div class="error-container" *ngIf="error()">
+    <mat-icon color="warn">error</mat-icon>
+    <span>{{ error() }}</span>
+  </div>
+
+  <!-- Content -->
+  <div class="content" *ngIf="!loading()">
+    <!-- Filtros -->
+    <mat-card class="filter-card">
+      <mat-card-header>
+        <mat-card-title>Filtros</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="filtroForm" class="filter-form">
+          <div class="filter-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Buscar</mat-label>
+              <input matInput formControlName="search" placeholder="Código, nombre o símbolo">
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Magnitud</mat-label>
+              <mat-select formControlName="magnitud">
+                <mat-option value="">Todas</mat-option>
+                <mat-option *ngFor="let magnitud of magnitudes()" [value]="magnitud">
+                  {{ magnitud | titlecase }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Es Base</mat-label>
+              <mat-select formControlName="esBase">
+                <mat-option *ngFor="let opcion of opcionesEsBase" [value]="opcion.value">
+                  {{ opcion.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Estado</mat-label>
+              <mat-select formControlName="activa">
+                <mat-option *ngFor="let opcion of opcionesActiva" [value]="opcion.value">
+                  {{ opcion.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="filter-actions">
+            <button mat-raised-button color="primary" type="button" (click)="filtrar()">
+              <mat-icon>filter_list</mat-icon>
+              Filtrar
+            </button>
+            <button mat-button type="button" (click)="limpiarFiltros()">
+              <mat-icon>clear</mat-icon>
+              Limpiar
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Formulario -->
+    <mat-card class="form-card">
+      <mat-card-header>
+        <mat-card-title>{{ tituloFormulario() }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="unidadMedidaForm" class="unidad-form">
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Código *</mat-label>
+              <input matInput formControlName="codigo" placeholder="Ej: KG, M, L">
+              <mat-error *ngIf="unidadMedidaForm.get('codigo')?.invalid && unidadMedidaForm.get('codigo')?.touched">
+                {{ obtenerMensajeError('codigo') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Nombre *</mat-label>
+              <input matInput formControlName="nombre" placeholder="Ej: Kilogramo, Metro, Litro">
+              <mat-error *ngIf="unidadMedidaForm.get('nombre')?.invalid && unidadMedidaForm.get('nombre')?.touched">
+                {{ obtenerMensajeError('nombre') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Símbolo *</mat-label>
+              <input matInput formControlName="simbolo" placeholder="Ej: kg, m, l">
+              <mat-error *ngIf="unidadMedidaForm.get('simbolo')?.invalid && unidadMedidaForm.get('simbolo')?.touched">
+                {{ obtenerMensajeError('simbolo') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Magnitud *</mat-label>
+              <mat-select formControlName="magnitud">
+                <mat-option *ngFor="let magnitud of magnitudes()" [value]="magnitud">
+                  {{ magnitud | titlecase }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="unidadMedidaForm.get('magnitud')?.invalid && unidadMedidaForm.get('magnitud')?.touched">
+                {{ obtenerMensajeError('magnitud') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Factor de Conversión *</mat-label>
+              <input matInput type="number" formControlName="factorConversion" 
+                     placeholder="1.0" step="0.000001" min="0.000001">
+              <mat-hint>Factor para convertir a la unidad base</mat-hint>
+              <mat-error *ngIf="unidadMedidaForm.get('factorConversion')?.invalid && unidadMedidaForm.get('factorConversion')?.touched">
+                {{ obtenerMensajeError('factorConversion') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Descripción</mat-label>
+              <textarea matInput formControlName="descripcion" rows="3" 
+                        placeholder="Descripción opcional de la unidad de medida"></textarea>
+              <mat-error *ngIf="unidadMedidaForm.get('descripcion')?.invalid && unidadMedidaForm.get('descripcion')?.touched">
+                {{ obtenerMensajeError('descripcion') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-checkbox formControlName="esBase">
+              Es unidad base de la magnitud
+            </mat-checkbox>
+
+            <mat-checkbox formControlName="activa">
+              Activa
+            </mat-checkbox>
+          </div>
+
+          <div class="form-actions">
+            <button mat-raised-button color="primary" type="button" (click)="guardar()" 
+                    [disabled]="loading()">
+              <mat-icon>save</mat-icon>
+              {{ textoBoton() }}
+            </button>
+            <button mat-button type="button" (click)="cancelar()" [disabled]="loading()">
+              <mat-icon>cancel</mat-icon>
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Tabla de datos -->
+    <mat-card class="table-card">
+      <mat-card-header>
+        <mat-card-title>Unidades de Medida ({{ unidadesMedida().length }})</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="unidadesMedida()" class="unidades-table" matSort>
+            <!-- Código -->
+            <ng-container matColumnDef="codigo">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Código</th>
+              <td mat-cell *matCellDef="let unidad" class="codigo-cell">
+                <strong>{{ unidad.codigo }}</strong>
+              </td>
+            </ng-container>
+
+            <!-- Nombre -->
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
+              <td mat-cell *matCellDef="let unidad">{{ unidad.nombre }}</td>
+            </ng-container>
+
+            <!-- Símbolo -->
+            <ng-container matColumnDef="simbolo">
+              <th mat-header-cell *matHeaderCellDef>Símbolo</th>
+              <td mat-cell *matCellDef="let unidad" class="simbolo-cell">
+                <code>{{ unidad.simbolo }}</code>
+              </td>
+            </ng-container>
+
+            <!-- Magnitud -->
+            <ng-container matColumnDef="magnitud">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Magnitud</th>
+              <td mat-cell *matCellDef="let unidad">
+                <span class="magnitud-badge">{{ unidad.magnitud | titlecase }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Es Base -->
+            <ng-container matColumnDef="esBase">
+              <th mat-header-cell *matHeaderCellDef>Es Base</th>
+              <td mat-cell *matCellDef="let unidad" class="center-cell">
+                <mat-icon *ngIf="unidad.esBase" color="primary" matTooltip="Unidad base">
+                  star
+                </mat-icon>
+                <mat-icon *ngIf="!unidad.esBase" class="icon-disabled" matTooltip="No es unidad base">
+                  star_border
+                </mat-icon>
+              </td>
+            </ng-container>
+
+            <!-- Factor de Conversión -->
+            <ng-container matColumnDef="factorConversion">
+              <th mat-header-cell *matHeaderCellDef>Factor</th>
+              <td mat-cell *matCellDef="let unidad" class="factor-cell">
+                {{ formatearFactor(unidad.factorConversion) }}
+              </td>
+            </ng-container>
+
+            <!-- Estado -->
+            <ng-container matColumnDef="activa">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let unidad" class="center-cell">
+                <span class="status-badge" [class.active]="unidad.activa" [class.inactive]="!unidad.activa">
+                  {{ unidad.activa ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Acciones -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let unidad" class="actions-cell">
+                <button mat-icon-button color="primary" 
+                        (click)="editarUnidadMedida(unidad)"
+                        matTooltip="Editar unidad de medida">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" 
+                        (click)="eliminarUnidadMedida(unidad)"
+                        [disabled]="unidad.esBase"
+                        [matTooltip]="unidad.esBase ? 'No se puede eliminar una unidad base' : 'Eliminar unidad de medida'">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+
+          <!-- Mensaje cuando no hay datos -->
+          <div class="no-data" *ngIf="unidadesMedida().length === 0 && !loading()">
+            <mat-icon>inventory_2</mat-icon>
+            <p>No se encontraron unidades de medida</p>
+            <p class="subtitle">Ajuste los filtros o cree una nueva unidad de medida</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

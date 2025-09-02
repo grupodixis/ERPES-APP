@@ -1,0 +1,292 @@
+<!-- ============================================================================ -->
+<!-- ROLES-PERMISOS COMPONENT TEMPLATE -->
+<!-- ============================================================================ -->
+
+<div class="roles-permisos-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1>
+          <mat-icon>admin_panel_settings</mat-icon>
+          Gestión de Roles y Permisos
+        </h1>
+        <p class="subtitle">Administra la matriz de permisos por rol del sistema</p>
+      </div>
+      
+      <div class="header-actions">
+        <button mat-raised-button color="primary" (click)="abrirAsignacionMasiva()">
+          <mat-icon>assignment</mat-icon>
+          Asignación Masiva
+        </button>
+        <button mat-raised-button color="accent" (click)="abrirComparacionRoles()">
+          <mat-icon>compare</mat-icon>
+          Comparar Roles
+        </button>
+        <button mat-button (click)="exportarMatriz()">
+          <mat-icon>download</mat-icon>
+          Exportar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros y Estadísticas -->
+  <div class="filters-section">
+    <mat-card class="filters-card">
+      <mat-card-content>
+        <div class="filters-row">
+          <!-- Filtros de roles -->
+          <div class="filter-group">
+            <mat-form-field>
+              <mat-label>Filtrar roles</mat-label>
+              <mat-select [formControl]="filtros.roles" multiple>
+                <mat-option *ngFor="let rol of roles()" [value]="rol.id">
+                  {{ rol.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Filtros de módulos -->
+          <div class="filter-group">
+            <mat-form-field>
+              <mat-label>Filtrar módulos</mat-label>
+              <mat-select [formControl]="filtros.modulos" multiple>
+                <mat-option *ngFor="let modulo of modulosDisponibles()" [value]="modulo">
+                  {{ formatearModulo(modulo) }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Filtros de acciones -->
+          <div class="filter-group">
+            <mat-form-field>
+              <mat-label>Filtrar acciones</mat-label>
+              <mat-select [formControl]="filtros.acciones" multiple>
+                <mat-option *ngFor="let accion of accionesDisponibles()" [value]="accion">
+                  {{ formatearAccion(accion) }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Búsqueda de texto -->
+          <div class="filter-group search-group">
+            <mat-form-field>
+              <mat-label>Buscar permisos</mat-label>
+              <input matInput [formControl]="filtros.busqueda" placeholder="Nombre o descripción...">
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Acciones de filtros -->
+          <div class="filter-actions">
+            <button mat-button (click)="limpiarFiltros()">
+              <mat-icon>clear</mat-icon>
+              Limpiar
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Estadísticas -->
+    <div class="statistics-section" *ngIf="estadisticas()">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value">{{ estadisticas()!.totalRoles }}</div>
+          <div class="stat-label">Roles</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ estadisticas()!.totalPermisos }}</div>
+          <div class="stat-label">Permisos</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ estadisticas()!.asignacionesActivas }}</div>
+          <div class="stat-label">Asignaciones</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ estadisticas()!.cobertura }}%</div>
+          <div class="stat-label">Cobertura</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-section" *ngIf="cargando()">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando matriz de permisos...</p>
+  </div>
+
+  <!-- Matriz de Permisos -->
+  <div class="matriz-section" *ngIf="!cargando() && matrizFiltrada()">
+    <mat-card class="matriz-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>grid_on</mat-icon>
+          Matriz de Roles y Permisos
+        </mat-card-title>
+        <mat-card-subtitle>
+          {{ permisosFiltrados().length }} permisos × {{ rolesFiltrados().length }} roles
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="matriz-container">
+          <div class="matriz-scroll">
+            <table class="matriz-table">
+              <!-- Header con roles -->
+              <thead>
+                <tr>
+                  <th class="permiso-header">
+                    <div class="header-content">
+                      <span>Permiso</span>
+                      <div class="header-actions">
+                        <button mat-icon-button 
+                                matTooltip="Seleccionar todos los permisos"
+                                (click)="toggleTodosPermisos()">
+                          <mat-icon>{{ todosMarcados() ? 'deselect' : 'select_all' }}</mat-icon>
+                        </button>
+                      </div>
+                    </div>
+                  </th>
+                  <th class="rol-header" *ngFor="let rol of rolesFiltrados(); trackBy: trackByRolId">
+                    <div class="rol-header-content">
+                      <div class="rol-info">
+                        <span class="rol-nombre">{{ rol.nombre }}</span>
+                        <span class="rol-descripcion" *ngIf="rol.descripcion">{{ rol.descripcion }}</span>
+                      </div>
+                      <div class="rol-actions">
+                        <button mat-icon-button 
+                                matTooltip="Seleccionar todos los permisos para este rol"
+                                (click)="toggleTodosPermisosRol(rol.id)">
+                          <mat-icon>{{ todosMarcadosRol(rol.id) ? 'deselect' : 'select_all' }}</mat-icon>
+                        </button>
+                      </div>
+                      <div class="rol-stats">
+                        <mat-chip size="small">{{ contarPermisosRol(rol.id) }}</mat-chip>
+                      </div>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+
+              <!-- Body con permisos agrupados por módulo -->
+              <tbody>
+                <ng-container *ngFor="let grupo of permisosPorModulo(); trackBy: trackByModulo">
+                  <!-- Separador de módulo -->
+                  <tr class="modulo-separator">
+                    <td [attr.colspan]="rolesFiltrados().length + 1">
+                      <div class="modulo-header">
+                        <mat-icon>{{ getModuloIcon(grupo.modulo) }}</mat-icon>
+                        <span class="modulo-nombre">{{ formatearModulo(grupo.modulo) }}</span>
+                        <mat-chip size="small" class="modulo-count">{{ grupo.permisos.length }}</mat-chip>
+                        <div class="modulo-actions">
+                          <button mat-button size="small" 
+                                  (click)="toggleTodosPermisosModulo(grupo.modulo)">
+                            <mat-icon>{{ todosMarcadosModulo(grupo.modulo) ? 'deselect' : 'select_all' }}</mat-icon>
+                            {{ todosMarcadosModulo(grupo.modulo) ? 'Deseleccionar' : 'Seleccionar' }} Módulo
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Permisos del módulo -->
+                  <tr class="permiso-row" 
+                      *ngFor="let permiso of grupo.permisos; trackBy: trackByPermisoId"
+                      [class.permiso-destacado]="esPermisoDestacado(permiso)">
+                    
+                    <!-- Columna de permiso -->
+                    <td class="permiso-cell">
+                      <div class="permiso-info">
+                        <div class="permiso-principal">
+                          <span class="permiso-nombre">{{ permiso.nombre }}</span>
+                          <div class="permiso-badges">
+                            <mat-chip size="small" class="recurso-chip">{{ permiso.recurso }}</mat-chip>
+                            <mat-chip size="small" class="accion-chip">{{ permiso.accion }}</mat-chip>
+                          </div>
+                        </div>
+                        <div class="permiso-descripcion" *ngIf="permiso.descripcion">
+                          {{ permiso.descripcion }}
+                        </div>
+                      </div>
+                    </td>
+
+                    <!-- Columnas de roles -->
+                    <td class="rol-cell" 
+                        *ngFor="let rol of rolesFiltrados(); trackBy: trackByRolId">
+                      <div class="checkbox-container">
+                        <mat-checkbox 
+                          [checked]="tienePermiso(rol.id, permiso.id)"
+                          [disabled]="!puedeEditarPermiso(rol.id, permiso.id)"
+                          (change)="togglePermiso(rol.id, permiso.id, $event.checked)"
+                          [matTooltip]="getTooltipPermiso(rol, permiso)"
+                          class="permiso-checkbox">
+                        </mat-checkbox>
+                        
+                        <!-- Indicador de herencia -->
+                        <mat-icon class="herencia-icon" 
+                                  *ngIf="esPermisoHeredado(rol.id, permiso.id)"
+                                  matTooltip="Permiso heredado">
+                          link
+                        </mat-icon>
+                      </div>
+                    </td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Estado vacío -->
+  <div class="empty-state" *ngIf="!cargando() && (!matrizFiltrada() || permisosFiltrados().length === 0)">
+    <mat-icon>admin_panel_settings</mat-icon>
+    <h3>No hay permisos para mostrar</h3>
+    <p>Ajusta los filtros para ver la matriz de permisos</p>
+    <button mat-raised-button color="primary" (click)="limpiarFiltros()">
+      <mat-icon>refresh</mat-icon>
+      Limpiar Filtros
+    </button>
+  </div>
+
+  <!-- Acciones flotantes -->
+  <div class="floating-actions">
+    <button mat-fab 
+            color="primary" 
+            matTooltip="Guardar cambios"
+            [disabled]="!tieneCambiosPendientes()"
+            (click)="guardarCambios()">
+      <mat-icon>save</mat-icon>
+    </button>
+  </div>
+
+  <!-- Indicador de cambios pendientes -->
+  <div class="cambios-pendientes" *ngIf="tieneCambiosPendientes()">
+    <mat-card class="cambios-card">
+      <mat-card-content>
+        <div class="cambios-info">
+          <mat-icon>edit</mat-icon>
+          <span>{{ contarCambiosPendientes() }} cambios pendientes</span>
+        </div>
+        <div class="cambios-actions">
+          <button mat-button (click)="deshacerCambios()">
+            <mat-icon>undo</mat-icon>
+            Deshacer
+          </button>
+          <button mat-raised-button color="primary" (click)="guardarCambios()">
+            <mat-icon>save</mat-icon>
+            Guardar
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

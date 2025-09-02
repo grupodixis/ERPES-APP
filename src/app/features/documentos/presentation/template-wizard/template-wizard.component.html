@@ -1,0 +1,371 @@
+<div class="template-wizard-container">
+  <!-- Header -->
+  <div class="wizard-header">
+    <h2 mat-dialog-title>
+      <mat-icon>{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
+      {{ isEditMode ? 'Editar Plantilla' : 'Nueva Plantilla' }}
+    </h2>
+    <button mat-icon-button mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Progress Stepper -->
+  <mat-horizontal-stepper #stepper [selectedIndex]="currentStep" [linear]="true" class="wizard-stepper">
+    
+    <!-- Step 1: Basic Information -->
+    <mat-step [stepControl]="templateForm" [completed]="isStepValid(0)">
+      <ng-template matStepLabel>Información Básica</ng-template>
+      
+      <div class="step-content">
+        <form [formGroup]="templateForm" class="template-form">
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Nombre de la Plantilla</mat-label>
+              <input matInput formControlName="nombre" placeholder="Ej: Formulario de Registro">
+              <mat-error *ngIf="templateForm.get('nombre')?.hasError('required')">
+                El nombre es requerido
+              </mat-error>
+              <mat-error *ngIf="templateForm.get('nombre')?.hasError('maxlength')">
+                El nombre no puede exceder 100 caracteres
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Descripción</mat-label>
+              <textarea matInput formControlName="descripcion" rows="3" 
+                       placeholder="Describe el propósito de esta plantilla..."></textarea>
+              <mat-error *ngIf="templateForm.get('descripcion')?.hasError('maxlength')">
+                La descripción no puede exceder 500 caracteres
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Tipo de Plantilla</mat-label>
+              <mat-select formControlName="tipo">
+                <mat-option [value]="'FORMULARIO'">
+                  <mat-icon>description</mat-icon>
+                  Formulario
+                </mat-option>
+                <mat-option [value]="'CONTRATO'">
+                  <mat-icon>gavel</mat-icon>
+                  Contrato
+                </mat-option>
+                <mat-option [value]="'FACTURA'">
+                  <mat-icon>receipt</mat-icon>
+                  Factura
+                </mat-option>
+                <mat-option [value]="'REPORTE'">
+                  <mat-icon>assessment</mat-icon>
+                  Reporte
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </form>
+      </div>
+    </mat-step>
+
+    <!-- Step 2: File Upload -->
+    <mat-step [completed]="isStepValid(1)">
+      <ng-template matStepLabel>Cargar PDF</ng-template>
+      
+      <div class="step-content">
+        <div class="file-upload-section">
+          <div class="upload-area" 
+               [class.has-file]="selectedFile"
+               (click)="fileInput.click()">
+            <input #fileInput type="file" accept=".pdf" 
+                   (change)="onFileSelected($event)" style="display: none;">
+            
+            <div class="upload-content" *ngIf="!selectedFile">
+              <mat-icon class="upload-icon">cloud_upload</mat-icon>
+              <h3>Seleccionar archivo PDF</h3>
+              <p>Haz clic aquí o arrastra un archivo PDF</p>
+              <p class="file-requirements">
+                <mat-icon>info</mat-icon>
+                Máximo 10MB • Solo archivos PDF
+              </p>
+            </div>
+            
+            <div class="file-info" *ngIf="selectedFile">
+              <mat-icon class="file-icon">picture_as_pdf</mat-icon>
+              <div class="file-details">
+                <h4>{{ selectedFile.name }}</h4>
+                <p>{{ formatFileSize(selectedFile.size || 0) }}</p>
+              </div>
+              <button mat-icon-button (click)="fileInput.click(); $event.stopPropagation()">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </div>
+          </div>
+          
+          <!-- PDF Viewer -->
+          <div class="pdf-viewer" *ngIf="pdfLoaded">
+            <div class="pdf-controls">
+              <div class="page-controls">
+                <button mat-icon-button (click)="previousPage()" [disabled]="currentPage <= 1">
+                  <mat-icon>chevron_left</mat-icon>
+                </button>
+                <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
+                <button mat-icon-button (click)="nextPage()" [disabled]="currentPage >= totalPages">
+                  <mat-icon>chevron_right</mat-icon>
+                </button>
+              </div>
+              
+              <div class="zoom-controls">
+                <button mat-icon-button (click)="zoomOut()" [disabled]="zoomLevel <= 0.5">
+                  <mat-icon>zoom_out</mat-icon>
+                </button>
+                <span class="zoom-info">{{ (zoomLevel * 100) | number:'1.0-0' }}%</span>
+                <button mat-icon-button (click)="zoomIn()" [disabled]="zoomLevel >= 3.0">
+                  <mat-icon>zoom_in</mat-icon>
+                </button>
+              </div>
+            </div>
+            
+            <div class="pdf-canvas-container">
+              <canvas #pdfCanvas class="pdf-canvas"></canvas>
+            </div>
+          </div>
+          
+          <!-- Loading indicator -->
+          <div class="loading-container" *ngIf="loading">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Cargando PDF...</p>
+          </div>
+        </div>
+      </div>
+    </mat-step>
+
+    <!-- Step 3: Field Detection -->
+    <mat-step [completed]="isStepValid(2)">
+      <ng-template matStepLabel>Detectar Campos</ng-template>
+      
+      <div class="step-content">
+        <div class="field-detection-section">
+          <div class="detection-header">
+            <h3>Campos del Formulario</h3>
+            <div class="detection-actions">
+              <button mat-raised-button color="primary" 
+                      (click)="detectFields()" 
+                      [disabled]="!pdfLoaded || loading">
+                <mat-icon>search</mat-icon>
+                Detectar Campos Automáticamente
+              </button>
+              <button mat-stroked-button (click)="addField({})">
+                <mat-icon>add</mat-icon>
+                Agregar Campo Manual
+              </button>
+            </div>
+          </div>
+          
+          <!-- Fields List -->
+          <div class="fields-list" *ngIf="templateFields.length > 0">
+            <mat-card class="field-card" *ngFor="let field of templateFields; trackBy: trackByFieldId">
+              <mat-card-content>
+                <div class="field-header">
+                  <div class="field-info">
+                    <mat-icon class="field-type-icon">{{ getFieldTypeIcon(field.tipo) }}</mat-icon>
+                    <div class="field-details">
+                      <h4>{{ field.etiqueta || field.nombreCampo }}</h4>
+                      <p class="field-meta">
+                        {{ field.nombreCampo }} • Página {{ field.coordenadas.pagina }} • 
+                        {{ field.requerido ? 'Requerido' : 'Opcional' }}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div class="field-actions">
+                    <button mat-icon-button (click)="editField(field, {})">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="deleteField(field)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="field-properties">
+                  <mat-chip-set>
+                    <mat-chip [color]="field.tipo === 'TEXTO' ? 'primary' : 'accent'" selected>
+                      {{ field.tipo }}
+                    </mat-chip>
+                    <mat-chip *ngIf="field.requerido" color="warn" selected>
+                      Requerido
+                    </mat-chip>
+                  </mat-chip-set>
+                  
+                  <div class="field-position">
+                    <small>
+                      Posición: ({{ field.coordenadas.x }}, {{ field.coordenadas.y }}) • 
+                      Tamaño: {{ field.coordenadas.width }}x{{ field.coordenadas.height }}
+                    </small>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+          
+          <!-- No fields message -->
+          <div class="no-fields" *ngIf="templateFields.length === 0">
+            <mat-icon class="no-fields-icon">search_off</mat-icon>
+            <h3>No se han detectado campos</h3>
+            <p>Haz clic en "Detectar Campos Automáticamente" o agrega campos manualmente.</p>
+          </div>
+          
+          <!-- Loading indicator -->
+          <div class="loading-container" *ngIf="loading">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Detectando campos...</p>
+          </div>
+        </div>
+      </div>
+    </mat-step>
+
+    <!-- Step 4: Field Mapping -->
+    <mat-step [completed]="isStepValid(3)">
+      <ng-template matStepLabel>Mapear Campos</ng-template>
+      
+      <div class="step-content">
+        <div class="field-mapping-section">
+          <div class="mapping-header">
+            <h3>Mapeo de Campos</h3>
+            <p>Arrastra los campos del ERP hacia los campos de la plantilla para crear el mapeo.</p>
+          </div>
+          
+          <div class="mapping-content">
+            <!-- ERP Fields Panel -->
+            <div class="erp-fields-panel">
+              <h4>
+                <mat-icon>account_tree</mat-icon>
+                Campos del ERP
+              </h4>
+              
+              <div class="erp-fields-list">
+                <div class="erp-field" 
+                     *ngFor="let erpField of availableErpFields"
+                     draggable="true"
+                     (dragstart)="onDragStart($event, erpField)">
+                  <mat-icon class="drag-handle">drag_indicator</mat-icon>
+                  <div class="erp-field-info">
+                    <span class="erp-field-label">{{ erpField.label }}</span>
+                    <small class="erp-field-name">{{ erpField.name }}</small>
+                  </div>
+                  <mat-chip class="erp-field-type">{{ erpField.type }}</mat-chip>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Template Fields Panel -->
+            <div class="template-fields-panel">
+              <h4>
+                <mat-icon>description</mat-icon>
+                Campos de la Plantilla
+              </h4>
+              
+              <div class="template-fields-list">
+                <div class="template-field" 
+                     *ngFor="let field of templateFields"
+                     [class.mapped]="isMapped(field)"
+                     [class.drag-over]="dragOverField === field"
+                     (dragover)="onDragOver($event)"
+                     (dragenter)="onDragEnter(field)"
+                     (dragleave)="onDragLeave()"
+                     (drop)="onFieldDrop($event, field)">
+                  
+                  <div class="template-field-header">
+                    <mat-icon class="field-type-icon">{{ getFieldTypeIcon(field.tipo) }}</mat-icon>
+                    <div class="template-field-info">
+                      <span class="template-field-label">{{ field.etiqueta || field.nombreCampo }}</span>
+                      <small class="template-field-name">{{ field.nombreCampo }}</small>
+                    </div>
+                    
+                    <button mat-icon-button 
+                            *ngIf="isMapped(field)" 
+                            (click)="removeMapping(field.id!)" 
+                            color="warn">
+                      <mat-icon>clear</mat-icon>
+                    </button>
+                  </div>
+                  
+                  <div class="mapping-status" *ngIf="isMapped(field)">
+                    <mat-icon class="mapping-icon">link</mat-icon>
+                    <span class="mapped-field">{{ getMappedErpField(field) }}</span>
+                  </div>
+                  
+                  <div class="drop-zone" *ngIf="!isMapped(field)">
+                    <mat-icon>add_link</mat-icon>
+                    <span>Arrastra un campo del ERP aquí</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Mapping Summary -->
+          <div class="mapping-summary" *ngIf="fieldMappings.length > 0">
+            <h4>Resumen del Mapeo</h4>
+            <div class="mapping-stats">
+              <mat-chip-set>
+                <mat-chip color="primary" selected>
+                  {{ fieldMappings.length }} campos mapeados
+                </mat-chip>
+                <mat-chip color="accent" selected>
+                  {{ templateFields.length - fieldMappings.length }} sin mapear
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+            
+            <!-- Validation Errors -->
+            <div class="mapping-errors" *ngIf="mappingErrors.length > 0">
+              <mat-icon color="warn">warning</mat-icon>
+              <div class="error-list">
+                <p *ngFor="let error of mappingErrors" class="error-message">{{ error }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-step>
+  </mat-horizontal-stepper>
+
+  <!-- Dialog Actions -->
+  <div class="wizard-actions" mat-dialog-actions>
+    <div class="action-buttons">
+      <button mat-button (click)="onCancel()">Cancelar</button>
+      
+      <div class="navigation-buttons">
+        <button mat-stroked-button 
+                (click)="previousStep()" 
+                [disabled]="currentStep === 0">
+          <mat-icon>chevron_left</mat-icon>
+          Anterior
+        </button>
+        
+        <button mat-raised-button 
+                color="primary"
+                *ngIf="currentStep < totalSteps - 1"
+                (click)="nextStep()"
+                [disabled]="!isStepValid(currentStep)">
+          Siguiente
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+        
+        <button mat-raised-button 
+                color="primary"
+                *ngIf="currentStep === totalSteps - 1"
+                (click)="saveTemplate()"
+                [disabled]="loading || !templateForm.valid">
+          <mat-spinner diameter="20" *ngIf="loading"></mat-spinner>
+          <mat-icon *ngIf="!loading">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+          {{ isEditMode ? 'Actualizar' : 'Crear' }} Plantilla
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

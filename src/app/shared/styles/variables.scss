@@ -1,0 +1,70 @@
+// Variables SCSS globales para el proyecto ERPES
+
+// Colores principales
+$primary-color: #1976d2;
+$secondary-color: #424242;
+$accent-color: #ff4081;
+$warn-color: #f44336;
+$success-color: #4caf50;
+$info-color: #2196f3;
+$warning-color: #ff9800;
+
+// Colores de fondo
+$background-color: #fafafa;
+$surface-color: #ffffff;
+$card-background: #ffffff;
+
+// Colores de texto
+$text-primary: rgba(0, 0, 0, 0.87);
+$text-secondary: rgba(0, 0, 0, 0.54);
+$text-disabled: rgba(0, 0, 0, 0.38);
+$text-hint: rgba(0, 0, 0, 0.38);
+
+// Espaciado
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-xxl: 48px;
+
+// Bordes
+$border-radius: 4px;
+$border-radius-lg: 8px;
+$border-color: rgba(0, 0, 0, 0.12);
+$border-width: 1px;
+
+// Sombras
+$shadow-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+$shadow-2: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+$shadow-3: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+
+// Tipografía
+$font-family: 'Roboto', sans-serif;
+$font-size-xs: 10px;
+$font-size-sm: 12px;
+$font-size-base: 14px;
+$font-size-lg: 16px;
+$font-size-xl: 18px;
+$font-size-xxl: 24px;
+
+// Breakpoints
+$breakpoint-xs: 0;
+$breakpoint-sm: 600px;
+$breakpoint-md: 960px;
+$breakpoint-lg: 1280px;
+$breakpoint-xl: 1920px;
+
+// Z-index
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+
+// Transiciones
+$transition-duration: 0.3s;
+$transition-timing: ease-in-out;
+$transition-base: all $transition-duration $transition-timing;

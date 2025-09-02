@@ -1,0 +1,226 @@
+<div class="tipos-iva-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>Tipos de IVA</h1>
+    <p>Gestión de tipos de IVA del sistema</p>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div class="loading-container" *ngIf="loading()">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando tipos de IVA...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div class="error-container" *ngIf="error()">
+    <mat-icon>error</mat-icon>
+    <p>{{ error() }}</p>
+    <button mat-button color="primary" (click)="cargarDatos()">
+      <mat-icon>refresh</mat-icon>
+      Reintentar
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="content" *ngIf="!loading()">
+    <!-- Filtros -->
+    <mat-card class="filter-card">
+      <mat-card-header>
+        <mat-card-title>Filtros</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="filtroForm" class="filter-form">
+          <div class="filter-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Buscar</mat-label>
+              <input matInput formControlName="search" placeholder="Código, nombre o descripción">
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Estado</mat-label>
+              <mat-select formControlName="activo">
+                <mat-option *ngFor="let opcion of opcionesActivo" [value]="opcion.value">
+                  {{ opcion.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Porcentaje mínimo</mat-label>
+              <input matInput type="number" formControlName="porcentajeMin" min="0" max="100">
+              <span matSuffix>%</span>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Porcentaje máximo</mat-label>
+              <input matInput type="number" formControlName="porcentajeMax" min="0" max="100">
+              <span matSuffix>%</span>
+            </mat-form-field>
+          </div>
+
+          <div class="filter-actions">
+            <button mat-raised-button color="primary" (click)="filtrar()">
+              <mat-icon>filter_list</mat-icon>
+              Filtrar
+            </button>
+            <button mat-button (click)="limpiarFiltros()">
+              <mat-icon>clear</mat-icon>
+              Limpiar
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Formulario -->
+    <mat-card class="form-card">
+      <mat-card-header>
+        <mat-card-title>{{ tituloFormulario() }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="tipoIvaForm" class="tipo-iva-form">
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Código *</mat-label>
+              <input matInput formControlName="codigo" placeholder="Ej: IVA21">
+              <mat-error *ngIf="tipoIvaForm.get('codigo')?.invalid && tipoIvaForm.get('codigo')?.touched">
+                {{ obtenerMensajeError('codigo') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Nombre *</mat-label>
+              <input matInput formControlName="nombre" placeholder="Ej: IVA General">
+              <mat-error *ngIf="tipoIvaForm.get('nombre')?.invalid && tipoIvaForm.get('nombre')?.touched">
+                {{ obtenerMensajeError('nombre') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Porcentaje *</mat-label>
+              <input matInput type="number" formControlName="porcentaje" min="0" max="100" step="0.01">
+              <span matSuffix>%</span>
+              <mat-error *ngIf="tipoIvaForm.get('porcentaje')?.invalid && tipoIvaForm.get('porcentaje')?.touched">
+                {{ obtenerMensajeError('porcentaje') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Descripción</mat-label>
+              <textarea matInput formControlName="descripcion" rows="3" placeholder="Descripción del tipo de IVA"></textarea>
+              <mat-error *ngIf="tipoIvaForm.get('descripcion')?.invalid && tipoIvaForm.get('descripcion')?.touched">
+                {{ obtenerMensajeError('descripcion') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-checkbox formControlName="activo">Activo</mat-checkbox>
+          </div>
+
+          <div class="form-actions">
+            <button mat-raised-button color="primary" (click)="guardar()" [disabled]="loading()">
+              <mat-icon>{{ esEdicion() ? 'edit' : 'add' }}</mat-icon>
+              {{ textoBoton() }}
+            </button>
+            <button mat-button (click)="cancelar()" [disabled]="loading()">
+              <mat-icon>cancel</mat-icon>
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Tabla de datos -->
+    <mat-card class="table-card">
+      <mat-card-header>
+        <mat-card-title>Lista de Tipos de IVA</mat-card-title>
+        <mat-card-subtitle>{{ tiposIva().length }} registro(s) encontrado(s)</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="tiposIva()" class="tipos-iva-table" matSort>
+            <!-- Columna Código -->
+            <ng-container matColumnDef="codigo">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Código</th>
+              <td mat-cell *matCellDef="let tipo" class="codigo-cell">
+                <span class="codigo-badge">{{ tipo.codigo }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Columna Nombre -->
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
+              <td mat-cell *matCellDef="let tipo" class="nombre-cell">
+                <div class="nombre-info">
+                  <span class="nombre-principal">{{ tipo.nombre }}</span>
+                  <span class="descripcion-secundaria" *ngIf="tipo.descripcion">{{ tipo.descripcion }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Porcentaje -->
+            <ng-container matColumnDef="porcentaje">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Porcentaje</th>
+              <td mat-cell *matCellDef="let tipo" class="porcentaje-cell">
+                <span class="porcentaje-badge" [class.porcentaje-cero]="tipo.porcentaje === 0">
+                  {{ formatearPorcentaje(tipo.porcentaje) }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Columna Descripción -->
+            <ng-container matColumnDef="descripcion">
+              <th mat-header-cell *matHeaderCellDef>Descripción</th>
+              <td mat-cell *matCellDef="let tipo" class="descripcion-cell">
+                <span [matTooltip]="tipo.descripcion" [matTooltipDisabled]="!tipo.descripcion">
+                  {{ tipo.descripcion || '-' }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Columna Estado -->
+            <ng-container matColumnDef="activo">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+              <td mat-cell *matCellDef="let tipo" class="estado-cell">
+                <span class="estado-badge" [class.activo]="tipo.activo" [class.inactivo]="!tipo.activo">
+                  <mat-icon>{{ tipo.activo ? 'check_circle' : 'cancel' }}</mat-icon>
+                  {{ tipo.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Columna Acciones -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let tipo" class="acciones-cell">
+                <button mat-icon-button color="primary" (click)="editarTipoIva(tipo)" 
+                        matTooltip="Editar tipo de IVA" [disabled]="loading()">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="eliminarTipoIva(tipo)" 
+                        matTooltip="Eliminar tipo de IVA" [disabled]="loading()">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+
+          <!-- Mensaje cuando no hay datos -->
+          <div class="no-data" *ngIf="tiposIva().length === 0 && !loading()">
+            <mat-icon>info</mat-icon>
+            <p>No se encontraron tipos de IVA</p>
+            <p class="no-data-subtitle">Ajusta los filtros o crea un nuevo tipo de IVA</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

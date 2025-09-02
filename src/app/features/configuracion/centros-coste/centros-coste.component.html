@@ -1,0 +1,307 @@
+<div class="centros-coste-container">
+  <!-- Header -->
+  <div class="header-section">
+    <div class="title-section">
+      <h1 class="page-title">
+        <mat-icon>account_tree</mat-icon>
+        Centros de Coste
+      </h1>
+      <p class="page-subtitle">Gestión de centros de coste organizacionales</p>
+    </div>
+    
+    <div class="header-actions">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="toggleVistaArbol()"
+        [disabled]="loading()">
+        <mat-icon>{{ vistaArbol ? 'view_list' : 'account_tree' }}</mat-icon>
+        {{ vistaArbol ? 'Vista Lista' : 'Vista Árbol' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading()" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando centros de coste...</p>
+  </div>
+
+  <!-- Error Message -->
+  <mat-card *ngIf="error()" class="error-card">
+    <mat-card-content>
+      <div class="error-content">
+        <mat-icon color="warn">error</mat-icon>
+        <span>{{ error() }}</span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading()" class="main-content">
+    
+    <!-- Filters Section -->
+    <mat-card class="filters-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>filter_list</mat-icon>
+          Filtros
+        </mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <form [formGroup]="filtroForm" class="filters-form">
+          <div class="filter-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Buscar</mat-label>
+              <input matInput formControlName="search" placeholder="Código, nombre o descripción...">
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Estado</mat-label>
+              <mat-select formControlName="activo">
+                <mat-option [value]="null">Todos</mat-option>
+                <mat-option [value]="true">Activos</mat-option>
+                <mat-option [value]="false">Inactivos</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Centro Padre</mat-label>
+              <mat-select formControlName="centroPadreId">
+                <mat-option [value]="null">Todos</mat-option>
+                <mat-option [value]="undefined">Solo raíz</mat-option>
+                <mat-option *ngFor="let centro of centrosRaiz()" [value]="centro.id">
+                  {{ centro.codigo }} - {{ centro.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="filter-actions">
+            <button mat-raised-button color="primary" (click)="aplicarFiltros()" type="button">
+              <mat-icon>search</mat-icon>
+              Aplicar Filtros
+            </button>
+            <button mat-button (click)="limpiarFiltros()" type="button">
+              <mat-icon>clear</mat-icon>
+              Limpiar
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Form Section -->
+    <mat-card class="form-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>{{ isEditing() ? 'edit' : 'add' }}</mat-icon>
+          {{ formTitle() }}
+        </mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <form [formGroup]="centroForm" (ngSubmit)="guardarCentro()" class="centro-form">
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Código *</mat-label>
+              <input matInput formControlName="codigo" placeholder="Ej: ADM, PROD-001">
+              <mat-error *ngIf="centroForm.get('codigo')?.invalid && centroForm.get('codigo')?.touched">
+                {{ getErrorMessage('codigo') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Nombre *</mat-label>
+              <input matInput formControlName="nombre" placeholder="Nombre del centro de coste">
+              <mat-error *ngIf="centroForm.get('nombre')?.invalid && centroForm.get('nombre')?.touched">
+                {{ getErrorMessage('nombre') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Descripción</mat-label>
+              <textarea matInput formControlName="descripcion" rows="3" placeholder="Descripción opcional"></textarea>
+              <mat-error *ngIf="centroForm.get('descripcion')?.invalid && centroForm.get('descripcion')?.touched">
+                {{ getErrorMessage('descripcion') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Centro Padre</mat-label>
+              <mat-select formControlName="centroPadreId">
+                <mat-option [value]="null">Sin centro padre (raíz)</mat-option>
+                <mat-option *ngFor="let centro of centrosActivos()" [value]="centro.id">
+                  {{ centro.ruta }} - {{ centro.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <div class="checkbox-container">
+              <mat-checkbox formControlName="activo">Activo</mat-checkbox>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button mat-raised-button color="primary" type="submit" [disabled]="centroForm.invalid || loading()">
+              <mat-icon>{{ isEditing() ? 'save' : 'add' }}</mat-icon>
+              {{ submitButtonText() }}
+            </button>
+            
+            <button *ngIf="isEditing()" mat-button type="button" (click)="cancelarEdicion()">
+              <mat-icon>cancel</mat-icon>
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Data Section -->
+    <mat-card class="data-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>{{ vistaArbol ? 'account_tree' : 'list' }}</mat-icon>
+          {{ vistaArbol ? 'Árbol de Centros' : 'Lista de Centros' }}
+          <span class="total-count">({{ totalCentros() }} total)</span>
+        </mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content>
+        
+        <!-- Table View -->
+        <div *ngIf="!vistaArbol" class="table-container">
+          <table mat-table [dataSource]="centrosCoste()" class="centros-table">
+            
+            <!-- Código Column -->
+            <ng-container matColumnDef="codigo">
+              <th mat-header-cell *matHeaderCellDef>Código</th>
+              <td mat-cell *matCellDef="let centro">
+                <span class="codigo-badge">{{ centro.codigo }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Nombre Column -->
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef>Nombre</th>
+              <td mat-cell *matCellDef="let centro">
+                <div class="nombre-cell">
+                  <span class="nombre-principal">{{ centro.nombre }}</span>
+                  <span *ngIf="centro.descripcion" class="descripcion-secundaria">{{ centro.descripcion }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Descripción Column -->
+            <ng-container matColumnDef="descripcion">
+              <th mat-header-cell *matHeaderCellDef>Descripción</th>
+              <td mat-cell *matCellDef="let centro">
+                {{ centro.descripcion || '-' }}
+              </td>
+            </ng-container>
+
+            <!-- Centro Padre Column -->
+            <ng-container matColumnDef="centroPadre">
+              <th mat-header-cell *matHeaderCellDef>Centro Padre</th>
+              <td mat-cell *matCellDef="let centro">
+                {{ obtenerNombreCentroPadre(centro.centroPadreId) }}
+              </td>
+            </ng-container>
+
+            <!-- Nivel Column -->
+            <ng-container matColumnDef="nivel">
+              <th mat-header-cell *matHeaderCellDef>Nivel</th>
+              <td mat-cell *matCellDef="let centro">
+                <span class="nivel-badge nivel-{{ centro.nivel }}">{{ centro.nivel }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Estado Column -->
+            <ng-container matColumnDef="activo">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let centro">
+                <span class="estado-badge" [class.activo]="centro.activo" [class.inactivo]="!centro.activo">
+                  <mat-icon>{{ centro.activo ? 'check_circle' : 'cancel' }}</mat-icon>
+                  {{ centro.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Acciones Column -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let centro">
+                <div class="acciones-cell">
+                  <button mat-icon-button color="primary" (click)="editarCentro(centro)" matTooltip="Editar">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" (click)="eliminarCentro(centro.id)" matTooltip="Eliminar">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+
+          <!-- Empty State -->
+          <div *ngIf="centrosCoste().length === 0" class="empty-state">
+            <mat-icon>account_tree</mat-icon>
+            <h3>No hay centros de coste</h3>
+            <p>Crea el primer centro de coste para comenzar</p>
+          </div>
+        </div>
+
+        <!-- Tree View -->
+        <div *ngIf="vistaArbol" class="tree-container">
+          <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+            <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
+              <button mat-icon-button disabled></button>
+              <div class="tree-node-content">
+                <span class="tree-node-codigo">{{ node.codigo }}</span>
+                <span class="tree-node-nombre">{{ node.name }}</span>
+                <span *ngIf="node.descripcion" class="tree-node-descripcion">{{ node.descripcion }}</span>
+                <span class="tree-node-estado" [class.activo]="node.activo" [class.inactivo]="!node.activo">
+                  <mat-icon>{{ node.activo ? 'check_circle' : 'cancel' }}</mat-icon>
+                </span>
+              </div>
+            </mat-tree-node>
+
+            <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding>
+              <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.name">
+                <mat-icon class="mat-icon-rtl-mirror">
+                  {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+                </mat-icon>
+              </button>
+              <div class="tree-node-content">
+                <span class="tree-node-codigo">{{ node.codigo }}</span>
+                <span class="tree-node-nombre">{{ node.name }}</span>
+                <span *ngIf="node.descripcion" class="tree-node-descripcion">{{ node.descripcion }}</span>
+                <span class="tree-node-estado" [class.activo]="node.activo" [class.inactivo]="!node.activo">
+                  <mat-icon>{{ node.activo ? 'check_circle' : 'cancel' }}</mat-icon>
+                </span>
+              </div>
+            </mat-tree-node>
+          </mat-tree>
+
+          <!-- Empty Tree State -->
+          <div *ngIf="arbolCentros.length === 0" class="empty-state">
+            <mat-icon>account_tree</mat-icon>
+            <h3>No hay centros de coste</h3>
+            <p>Crea el primer centro de coste para ver la estructura jerárquica</p>
+          </div>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+</div>

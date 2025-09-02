@@ -1,0 +1,486 @@
+<div class="permisos-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="page-title">
+          <i class="fas fa-shield-alt"></i>
+          Gestión de Permisos
+        </h1>
+        <p class="page-subtitle">Administre los permisos del sistema y su jerarquía</p>
+      </div>
+      <div class="header-actions">
+        <button 
+          type="button" 
+          class="btn btn-outline-primary"
+          (click)="cambiarVista()"
+          [disabled]="cargando">
+          <i class="fas" [class.fa-list]="vistaArbol" [class.fa-sitemap]="!vistaArbol"></i>
+          {{ vistaArbol ? 'Vista Lista' : 'Vista Árbol' }}
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-primary"
+          (click)="nuevoPermiso()"
+          [disabled]="cargando">
+          <i class="fas fa-plus"></i>
+          Nuevo Permiso
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-card" *ngIf="!vistaArbol">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-filter"></i>
+          Filtros de Búsqueda
+        </h5>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="formularioFiltros" class="filters-form">
+          <div class="row">
+            <div class="col-md-3">
+              <label class="form-label">Módulo</label>
+              <select class="form-select" formControlName="modulo">
+                <option value="">Todos los módulos</option>
+                <option *ngFor="let modulo of MODULOS" [value]="modulo">
+                  {{ formatearModulo(modulo) }}
+                </option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Acción</label>
+              <select class="form-select" formControlName="accion">
+                <option value="">Todas las acciones</option>
+                <option *ngFor="let accion of ACCIONES" [value]="accion">
+                  {{ formatearAccion(accion) }}
+                </option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Estado</label>
+              <select class="form-select" formControlName="activo">
+                <option value="">Todos</option>
+                <option value="true">Activos</option>
+                <option value="false">Inactivos</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Recurso</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                formControlName="recurso"
+                placeholder="Filtrar por recurso...">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Búsqueda</label>
+              <div class="input-group">
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  formControlName="search"
+                  placeholder="Buscar...">
+                <button 
+                  type="button" 
+                  class="btn btn-outline-secondary"
+                  (click)="limpiarFiltros()">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vista Lista -->
+  <div class="content-card" *ngIf="!vistaArbol">
+    <div class="card">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-list"></i>
+            Lista de Permisos
+            <span class="badge bg-primary ms-2">{{ totalElementos }}</span>
+          </h5>
+          <div class="table-actions">
+            <span class="text-muted">{{ permisosPaginados.length }} de {{ totalElementos }} permisos</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <!-- Loading -->
+        <div *ngIf="cargando" class="text-center p-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <p class="mt-2 text-muted">Cargando permisos...</p>
+        </div>
+
+        <!-- Tabla -->
+        <div *ngIf="!cargando" class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Módulo</th>
+                <th>Recurso</th>
+                <th>Acción</th>
+                <th>Jerarquía</th>
+                <th>Estado</th>
+                <th>Creado</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let permiso of permisosPaginados; trackBy: trackByPermiso">
+                <td>
+                  <span class="badge bg-light text-dark">{{ permiso.id }}</span>
+                </td>
+                <td>
+                  <div class="d-flex flex-column">
+                    <span class="fw-medium">{{ permiso.nombre }}</span>
+                    <small class="text-muted" *ngIf="permiso.descripcion">
+                      {{ permiso.descripcion }}
+                    </small>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge bg-info">{{ formatearModulo(permiso.modulo) }}</span>
+                </td>
+                <td>
+                  <code class="small">{{ permiso.recurso }}</code>
+                </td>
+                <td>
+                  <span class="badge bg-secondary">{{ formatearAccion(permiso.accion) }}</span>
+                </td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <span class="badge bg-warning text-dark">{{ permiso.jerarquia }}</span>
+                    <div class="ms-2" style="width: 50px; height: 4px; background: #e9ecef; border-radius: 2px;">
+                      <div 
+                        class="bg-warning" 
+                        style="height: 100%; border-radius: 2px;"
+                        [style.width.%]="(permiso.jerarquia / 10) * 100">
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span 
+                    class="badge"
+                    [class]="obtenerClaseEstado(permiso.activo)">
+                    {{ obtenerTextoEstado(permiso.activo) }}
+                  </span>
+                </td>
+                <td>
+                  <small class="text-muted">
+                    {{ permiso.createdAt | date:'dd/MM/yyyy' }}
+                  </small>
+                </td>
+                <td class="text-center">
+                  <div class="btn-group btn-group-sm" role="group">
+                    <button 
+                      type="button" 
+                      class="btn btn-outline-primary"
+                      (click)="editarPermiso(permiso)"
+                      [disabled]="guardando || eliminando"
+                      title="Editar">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button 
+                      type="button" 
+                      class="btn btn-outline-danger"
+                      (click)="eliminarPermiso(permiso)"
+                      [disabled]="guardando || eliminando"
+                      title="Eliminar">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Empty State -->
+          <div *ngIf="permisos.length === 0" class="text-center p-4">
+            <i class="fas fa-shield-alt fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No hay permisos disponibles</h5>
+            <p class="text-muted">No se encontraron permisos con los filtros aplicados.</p>
+            <button type="button" class="btn btn-primary" (click)="nuevoPermiso()">
+              <i class="fas fa-plus"></i>
+              Crear Primer Permiso
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paginación -->
+      <div class="card-footer" *ngIf="!cargando && totalPaginas > 1">
+        <nav aria-label="Paginación de permisos">
+          <ul class="pagination pagination-sm justify-content-center mb-0">
+            <li class="page-item" [class.disabled]="paginaActual === 1">
+              <button class="page-link" (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+            </li>
+            <li 
+              *ngFor="let pagina of paginasArray" 
+              class="page-item" 
+              [class.active]="pagina === paginaActual">
+              <button class="page-link" (click)="cambiarPagina(pagina)">{{ pagina }}</button>
+            </li>
+            <li class="page-item" [class.disabled]="paginaActual === totalPaginas">
+              <button class="page-link" (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vista Árbol -->
+  <div class="content-card" *ngIf="vistaArbol">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-sitemap"></i>
+          Jerarquía de Permisos
+        </h5>
+      </div>
+      <div class="card-body">
+        <!-- Loading -->
+        <div *ngIf="cargando" class="text-center p-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <p class="mt-2 text-muted">Cargando árbol de permisos...</p>
+        </div>
+
+        <!-- Árbol -->
+        <div *ngIf="!cargando" class="permissions-tree">
+          <div *ngFor="let modulo of arbolPermisos" class="tree-module mb-4">
+            <div class="module-header">
+              <h6 class="mb-2">
+                <i class="fas fa-folder text-primary"></i>
+                {{ formatearModulo(modulo.modulo) }}
+                <span class="badge bg-primary ms-2">{{ modulo.totalPermisos }}</span>
+              </h6>
+            </div>
+            <div class="module-resources ms-3">
+              <div *ngFor="let recurso of modulo.recursos" class="resource-group mb-3">
+                <div class="resource-header">
+                  <h6 class="mb-2 text-secondary">
+                    <i class="fas fa-folder-open"></i>
+                    {{ recurso.recurso }}
+                    <span class="badge bg-secondary ms-2">{{ recurso.permisos.length }}</span>
+                  </h6>
+                </div>
+                <div class="resource-permissions ms-3">
+                  <div *ngFor="let permiso of recurso.permisos" class="permission-item mb-2">
+                    <div class="d-flex justify-content-between align-items-center p-2 border rounded">
+                      <div class="permission-info">
+                        <div class="d-flex align-items-center">
+                          <i class="fas fa-key text-warning me-2"></i>
+                          <span class="fw-medium">{{ permiso.nombre }}</span>
+                          <span class="badge bg-secondary ms-2">{{ formatearAccion(permiso.accion) }}</span>
+                          <span class="badge bg-warning text-dark ms-1">Nivel {{ permiso.jerarquia }}</span>
+                          <span 
+                            class="badge ms-1"
+                            [class]="obtenerClaseEstado(permiso.activo)">
+                            {{ obtenerTextoEstado(permiso.activo) }}
+                          </span>
+                        </div>
+                        <small class="text-muted d-block mt-1" *ngIf="permiso.descripcion">
+                          {{ permiso.descripcion }}
+                        </small>
+                      </div>
+                      <div class="permission-actions">
+                        <div class="btn-group btn-group-sm" role="group">
+                          <button 
+                            type="button" 
+                            class="btn btn-outline-primary"
+                            (click)="editarPermiso(permiso)"
+                            [disabled]="guardando || eliminando"
+                            title="Editar">
+                            <i class="fas fa-edit"></i>
+                          </button>
+                          <button 
+                            type="button" 
+                            class="btn btn-outline-danger"
+                            (click)="eliminarPermiso(permiso)"
+                            [disabled]="guardando || eliminando"
+                            title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="arbolPermisos.length === 0" class="text-center p-4">
+            <i class="fas fa-sitemap fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No hay permisos en el árbol</h5>
+            <p class="text-muted">No se encontraron permisos activos para mostrar en la jerarquía.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Formulario -->
+  <div class="modal fade" [class.show]="mostrarFormulario" [style.display]="mostrarFormulario ? 'block' : 'none'" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-shield-alt"></i>
+            {{ modoEdicion ? 'Editar Permiso' : 'Nuevo Permiso' }}
+          </h5>
+          <button type="button" class="btn-close" (click)="cerrarFormulario()"></button>
+        </div>
+        <form [formGroup]="formularioPermiso" (ngSubmit)="guardarPermiso()">
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label required">Nombre</label>
+                  <input 
+                    type="text" 
+                    class="form-control"
+                    formControlName="nombre"
+                    [class.is-invalid]="esCampoInvalido('nombre')"
+                    placeholder="Ej: Crear Usuario">
+                  <div class="invalid-feedback" *ngIf="esCampoInvalido('nombre')">
+                    {{ obtenerErrorCampo('nombre') }}
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label required">Módulo</label>
+                  <select 
+                    class="form-select"
+                    formControlName="modulo"
+                    [class.is-invalid]="esCampoInvalido('modulo')">
+                    <option value="">Seleccione un módulo</option>
+                    <option *ngFor="let modulo of MODULOS" [value]="modulo">
+                      {{ formatearModulo(modulo) }}
+                    </option>
+                  </select>
+                  <div class="invalid-feedback" *ngIf="esCampoInvalido('modulo')">
+                    {{ obtenerErrorCampo('modulo') }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label required">Recurso</label>
+                  <input 
+                    type="text" 
+                    class="form-control"
+                    formControlName="recurso"
+                    [class.is-invalid]="esCampoInvalido('recurso')"
+                    placeholder="Ej: usuarios">
+                  <div class="invalid-feedback" *ngIf="esCampoInvalido('recurso')">
+                    {{ obtenerErrorCampo('recurso') }}
+                  </div>
+                  <div class="form-text">Nombre del recurso en minúsculas y sin espacios</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label required">Acción</label>
+                  <select 
+                    class="form-select"
+                    formControlName="accion"
+                    [class.is-invalid]="esCampoInvalido('accion')">
+                    <option value="">Seleccione una acción</option>
+                    <option *ngFor="let accion of ACCIONES" [value]="accion">
+                      {{ formatearAccion(accion) }}
+                    </option>
+                  </select>
+                  <div class="invalid-feedback" *ngIf="esCampoInvalido('accion')">
+                    {{ obtenerErrorCampo('accion') }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label required">Jerarquía</label>
+                  <input 
+                    type="number" 
+                    class="form-control"
+                    formControlName="jerarquia"
+                    [class.is-invalid]="esCampoInvalido('jerarquia')"
+                    min="1" 
+                    max="10">
+                  <div class="invalid-feedback" *ngIf="esCampoInvalido('jerarquia')">
+                    {{ obtenerErrorCampo('jerarquia') }}
+                  </div>
+                  <div class="form-text">Nivel de jerarquía del 1 al 10 (1 = más alto)</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <div class="form-check form-switch mt-4">
+                    <input 
+                      class="form-check-input" 
+                      type="checkbox" 
+                      formControlName="activo"
+                      id="activoSwitch">
+                    <label class="form-check-label" for="activoSwitch">
+                      Permiso Activo
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Descripción</label>
+              <textarea 
+                class="form-control"
+                formControlName="descripcion"
+                [class.is-invalid]="esCampoInvalido('descripcion')"
+                rows="3"
+                placeholder="Descripción opcional del permiso..."></textarea>
+              <div class="invalid-feedback" *ngIf="esCampoInvalido('descripcion')">
+                {{ obtenerErrorCampo('descripcion') }}
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="cerrarFormulario()" [disabled]="guardando">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="formularioPermiso.invalid || guardando">
+              <span *ngIf="guardando" class="spinner-border spinner-border-sm me-2"></span>
+              <i *ngIf="!guardando" class="fas fa-save me-2"></i>
+              {{ guardando ? 'Guardando...' : (modoEdicion ? 'Actualizar' : 'Crear') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Backdrop -->
+  <div class="modal-backdrop fade" [class.show]="mostrarFormulario" *ngIf="mostrarFormulario" (click)="cerrarFormulario()"></div>
+</div>
