@@ -1,5 +1,5 @@
-@import '../../../../shared/styles/variables';
-@import '../../../../shared/styles/mixins';
+@use '../../../../shared/styles/variables' as vars;
+@use '../../../../shared/styles/mixins' as mixins;
 
 .template-wizard-container {
   display: flex;

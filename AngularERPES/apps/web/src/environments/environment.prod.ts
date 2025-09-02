@@ -3,4 +3,5 @@ export const environment = {
   demo: false,
   envName: 'PROD',
   apiBaseUrl: '/api',
+  apiUrl: '/api', // Alias para compatibilidad
 };

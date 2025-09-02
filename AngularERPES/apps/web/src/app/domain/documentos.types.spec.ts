@@ -281,18 +281,18 @@ describe('Documentos Types', () => {
     });
 
     it('should validate TipoCampo values', () => {
-      const tipos: TipoCampo[] = ['texto', 'numero', 'fecha', 'booleano', 'lista', 'firma', 'imagen'];
+      const tipos: TipoCampo[] = ['TEXTO', 'NUMERO', 'EMAIL', 'FECHA', 'TELEFONO', 'CHECKBOX', 'LISTA', 'FIRMA', 'IMAGEN'];
       
       tipos.forEach(tipo => {
-        expect(['texto', 'numero', 'fecha', 'booleano', 'lista', 'firma', 'imagen']).toContain(tipo);
+        expect(['TEXTO', 'NUMERO', 'EMAIL', 'FECHA', 'TELEFONO', 'CHECKBOX', 'LISTA', 'FIRMA', 'IMAGEN']).toContain(tipo);
       });
     });
 
     it('should validate TipoTransformacion values', () => {
-      const tipos: TipoTransformacion[] = ['texto', 'numero', 'fecha', 'moneda', 'personalizada'];
+      const tipos: TipoTransformacion[] = ['UPPERCASE', 'LOWERCASE', 'CAPITALIZE', 'TRIM', 'DATE', 'NUMBER', 'REGEX', 'CUSTOM', 'CONCATENATE', 'EXTRACT', 'REPLACE', 'CONDITIONAL'];
       
       tipos.forEach(tipo => {
-        expect(['texto', 'numero', 'fecha', 'moneda', 'personalizada']).toContain(tipo);
+        expect(['UPPERCASE', 'LOWERCASE', 'CAPITALIZE', 'TRIM', 'DATE', 'NUMBER', 'REGEX', 'CUSTOM', 'CONCATENATE', 'EXTRACT', 'REPLACE', 'CONDITIONAL']).toContain(tipo);
       });
     });
   });

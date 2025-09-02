@@ -47,19 +47,19 @@
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Tipo de Plantilla</mat-label>
               <mat-select formControlName="tipo">
-                <mat-option [value]="TipoTemplate.FORMULARIO">
+                <mat-option [value]="'FORMULARIO'">
                   <mat-icon>description</mat-icon>
                   Formulario
                 </mat-option>
-                <mat-option [value]="TipoTemplate.CONTRATO">
+                <mat-option [value]="'CONTRATO'">
                   <mat-icon>gavel</mat-icon>
                   Contrato
                 </mat-option>
-                <mat-option [value]="TipoTemplate.FACTURA">
+                <mat-option [value]="'FACTURA'">
                   <mat-icon>receipt</mat-icon>
                   Factura
                 </mat-option>
-                <mat-option [value]="TipoTemplate.REPORTE">
+                <mat-option [value]="'REPORTE'">
                   <mat-icon>assessment</mat-icon>
                   Reporte
                 </mat-option>
@@ -95,8 +95,8 @@
             <div class="file-info" *ngIf="selectedFile">
               <mat-icon class="file-icon">picture_as_pdf</mat-icon>
               <div class="file-details">
-                <h4>{{ selectedFile?.name }}</h4>
-                <p>{{ formatFileSize(selectedFile?.size || 0) }}</p>
+                <h4>{{ selectedFile.name }}</h4>
+                <p>{{ formatFileSize(selectedFile.size || 0) }}</p>
               </div>
               <button mat-icon-button (click)="fileInput.click(); $event.stopPropagation()">
                 <mat-icon>edit</mat-icon>
@@ -172,9 +172,9 @@
                   <div class="field-info">
                     <mat-icon class="field-type-icon">{{ getFieldTypeIcon(field.tipo) }}</mat-icon>
                     <div class="field-details">
-                      <h4>{{ field.etiqueta || field.nombre }}</h4>
+                      <h4>{{ field.etiqueta || field.nombreCampo }}</h4>
                       <p class="field-meta">
-                        {{ field.nombre }} • Página {{ field.pagina }} • 
+                        {{ field.nombreCampo }} • Página {{ field.coordenadas.pagina }} • 
                         {{ field.requerido ? 'Requerido' : 'Opcional' }}
                       </p>
                     </div>
@@ -191,19 +191,19 @@
                 </div>
                 
                 <div class="field-properties">
-                  <mat-chip-list>
-                    <mat-chip [color]="field.tipo === TipoCampo.TEXTO ? 'primary' : 'accent'" selected>
+                  <mat-chip-set>
+                    <mat-chip [color]="field.tipo === 'TEXTO' ? 'primary' : 'accent'" selected>
                       {{ field.tipo }}
                     </mat-chip>
                     <mat-chip *ngIf="field.requerido" color="warn" selected>
                       Requerido
                     </mat-chip>
-                  </mat-chip-list>
+                  </mat-chip-set>
                   
                   <div class="field-position">
                     <small>
-                      Posición: ({{ field.posicionX }}, {{ field.posicionY }}) • 
-                      Tamaño: {{ field.ancho }}x{{ field.alto }}
+                      Posición: ({{ field.coordenadas.x }}, {{ field.coordenadas.y }}) • 
+                      Tamaño: {{ field.coordenadas.width }}x{{ field.coordenadas.height }}
                     </small>
                   </div>
                 </div>
@@ -281,8 +281,8 @@
                   <div class="template-field-header">
                     <mat-icon class="field-type-icon">{{ getFieldTypeIcon(field.tipo) }}</mat-icon>
                     <div class="template-field-info">
-                      <span class="template-field-label">{{ field.etiqueta || field.nombre }}</span>
-                      <small class="template-field-name">{{ field.nombre }}</small>
+                      <span class="template-field-label">{{ field.etiqueta || field.nombreCampo }}</span>
+                      <small class="template-field-name">{{ field.nombreCampo }}</small>
                     </div>
                     
                     <button mat-icon-button 
@@ -311,14 +311,14 @@
           <div class="mapping-summary" *ngIf="fieldMappings.length > 0">
             <h4>Resumen del Mapeo</h4>
             <div class="mapping-stats">
-              <mat-chip-list>
+              <mat-chip-set>
                 <mat-chip color="primary" selected>
                   {{ fieldMappings.length }} campos mapeados
                 </mat-chip>
                 <mat-chip color="accent" selected>
                   {{ templateFields.length - fieldMappings.length }} sin mapear
                 </mat-chip>
-              </mat-chip-list>
+              </mat-chip-set>
             </div>
             
             <!-- Validation Errors -->

@@ -133,73 +133,73 @@ export class MappingService {
       let result = value;
 
       switch (transformation) {
-        case 'uppercase':
+        case 'UPPERCASE':
           result = value.toUpperCase();
           if (parameters?.trim) {
             result = result.trim();
           }
           break;
 
-        case 'lowercase':
+        case 'LOWERCASE':
           result = value.toLowerCase();
           if (parameters?.trim) {
             result = result.trim();
           }
           break;
 
-        case 'capitalize':
+        case 'CAPITALIZE':
           result = value.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
           break;
 
-        case 'trim':
+        case 'TRIM':
           result = value.trim();
           if (parameters?.removeExtraSpaces) {
             result = result.replace(/\s+/g, ' ');
           }
           break;
 
-        case 'date':
+        case 'DATE':
           result = this.formatDate(value, parameters?.format || 'DD/MM/YYYY');
           break;
 
-        case 'number':
+        case 'NUMBER':
           result = this.formatNumber(value, parameters);
           break;
 
-        case 'regex':
+        case 'REGEX':
           if (parameters?.pattern) {
             const regex = new RegExp(parameters.pattern, parameters.flags || '');
             result = value.replace(regex, parameters.replacement || '');
           }
           break;
 
-        case 'custom':
+        case 'CUSTOM':
           if (parameters?.code) {
             // Ejecutar código personalizado de forma segura
             result = this.executeCustomTransformation(value, parameters.code);
           }
           break;
 
-        case 'concatenar':
+        case 'CONCATENATE':
           if (parameters?.values && Array.isArray(parameters.values)) {
             result = parameters.values.join(parameters.separator || ' ');
           }
           break;
 
-        case 'extraer':
+        case 'EXTRACT':
           if (parameters?.pattern) {
             const match = value.match(new RegExp(parameters.pattern));
             result = match ? match[parameters.group || 0] : value;
           }
           break;
 
-        case 'reemplazar':
+        case 'REPLACE':
           if (parameters?.search && parameters?.replace !== undefined) {
             result = value.replace(new RegExp(parameters.search, 'g'), parameters.replace);
           }
           break;
 
-        case 'condicional':
+        case 'CONDITIONAL':
           if (parameters?.condition && parameters?.trueValue && parameters?.falseValue) {
             result = this.evaluateCondition(value, parameters.condition) 
               ? parameters.trueValue 
@@ -338,7 +338,7 @@ export class MappingService {
       }
       
       if (condition === 'not_empty') {
-        return value && value.trim() !== '';
+        return Boolean(value && value.trim() !== '');
       }
 
       return false;

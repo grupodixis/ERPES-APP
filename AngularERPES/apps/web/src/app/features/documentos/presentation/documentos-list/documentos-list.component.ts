@@ -18,6 +18,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDividerModule } from '@angular/material/divider';
 import { FormControl } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil, startWith, combineLatest } from 'rxjs';
 
@@ -54,7 +55,8 @@ import { TemplatesService } from '../../application/templates.service';
     MatMenuModule,
     MatProgressBarModule,
     MatTooltipModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDividerModule
   ],
   templateUrl: './documentos-list.component.html',
   styleUrls: ['./documentos-list.component.scss']

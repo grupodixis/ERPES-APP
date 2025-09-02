@@ -3,7 +3,7 @@
   <div class="preview-header">
     <h2 mat-dialog-title>
       <mat-icon>{{ mode === 'create' ? 'add_circle' : 'edit' }}</mat-icon>
-      {{ mode === 'create' ? 'Fill Template' : 'Edit Fill Job' }}: {{ template.name }}
+      {{ mode === 'create' ? 'Fill Template' : 'Edit Fill Job' }}: {{ template.nombre }}
     </h2>
     <button mat-icon-button (click)="onCancel()" class="close-button">
       <mat-icon>close</mat-icon>
@@ -17,15 +17,15 @@
         <div class="template-details">
           <div class="template-name">
             <mat-icon>description</mat-icon>
-            <span>{{ template.name }}</span>
+            <span>{{ template.nombre }}</span>
           </div>
-          <div class="template-description" *ngIf="template.description">
+          <div class="template-description" *ngIf="template.descripcion">
             <mat-icon>info</mat-icon>
-            <span>{{ template.description }}</span>
+            <span>{{ template.descripcion }}</span>
           </div>
           <div class="template-fields">
             <mat-icon>list_alt</mat-icon>
-            <span>{{ template.fields.length }} fields</span>
+            <span>{{ template.totalCampos }} fields</span>
           </div>
         </div>
       </mat-card-content>
@@ -49,103 +49,10 @@
         
         <mat-card-content>
           <form [formGroup]="dataForm" class="data-form">
-            <div class="form-fields">
-              <div 
-                *ngFor="let field of template.fields" 
-                class="field-group"
-                [class.has-error]="hasFieldError(field.name)"
-              >
-                <mat-form-field class="full-width" appearance="outline">
-                  <mat-label>
-                    <mat-icon class="field-icon">{{ getFieldTypeIcon(field.type) }}</mat-icon>
-                    {{ field.name }}
-                    <span *ngIf="field.required" class="required-indicator">*</span>
-                  </mat-label>
-                  
-                  <!-- Text Input -->
-                  <input 
-                    *ngIf="field.type === 'text' || field.type === 'email'"
-                    matInput 
-                    [formControlName]="field.name"
-                    [placeholder]="field.defaultValue || 'Enter ' + field.name"
-                    [type]="field.type === 'email' ? 'email' : 'text'"
-                  >
-                  
-                  <!-- Number Input -->
-                  <input 
-                    *ngIf="field.type === 'number'"
-                    matInput 
-                    [formControlName]="field.name"
-                    [placeholder]="field.defaultValue || 'Enter number'"
-                    type="number"
-                  >
-                  
-                  <!-- Date Input -->
-                  <input 
-                    *ngIf="field.type === 'date'"
-                    matInput 
-                    [formControlName]="field.name"
-                    [matDatepicker]="picker"
-                    readonly
-                  >
-                  <mat-datepicker-toggle 
-                    *ngIf="field.type === 'date'"
-                    matSuffix 
-                    [for]="picker"
-                  ></mat-datepicker-toggle>
-                  <mat-datepicker #picker></mat-datepicker>
-                  
-                  <!-- Textarea -->
-                  <textarea 
-                    *ngIf="field.type === 'textarea'"
-                    matInput 
-                    [formControlName]="field.name"
-                    [placeholder]="field.defaultValue || 'Enter text'"
-                    rows="3"
-                  ></textarea>
-                  
-                  <!-- Checkbox -->
-                  <mat-checkbox 
-                    *ngIf="field.type === 'checkbox'"
-                    [formControlName]="field.name"
-                  >
-                    {{ field.name }}
-                  </mat-checkbox>
-                  
-                  <!-- Field Error Messages -->
-                  <mat-error *ngIf="dataForm.get(field.name)?.errors?.['required']">
-                    {{ getErrorMessage(field.name) }}
-                  </mat-error>
-                  <mat-error *ngIf="dataForm.get(field.name)?.errors?.['email']">
-                    {{ getErrorMessage(field.name) }}
-                  </mat-error>
-                  <mat-error *ngIf="dataForm.get(field.name)?.errors?.['pattern']">
-                    {{ getErrorMessage(field.name) }}
-                  </mat-error>
-                  <mat-error *ngIf="hasFieldError(field.name)">
-                    {{ getFieldError(field.name) }}
-                  </mat-error>
-                  
-                  <!-- Field Hint -->
-                  <mat-hint *ngIf="field.defaultValue && !dataForm.get(field.name)?.value">
-                    Default: {{ field.defaultValue }}
-                  </mat-hint>
-                </mat-form-field>
-                
-                <!-- Field Metadata -->
-                <div class="field-metadata" *ngIf="field.confidence">
-                  <mat-chip-list>
-                    <mat-chip 
-                      [color]="field.confidence > 0.9 ? 'primary' : field.confidence > 0.7 ? 'accent' : 'warn'"
-                      selected
-                    >
-                      <mat-icon matChipAvatar>{{ field.confidence > 0.9 ? 'verified' : 'help_outline' }}</mat-icon>
-                      Confidence: {{ (field.confidence * 100).toFixed(0) }}%
-                    </mat-chip>
-                  </mat-chip-list>
-                </div>
-              </div>
-            </div>
+            <!-- TODO: Implement form fields when Template interface includes fields property -->
+            <!-- <div class="form-fields">
+              Form fields will be rendered here when template fields are available
+            </div> -->
             
             <!-- Validation Summary -->
             <div class="validation-summary" *ngIf="validationErrors.length > 0">
@@ -315,18 +222,18 @@
           <div class="status-item">
             <span class="label">Status:</span>
             <mat-chip [color]="getJobStatusColor()" selected>
-              {{ fillJob.status | titlecase }}
+              {{ fillJob.estado | titlecase }}
             </mat-chip>
           </div>
           
-          <div class="status-item" *ngIf="fillJob.progress !== undefined">
+          <div class="status-item" *ngIf="jobProgress !== undefined">
             <span class="label">Progress:</span>
             <mat-progress-bar 
               mode="determinate" 
-              [value]="fillJob.progress"
+              [value]="jobProgress"
               [color]="getJobStatusColor()"
             ></mat-progress-bar>
-            <span class="progress-text">{{ fillJob.progress }}%</span>
+            <span class="progress-text">{{ jobProgress }}%</span>
           </div>
           
           <div class="status-item" *ngIf="fillJob.createdAt">
@@ -334,9 +241,9 @@
             <span>{{ fillJob.createdAt | date:'medium' }}</span>
           </div>
           
-          <div class="status-item" *ngIf="fillJob.completedAt">
+          <div class="status-item" *ngIf="fillJob.estado === 'Completado'">
             <span class="label">Completed:</span>
-            <span>{{ fillJob.completedAt | date:'medium' }}</span>
+            <span>{{ fillJob.updatedAt | date:'medium' }}</span>
           </div>
         </div>
         

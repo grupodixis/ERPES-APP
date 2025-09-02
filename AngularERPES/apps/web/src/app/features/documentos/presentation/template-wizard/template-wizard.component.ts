@@ -28,9 +28,9 @@ import {
   FieldMapping,
   TipoTemplate,
   EstadoTemplate,
-  TipoCampo,
   CreateTemplateDto,
-  UpdateTemplateDto
+  UpdateTemplateDto,
+  TipoCampo
 } from '../../../../domain/documentos.types';
 
 export interface WizardDialogData {
@@ -102,10 +102,7 @@ export class TemplateWizardComponent implements OnInit, OnDestroy {
   dragOverField: TemplateField | null = null;
   mappingErrors: string[] = [];
   
-  // Enums for template
-  TipoTemplate = TipoTemplate;
-  TipoCampo = TipoCampo;
-  EstadoTemplate = EstadoTemplate;
+  // Exposed types for template
 
   constructor(
     private fb: FormBuilder,
@@ -139,7 +136,7 @@ export class TemplateWizardComponent implements OnInit, OnDestroy {
     return this.fb.group({
       nombre: ['', [Validators.required, Validators.maxLength(100)]],
       descripcion: ['', [Validators.maxLength(500)]],
-      tipo: [TipoTemplate.FORMULARIO, Validators.required],
+      tipo: ['FORMULARIO', Validators.required],
       archivoNombre: [''],
       archivoTamaño: [0]
     });
@@ -150,8 +147,8 @@ export class TemplateWizardComponent implements OnInit, OnDestroy {
       nombre: template.nombre,
       descripcion: template.descripcion,
       tipo: template.tipo,
-      archivoNombre: template.archivoNombre,
-      archivoTamaño: template.archivoTamaño
+      archivoNombre: template.nombre,
+      archivoTamaño: 0
     });
     
     // Load existing fields and mappings if in edit mode
@@ -175,13 +172,13 @@ export class TemplateWizardComponent implements OnInit, OnDestroy {
   }
 
   private loadAvailableErpFields(): void {
-    this.mappingService.getAvailableErpFields()
+    this.mappingService.getAvailableERPFields()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (fields) => {
+        next: (fields: any) => {
           this.availableErpFields = fields;
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error loading ERP fields:', error);
           this.snackBar.open(
             'Error al cargar campos del ERP',
@@ -296,7 +293,7 @@ export class TemplateWizardComponent implements OnInit, OnDestroy {
     
     try {
       this.loading = true;
-      this.detectedFields = await this.pdfViewerService.extractFormFields();
+      this.detectedFields = await this.pdfViewerService.extractFormFields(1);
       this.fieldsDetected = true;
       
       // Convert detected fields to template fields
@@ -322,22 +319,24 @@ export class TemplateWizardComponent implements OnInit, OnDestroy {
 
   convertToTemplateFields(): void {
     this.templateFields = this.detectedFields.map((field, index) => ({
-      id: undefined,
-      templateId: 0,
-      nombre: field.name,
+      id: 0,
+      templateVersionId: 0,
+      nombreCampo: field.name,
       etiqueta: this.formatFieldLabel(field.name),
       tipo: this.inferFieldType(field),
-      requerido: field.required || false,
-      posicionX: field.x,
-      posicionY: field.y,
-      ancho: field.width,
-      alto: field.height,
-      pagina: field.page,
+      requerido: (field as any).required || false,
+      coordenadas: {
+        x: field.x,
+        y: field.y,
+        width: field.width,
+        height: field.height,
+        pagina: field.page
+      },
+      propiedades: this.createFieldValidations(field),
+      confianzaDeteccion: 0.8,
+      validadoPorHumano: false,
       orden: index + 1,
-      valorPorDefecto: field.defaultValue || '',
-      validaciones: this.createFieldValidations(field),
-      fechaCreacion: new Date(),
-      fechaActualizacion: new Date()
+      createdAt: new Date()
     }));
   }
 
@@ -353,31 +352,31 @@ export class TemplateWizardComponent implements OnInit, OnDestroy {
     const type = field.type.toLowerCase();
     
     if (name.includes('email') || name.includes('correo')) {
-      return TipoCampo.EMAIL;
+      return 'EMAIL';
     }
     if (name.includes('phone') || name.includes('telefono') || name.includes('tel')) {
-      return TipoCampo.TELEFONO;
+      return 'TELEFONO';
     }
     if (name.includes('date') || name.includes('fecha')) {
-      return TipoCampo.FECHA;
+      return 'FECHA';
     }
     if (type === 'checkbox') {
-      return TipoCampo.CHECKBOX;
+      return 'CHECKBOX';
     }
     if (type === 'select' || type === 'combobox') {
-      return TipoCampo.LISTA;
+      return 'LISTA';
     }
     if (name.includes('number') || name.includes('numero') || name.includes('cantidad')) {
-      return TipoCampo.NUMERO;
+      return 'NUMERO';
     }
     
-    return TipoCampo.TEXTO;
+    return 'TEXTO';
   }
 
   private createFieldValidations(field: ExtractedField): any {
     const validations: any = {};
     
-    if (field.type === 'email') {
+    if ((field.type as string) === 'email') {
       validations.pattern = '^[^@]+@[^@]+\\.[^@]+$';
     }
     
@@ -404,24 +403,26 @@ export class TemplateWizardComponent implements OnInit, OnDestroy {
     }
   }
 
-  addField(fieldData: Partial<TemplateField>): void {
+  addField(fieldData: any): void {
     const newField: TemplateField = {
-      id: undefined,
-      templateId: 0,
-      nombre: fieldData.nombre || '',
+      id: 0,
+      templateVersionId: 0,
+      nombreCampo: fieldData.nombre || '',
       etiqueta: fieldData.etiqueta || '',
-      tipo: fieldData.tipo || TipoCampo.TEXTO,
+      tipo: fieldData.tipo || 'TEXTO',
       requerido: fieldData.requerido || false,
-      posicionX: fieldData.posicionX || 0,
-      posicionY: fieldData.posicionY || 0,
-      ancho: fieldData.ancho || 100,
-      alto: fieldData.alto || 20,
-      pagina: fieldData.pagina || 1,
+      coordenadas: {
+        x: fieldData.posicionX || 0,
+        y: fieldData.posicionY || 0,
+        width: fieldData.ancho || 100,
+        height: fieldData.alto || 20,
+        pagina: fieldData.pagina || 1
+      },
+      propiedades: fieldData.validaciones || {},
+      confianzaDeteccion: 0,
+      validadoPorHumano: false,
       orden: this.templateFields.length + 1,
-      valorPorDefecto: fieldData.valorPorDefecto || '',
-      validaciones: fieldData.validaciones || {},
-      fechaCreacion: new Date(),
-      fechaActualizacion: new Date()
+      createdAt: new Date()
     };
     
     this.templateFields.push(newField);
@@ -458,13 +459,19 @@ export class TemplateWizardComponent implements OnInit, OnDestroy {
       
       // Create new mapping
       const newMapping: FieldMapping = {
-        id: undefined,
-        templateId: templateField.templateId,
+        id: 0,
         templateFieldId: templateField.id,
+        campoERP: erpFieldName,
         erpField: erpFieldName,
-        transformPresetId: null,
-        fechaCreacion: new Date(),
-        fechaActualizacion: new Date()
+        transformacionId: undefined,
+        transformacion: undefined,
+        valorPorDefecto: undefined,
+        validaciones: {},
+        confianzaMapeo: 0,
+        validadoPorHumano: false,
+        creadoPorId: 0,
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
       
       this.fieldMappings.push(newMapping);
@@ -570,8 +577,7 @@ export class TemplateWizardComponent implements OnInit, OnDestroy {
       if (this.isEditMode && this.data.template?.id) {
         const updateDto: UpdateTemplateDto = {
           nombre: formValue.nombre,
-          descripcion: formValue.descripcion,
-          tipo: formValue.tipo
+          descripcion: formValue.descripcion
         };
         
         result = await this.templatesService.updateTemplate(
@@ -588,7 +594,7 @@ export class TemplateWizardComponent implements OnInit, OnDestroy {
         const createDto: CreateTemplateDto = {
           nombre: formValue.nombre,
           descripcion: formValue.descripcion,
-          tipo: formValue.tipo,
+          archivo: formValue.archivo,
           empresaId: 1 // TODO: Get from auth service
         };
         
@@ -618,19 +624,19 @@ export class TemplateWizardComponent implements OnInit, OnDestroy {
   // Utility methods
   getFieldTypeIcon(tipo: TipoCampo): string {
     switch (tipo) {
-      case TipoCampo.TEXTO:
+      case 'TEXTO':
         return 'text_fields';
-      case TipoCampo.NUMERO:
+      case 'NUMERO':
         return 'numbers';
-      case TipoCampo.EMAIL:
+      case 'EMAIL':
         return 'email';
-      case TipoCampo.FECHA:
+      case 'FECHA':
         return 'calendar_today';
-      case TipoCampo.TELEFONO:
+      case 'TELEFONO':
         return 'phone';
-      case TipoCampo.CHECKBOX:
+      case 'CHECKBOX':
         return 'check_box';
-      case TipoCampo.LISTA:
+      case 'LISTA':
         return 'list';
       default:
         return 'text_fields';
@@ -657,7 +663,11 @@ export class TemplateWizardComponent implements OnInit, OnDestroy {
     const mapping = this.fieldMappings.find(
       mapping => mapping.templateFieldId === field.id
     );
-    return mapping ? mapping.erpField : null;
+    return mapping ? (mapping.erpField || null) : null;
+  }
+
+  trackByFieldId(index: number, field: TemplateField): number {
+    return field.id;
   }
 
   onCancel(): void {

@@ -127,7 +127,7 @@ export class PdfViewerService {
       }
 
       this.currentPdf = await loadingTask.promise;
-      return this.currentPdf;
+      return this.currentPdf!;
     } catch (error) {
       console.error('Error loading PDF:', error);
       throw error;

@@ -4,8 +4,8 @@
 export type EstadoTemplate = 'Borrador' | 'Activa' | 'Inactiva' | 'Archivada';
 export type TipoTemplate = 'AcroForm' | 'XFA' | 'Plano';
 export type EstadoFillJob = 'Pendiente' | 'Procesando' | 'Completado' | 'Error';
-export type TipoCampo = 'texto' | 'numero' | 'fecha' | 'booleano' | 'lista' | 'firma' | 'imagen';
-export type TipoTransformacion = 'texto' | 'numero' | 'fecha' | 'moneda' | 'personalizada';
+export type TipoCampo = 'TEXTO' | 'NUMERO' | 'EMAIL' | 'FECHA' | 'TELEFONO' | 'CHECKBOX' | 'LISTA' | 'FIRMA' | 'IMAGEN';
+export type TipoTransformacion = 'UPPERCASE' | 'LOWERCASE' | 'CAPITALIZE' | 'TRIM' | 'DATE' | 'NUMBER' | 'REGEX' | 'CUSTOM' | 'CONCATENATE' | 'EXTRACT' | 'REPLACE' | 'CONDITIONAL';
 
 // ===== INTERFACES PRINCIPALES =====
 
@@ -86,6 +86,7 @@ export interface FieldMapping {
   id: number;
   templateFieldId: number;
   campoERP: string;
+  erpField?: string;
   transformacionId?: number;
   transformacion?: string;
   valorPorDefecto?: string;
@@ -189,6 +190,9 @@ export interface CreateTemplateDto {
   descripcion?: string;
   archivo: File;
   empresaId: number;
+  metadatos?: {
+    [key: string]: any;
+  };
 }
 
 /**
@@ -237,6 +241,37 @@ export interface FillRequestDto {
     optimizar?: boolean;
     marca_agua?: boolean;
     [key: string]: any;
+  };
+}
+
+/**
+ * DTO para crear un trabajo de rellenado
+ */
+export interface CreateFillJobDto {
+  templateId: number;
+  datosOrigen: {
+    tipo: string;
+    id: number;
+    nombre?: string;
+    [key: string]: any;
+  };
+  configuracion?: {
+    aplanar?: boolean;
+    optimizar?: boolean;
+    marca_agua?: boolean;
+    [key: string]: any;
+  };
+}
+
+/**
+ * Resultado de validación
+ */
+export interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings?: string[];
+  fieldErrors?: {
+    [fieldName: string]: string[];
   };
 }
 
