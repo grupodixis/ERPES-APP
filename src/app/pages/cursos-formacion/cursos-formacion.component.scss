@@ -1,0 +1,439 @@
+.cursos-formacion-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
+
+// Header
+.page-header {
+  margin-bottom: 24px;
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 16px;
+    }
+  }
+
+  .title-section {
+    flex: 1;
+
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 8px 0;
+      font-size: 2rem;
+      font-weight: 500;
+      color: #1976d2;
+
+      mat-icon {
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+
+    .page-subtitle {
+      margin: 0;
+      color: #666;
+      font-size: 1rem;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      justify-content: stretch;
+
+      button {
+        flex: 1;
+      }
+    }
+  }
+}
+
+// Filtros
+.filters-card {
+  margin-bottom: 24px;
+
+  .filters-form {
+    .filters-row {
+      display: flex;
+      gap: 16px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .filter-field {
+        flex: 1;
+        min-width: 200px;
+
+        @media (max-width: 768px) {
+          width: 100%;
+          min-width: unset;
+        }
+      }
+
+      .clear-filters-btn {
+        height: 56px;
+        min-width: 120px;
+
+        @media (max-width: 768px) {
+          width: 100%;
+          height: 48px;
+        }
+      }
+    }
+  }
+}
+
+// Estadísticas
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat-card {
+  .stat-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      mat-icon {
+        color: white;
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+
+      &.primary {
+        background: linear-gradient(135deg, #1976d2, #1565c0);
+      }
+
+      &.success {
+        background: linear-gradient(135deg, #388e3c, #2e7d32);
+      }
+
+      &.info {
+        background: linear-gradient(135deg, #0288d1, #0277bd);
+      }
+
+      &.warning {
+        background: linear-gradient(135deg, #f57c00, #ef6c00);
+      }
+    }
+
+    .stat-info {
+      flex: 1;
+
+      h3 {
+        margin: 0 0 4px 0;
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: #333;
+      }
+
+      p {
+        margin: 0;
+        color: #666;
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+
+// Tabs
+.content-tabs {
+  .tab-content {
+    padding-top: 24px;
+
+    .tab-header {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 16px;
+    }
+  }
+}
+
+// Tablas
+.table-card {
+  .table-container {
+    position: relative;
+    overflow-x: auto;
+
+    .cursos-table,
+    .inscripciones-table {
+      width: 100%;
+      min-width: 800px;
+
+      @media (max-width: 768px) {
+        min-width: 600px;
+      }
+
+      th {
+        font-weight: 600;
+        color: #333;
+        background-color: #f5f5f5;
+      }
+
+      td {
+        padding: 12px 8px;
+      }
+
+      .description-cell {
+        max-width: 200px;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 4px;
+      }
+    }
+
+    .loading-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 48px;
+    }
+
+    .no-data {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+      color: #666;
+
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+      }
+
+      p {
+        margin: 0;
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+// Chips
+mat-chip {
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 12px;
+
+  // Estados de curso
+  &.estado-planificado {
+    background-color: #e3f2fd;
+    color: #1976d2;
+  }
+
+  &.estado-en_progreso {
+    background-color: #fff3e0;
+    color: #f57c00;
+  }
+
+  &.estado-completado {
+    background-color: #e8f5e8;
+    color: #388e3c;
+  }
+
+  &.estado-cancelado {
+    background-color: #ffebee;
+    color: #d32f2f;
+  }
+
+  // Estados de inscripción
+  &.estado-inscrito {
+    background-color: #e3f2fd;
+    color: #1976d2;
+  }
+
+  &.estado-abandonado {
+    background-color: #ffebee;
+    color: #d32f2f;
+  }
+
+  // Modalidades
+  &.modalidad-presencial {
+    background-color: #e8f5e8;
+    color: #388e3c;
+  }
+
+  &.modalidad-virtual {
+    background-color: #e3f2fd;
+    color: #1976d2;
+  }
+
+  &.modalidad-mixta {
+    background-color: #fff3e0;
+    color: #f57c00;
+  }
+}
+
+// Calificaciones
+.calificacion {
+  font-weight: 600;
+  color: #388e3c;
+}
+
+.sin-calificacion {
+  color: #999;
+  font-style: italic;
+}
+
+// Diálogos
+.dialog-container {
+  .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0 16px 0;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 24px;
+
+    h2 {
+      margin: 0;
+      color: #333;
+    }
+  }
+
+  .curso-form,
+  .inscripcion-form {
+    .form-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+
+      @media (max-width: 600px) {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      mat-form-field {
+        flex: 1;
+
+        &.full-width {
+          width: 100%;
+        }
+      }
+
+      .checkbox-field {
+        display: flex;
+        align-items: center;
+        flex: 1;
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .cursos-formacion-container {
+    .stats-grid {
+      .stat-card .stat-content {
+        .stat-icon {
+          width: 40px;
+          height: 40px;
+
+          mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+        }
+
+        .stat-info h3 {
+          font-size: 1.5rem;
+        }
+      }
+    }
+
+    .table-card .table-container {
+      .cursos-table,
+      .inscripciones-table {
+        th, td {
+          padding: 8px 4px;
+          font-size: 0.875rem;
+        }
+      }
+    }
+  }
+}
+
+// Angular Material overrides
+::ng-deep {
+  .mat-mdc-tab-group {
+    .mat-mdc-tab-header {
+      border-bottom: 1px solid #e0e0e0;
+    }
+  }
+
+  .mat-mdc-dialog-container {
+    .mat-mdc-dialog-surface {
+      border-radius: 12px;
+    }
+  }
+
+  .mat-mdc-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .mat-mdc-raised-button {
+    border-radius: 8px;
+  }
+
+  .mat-mdc-outlined-button {
+    border-radius: 8px;
+  }
+
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper {
+      border-radius: 8px;
+    }
+  }
+}

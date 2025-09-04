@@ -1,0 +1,308 @@
+.contratos-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+}
+
+.filters-card {
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+
+  mat-card-header {
+    background-color: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+    padding: 16px;
+    margin: -16px -16px 16px -16px;
+
+    mat-card-title {
+      color: #495057;
+      font-weight: 500;
+    }
+  }
+}
+
+.filters-form {
+  .filter-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+
+    mat-form-field {
+      min-width: 200px;
+      flex: 1;
+    }
+
+    button {
+      height: 40px;
+      margin-bottom: 1.25em;
+    }
+  }
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+
+  .stat-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 8px;
+
+      .stat-icon {
+        font-size: 2.5rem;
+        width: 2.5rem;
+        height: 2.5rem;
+        color: #6c757d;
+
+        &.active {
+          color: #28a745;
+        }
+
+        &.temporal {
+          color: #ffc107;
+        }
+
+        &.warning {
+          color: #dc3545;
+        }
+      }
+
+      .stat-info {
+        .stat-number {
+          font-size: 2rem;
+          font-weight: bold;
+          color: #495057;
+          line-height: 1;
+        }
+
+        .stat-label {
+          font-size: 0.875rem;
+          color: #6c757d;
+          margin-top: 4px;
+        }
+      }
+    }
+  }
+}
+
+.table-card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+
+  .contratos-table {
+    width: 100%;
+
+    th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      color: #495057;
+    }
+
+    .operario-info {
+      .operario-id {
+        font-weight: 500;
+        color: #495057;
+      }
+
+      .operario-email {
+        font-size: 0.875rem;
+        color: #6c757d;
+      }
+    }
+
+    .fechas-info {
+      .fecha-inicio {
+        font-weight: 500;
+        color: #495057;
+      }
+
+      .fecha-fin {
+        font-size: 0.875rem;
+        color: #6c757d;
+      }
+
+      .fecha-indefinido {
+        font-size: 0.875rem;
+        color: #28a745;
+        font-style: italic;
+      }
+    }
+
+    .salario-info {
+      .salario-base {
+        font-weight: 600;
+        color: #495057;
+      }
+
+      .salario-tipo {
+        font-size: 0.875rem;
+        color: #6c757d;
+      }
+    }
+
+    // Chips de estado y tipo
+    mat-chip-listbox {
+      mat-chip-option {
+        &.indefinido-chip {
+          background-color: #e3f2fd;
+          color: #1976d2;
+        }
+
+        &.temporal-chip {
+          background-color: #fff3e0;
+          color: #f57c00;
+        }
+
+        &.practicas-chip {
+          background-color: #f3e5f5;
+          color: #7b1fa2;
+        }
+
+        &.formacion-chip {
+          background-color: #e8f5e8;
+          color: #388e3c;
+        }
+
+        &.active-chip {
+          background-color: #e8f5e8;
+          color: #2e7d32;
+        }
+
+        &.finalizado-chip {
+          background-color: #ffebee;
+          color: #c62828;
+        }
+
+        &.suspendido-chip {
+          background-color: #fff3e0;
+          color: #ef6c00;
+        }
+      }
+    }
+  }
+}
+
+// Estilos del diálogo
+.contrato-form {
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    mat-form-field {
+      flex: 1;
+
+      &.full-width {
+        flex: 1 1 100%;
+      }
+    }
+  }
+
+  mat-accordion {
+    mat-expansion-panel {
+      margin-bottom: 8px;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+      mat-expansion-panel-header {
+        background-color: #f8f9fa;
+
+        mat-panel-title {
+          font-weight: 500;
+          color: #495057;
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .contratos-container {
+    padding: 10px;
+  }
+
+  .filters-form .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+
+    mat-form-field {
+      min-width: unset;
+    }
+
+    button {
+      margin-bottom: 0;
+      margin-top: 8px;
+    }
+  }
+
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .contratos-table {
+    font-size: 0.875rem;
+
+    .mat-column-operario,
+    .mat-column-fechas,
+    .mat-column-salario {
+      display: none;
+    }
+  }
+
+  .contrato-form .form-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    .page-title {
+      font-size: 1.25rem;
+    }
+  }
+
+  .contratos-table {
+    .mat-column-tipo,
+    .mat-column-estado {
+      display: none;
+    }
+  }
+}

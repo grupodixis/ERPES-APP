@@ -1,0 +1,501 @@
+// Variables
+$primary-color: #1976d2;
+$success-color: #4caf50;
+$warning-color: #ff9800;
+$error-color: #f44336;
+$info-color: #2196f3;
+$purple-color: #9c27b0;
+
+$border-radius: 8px;
+$shadow: 0 2px 4px rgba(0,0,0,0.1);
+$transition: all 0.3s ease;
+
+// Container
+.permisos-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
+
+// Header Section
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+.title-section {
+  .title-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: $primary-color;
+    margin-right: 12px;
+    vertical-align: middle;
+  }
+  
+  h1 {
+    display: inline;
+    margin: 0;
+    font-size: 28px;
+    font-weight: 500;
+    color: #333;
+    vertical-align: middle;
+  }
+  
+  .subtitle {
+    display: block;
+    margin-top: 8px;
+    color: #666;
+    font-size: 14px;
+    margin-left: 44px;
+  }
+}
+
+.actions-section {
+  .create-button {
+    height: 48px;
+    padding: 0 24px;
+    font-size: 16px;
+    
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+// Filters Card
+.filters-card {
+  margin-bottom: 24px;
+  border-radius: $border-radius;
+  box-shadow: $shadow;
+}
+
+.filters-container {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  
+  .filter-field {
+    min-width: 200px;
+    flex: 1;
+    
+    @media (max-width: 768px) {
+      min-width: 100%;
+    }
+  }
+  
+  .clear-filters-btn {
+    margin-top: 8px;
+    color: #666;
+    
+    &:hover {
+      color: $error-color;
+      background-color: rgba($error-color, 0.1);
+    }
+  }
+}
+
+// Stats Section
+.stats-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  border-radius: $border-radius;
+  box-shadow: $shadow;
+  transition: $transition;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
+  
+  mat-card-content {
+    padding: 20px !important;
+  }
+}
+
+.stat-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  
+  &.total { color: $primary-color; }
+  &.active { color: $success-color; }
+  &.inactive { color: $error-color; }
+  &.modules { color: $warning-color; }
+}
+
+.stat-info {
+  .stat-number {
+    display: block;
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .stat-label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+// Loading State
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  
+  p {
+    margin-top: 16px;
+    color: #666;
+    font-size: 16px;
+  }
+}
+
+// Error State
+.error-card {
+  border-radius: $border-radius;
+  border-left: 4px solid $error-color;
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  
+  .error-icon {
+    font-size: 32px;
+    color: $error-color;
+  }
+  
+  .error-info {
+    h3 {
+      margin: 0 0 8px 0;
+      color: $error-color;
+    }
+    
+    p {
+      margin: 0 0 16px 0;
+      color: #666;
+    }
+  }
+}
+
+// Permisos Content
+.permisos-content {
+  .modulo-section {
+    margin-bottom: 16px;
+  }
+}
+
+// Módulo Panel
+.modulo-panel {
+  border-radius: $border-radius;
+  box-shadow: $shadow;
+  
+  ::ng-deep {
+    .mat-expansion-panel-header {
+      padding: 16px 24px;
+      
+      &:hover {
+        background-color: rgba($primary-color, 0.04);
+      }
+    }
+    
+    .mat-expansion-panel-body {
+      padding: 0;
+    }
+  }
+}
+
+.modulo-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  
+  .modulo-icon {
+    color: $primary-color;
+    font-size: 20px;
+  }
+  
+  .modulo-name {
+    font-weight: 500;
+    font-size: 16px;
+  }
+  
+  .permisos-count {
+    background-color: $primary-color;
+    color: white;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 12px;
+  }
+}
+
+.modulo-stats {
+  display: flex;
+  gap: 16px;
+  
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    
+    .small-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      
+      &.active { color: $success-color; }
+      &.inactive { color: $error-color; }
+    }
+  }
+}
+
+// Permisos Table
+.permisos-table-container {
+  overflow-x: auto;
+}
+
+.permisos-table {
+  width: 100%;
+  
+  th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #e0e0e0;
+  }
+  
+  td {
+    border-bottom: 1px solid #e0e0e0;
+    padding: 12px 16px;
+  }
+  
+  tr:hover {
+    background-color: rgba($primary-color, 0.02);
+  }
+}
+
+// Table Cells
+.recurso-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  .resource-icon {
+    color: $primary-color;
+    font-size: 18px;
+  }
+  
+  .resource-name {
+    font-weight: 500;
+  }
+}
+
+.method-badge {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: white;
+  
+  &.method-get { background-color: $success-color; }
+  &.method-post { background-color: $info-color; }
+  &.method-put { background-color: $warning-color; }
+  &.method-delete { background-color: $error-color; }
+  &.method-patch { background-color: $purple-color; }
+}
+
+.description-text {
+  color: #666;
+  font-size: 14px;
+}
+
+.status-text {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  
+  &.active {
+    color: $success-color;
+  }
+  
+  &.inactive {
+    color: $error-color;
+  }
+}
+
+.actions-cell {
+  display: flex;
+  gap: 4px;
+  
+  button {
+    width: 32px;
+    height: 32px;
+    
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+    
+    &.edit-btn {
+      color: $warning-color;
+      
+      &:hover {
+        background-color: rgba($warning-color, 0.1);
+      }
+    }
+    
+    &.delete-btn {
+      color: $error-color;
+      
+      &:hover:not(:disabled) {
+        background-color: rgba($error-color, 0.1);
+      }
+      
+      &:disabled {
+        color: #ccc;
+        cursor: not-allowed;
+      }
+    }
+    
+    &.details-btn {
+      color: $info-color;
+      
+      &:hover {
+        background-color: rgba($info-color, 0.1);
+      }
+    }
+  }
+}
+
+// Empty State
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  
+  .empty-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: #ccc;
+    margin-bottom: 16px;
+  }
+  
+  h3 {
+    margin: 0 0 8px 0;
+    color: #666;
+  }
+  
+  p {
+    margin: 0 0 24px 0;
+    color: #999;
+  }
+}
+
+// Pagination
+.permisos-paginator {
+  margin-top: 24px;
+  border-radius: $border-radius;
+  box-shadow: $shadow;
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .permisos-table {
+    font-size: 12px;
+    
+    th, td {
+      padding: 8px 12px;
+    }
+  }
+  
+  .actions-cell {
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .modulo-stats {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .method-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modulo-section {
+  animation: fadeIn 0.3s ease-out;
+}
+
+// Material Design Overrides
+::ng-deep {
+  .mat-form-field-appearance-outline .mat-form-field-outline {
+    color: rgba(0,0,0,0.12);
+  }
+  
+  .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+    color: $primary-color;
+  }
+  
+  .mat-slide-toggle.mat-checked .mat-slide-toggle-thumb {
+    background-color: $success-color;
+  }
+  
+  .mat-slide-toggle.mat-checked .mat-slide-toggle-bar {
+    background-color: rgba($success-color, 0.5);
+  }
+  
+  .mat-paginator {
+    border-radius: $border-radius;
+  }
+  
+  .mat-expansion-panel:not(.mat-expanded) .mat-expansion-panel-header:hover {
+    background: rgba($primary-color, 0.04);
+  }
+}

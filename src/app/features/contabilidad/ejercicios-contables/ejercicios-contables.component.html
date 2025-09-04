@@ -1,0 +1,366 @@
+<div class="ejercicios-container">
+  <!-- Header -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon class="title-icon">calendar_today</mat-icon>
+          Ejercicios Contables
+        </h1>
+        <p class="page-description">
+          Gestión de períodos contables del sistema
+        </p>
+      </div>
+      
+      <div class="header-actions">
+        <button mat-raised-button color="primary" (click)="openCreateDialog()">
+          <mat-icon>add</mat-icon>
+          Nuevo Ejercicio
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <mat-card class="filters-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>filter_list</mat-icon>
+        Filtros
+      </mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="filters-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Buscar</mat-label>
+          <input matInput [formControl]="searchControl" placeholder="Código o nombre...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Estado</mat-label>
+          <mat-select [formControl]="estadoFilter">
+            <mat-option value="">Todos</mat-option>
+            <mat-option *ngFor="let estado of estadosEjercicio" [value]="estado">
+              {{ estado }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Activo</mat-label>
+          <mat-select [formControl]="activoFilter">
+            <mat-option value="">Todos</mat-option>
+            <mat-option value="true">Activos</mat-option>
+            <mat-option value="false">Inactivos</mat-option>
+          </mat-select>
+        </mat-form-field>
+        
+        <div class="filter-actions">
+          <button mat-stroked-button (click)="clearFilters()">
+            <mat-icon>clear</mat-icon>
+            Limpiar
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Estadísticas -->
+  <div class="stats-grid">
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon primary">
+            <mat-icon>assessment</mat-icon>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">{{ estadisticas().total }}</div>
+            <div class="stat-label">Total Ejercicios</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon success">
+            <mat-icon>lock_open</mat-icon>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">{{ estadisticas().abiertos }}</div>
+            <div class="stat-label">Abiertos</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon warning">
+            <mat-icon>lock</mat-icon>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">{{ estadisticas().cerrados }}</div>
+            <div class="stat-label">Cerrados</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon accent">
+            <mat-icon>star</mat-icon>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">{{ estadisticas().activos }}</div>
+            <div class="stat-label">Activos</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Ejercicio Activo -->
+  @if (ejercicioActivo()) {
+    <mat-card class="active-exercise-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon class="active-icon">star</mat-icon>
+          Ejercicio Activo
+        </mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="active-exercise-info">
+          <div class="exercise-details">
+            <h3>{{ ejercicioActivo()!.nombre }}</h3>
+            <p>{{ ejercicioActivo()!.codigo }} | {{ formatFecha(ejercicioActivo()!.fechaInicio) }} - {{ formatFecha(ejercicioActivo()!.fechaFin) }}</p>
+          </div>
+          
+          <mat-chip-set>
+            <mat-chip [color]="getEstadoColor(ejercicioActivo()!.estado)" selected>
+              <mat-icon matChipAvatar>{{ getEstadoIcon(ejercicioActivo()!.estado) }}</mat-icon>
+              {{ ejercicioActivo()!.estado }}
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <mat-card class="loading-card">
+      <mat-card-content>
+        <div class="loading-content">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Cargando ejercicios contables...</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Error State -->
+  @if (error()) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <div class="error-content">
+          <mat-icon class="error-icon">error</mat-icon>
+          <h3>Error al cargar datos</h3>
+          <p>{{ error() }}</p>
+          <button mat-raised-button color="primary" (click)="loadEjercicios()">
+            <mat-icon>refresh</mat-icon>
+            Reintentar
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Tabla de Ejercicios -->
+  @if (!loading() && !error() && ejercicios().length > 0) {
+    <mat-card class="table-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>list</mat-icon>
+          Lista de Ejercicios
+        </mat-card-title>
+        
+        <div class="table-actions">
+          <span class="results-count">{{ totalEjercicios() }} ejercicios encontrados</span>
+        </div>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="ejerciciosFiltrados()" matSort (matSortChange)="onSortChange($event)" class="ejercicios-table">
+            <!-- Código -->
+            <ng-container matColumnDef="codigo">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Código</th>
+              <td mat-cell *matCellDef="let ejercicio">
+                <div class="codigo-cell">
+                  <strong>{{ ejercicio.codigo }}</strong>
+                  @if (ejercicioActivo()?.id === ejercicio.id) {
+                    <mat-icon class="active-badge" matTooltip="Ejercicio Activo">star</mat-icon>
+                  }
+                </div>
+              </td>
+            </ng-container>
+            
+            <!-- Nombre -->
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
+              <td mat-cell *matCellDef="let ejercicio">
+                <div class="nombre-cell">
+                  <div class="nombre-principal">{{ ejercicio.nombre }}</div>
+                  @if (ejercicio.observaciones) {
+                    <div class="observaciones">{{ ejercicio.observaciones }}</div>
+                  }
+                </div>
+              </td>
+            </ng-container>
+            
+            <!-- Fecha Inicio -->
+            <ng-container matColumnDef="fechaInicio">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Inicio</th>
+              <td mat-cell *matCellDef="let ejercicio">
+                {{ formatFecha(ejercicio.fechaInicio) }}
+              </td>
+            </ng-container>
+            
+            <!-- Fecha Fin -->
+            <ng-container matColumnDef="fechaFin">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Fin</th>
+              <td mat-cell *matCellDef="let ejercicio">
+                {{ formatFecha(ejercicio.fechaFin) }}
+              </td>
+            </ng-container>
+            
+            <!-- Estado -->
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+              <td mat-cell *matCellDef="let ejercicio">
+                <mat-chip [color]="getEstadoColor(ejercicio.estado)" selected>
+                  <mat-icon matChipAvatar>{{ getEstadoIcon(ejercicio.estado) }}</mat-icon>
+                  {{ ejercicio.estado }}
+                </mat-chip>
+              </td>
+            </ng-container>
+            
+            <!-- Activo -->
+            <ng-container matColumnDef="activo">
+              <th mat-header-cell *matHeaderCellDef>Activo</th>
+              <td mat-cell *matCellDef="let ejercicio">
+                <mat-slide-toggle 
+                  [checked]="ejercicio.activo" 
+                  [disabled]="ejercicio.estado === 'CERRADO'"
+                  (change)="ejercicio.activo ? null : setEjercicioActivo(ejercicio)">
+                </mat-slide-toggle>
+              </td>
+            </ng-container>
+            
+            <!-- Acciones -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let ejercicio">
+                <div class="actions-cell">
+                  <button mat-icon-button 
+                          [matMenuTriggerFor]="actionsMenu" 
+                          matTooltip="Más acciones">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  
+                  <mat-menu #actionsMenu="matMenu">
+                    <button mat-menu-item (click)="openViewDialog(ejercicio)">
+                      <mat-icon>visibility</mat-icon>
+                      Ver Detalles
+                    </button>
+                    
+                    <button mat-menu-item 
+                            (click)="openEditDialog(ejercicio)"
+                            [disabled]="ejercicio.estado === 'CERRADO'">
+                      <mat-icon>edit</mat-icon>
+                      Editar
+                    </button>
+                    
+                    <button mat-menu-item 
+                            (click)="duplicarEjercicio(ejercicio)">
+                      <mat-icon>content_copy</mat-icon>
+                      Duplicar
+                    </button>
+                    
+                    <mat-divider></mat-divider>
+                    
+                    <button mat-menu-item 
+                            (click)="setEjercicioActivo(ejercicio)"
+                            [disabled]="ejercicio.estado !== 'ABIERTO' || ejercicio.activo">
+                      <mat-icon>star</mat-icon>
+                      Establecer como Activo
+                    </button>
+                    
+                    <button mat-menu-item 
+                            (click)="cerrarEjercicio(ejercicio)"
+                            [disabled]="ejercicio.estado === 'CERRADO'"
+                            class="warning-action">
+                      <mat-icon>lock</mat-icon>
+                      Cerrar Ejercicio
+                    </button>
+                    
+                    <mat-divider></mat-divider>
+                    
+                    <button mat-menu-item 
+                            (click)="deleteEjercicio(ejercicio)"
+                            [disabled]="ejercicio.estado === 'CERRADO' || ejercicio.activo"
+                            class="danger-action">
+                      <mat-icon>delete</mat-icon>
+                      Eliminar
+                    </button>
+                  </mat-menu>
+                </div>
+              </td>
+            </ng-container>
+            
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+                (click)="navigateToAsientos(row)" 
+                class="clickable-row" 
+                matTooltip="Hacer clic para ver los asientos contables de este ejercicio"></tr>
+          </table>
+        </div>
+        
+        <!-- Paginación -->
+        <mat-paginator
+          [length]="totalEjercicios()"
+          [pageSize]="pageSize()"
+          [pageIndex]="pageIndex()"
+          [pageSizeOptions]="[5, 10, 25, 50]"
+          (page)="onPageChange($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && !error() && ejercicios().length === 0) {
+    <mat-card class="empty-card">
+      <mat-card-content>
+        <div class="empty-content">
+          <mat-icon class="empty-icon">calendar_today</mat-icon>
+          <h3>No hay ejercicios contables</h3>
+          <p>Comience creando su primer ejercicio contable para gestionar los períodos del sistema.</p>
+          <button mat-raised-button color="primary" (click)="openCreateDialog()">
+            <mat-icon>add</mat-icon>
+            Crear Primer Ejercicio
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

@@ -1,0 +1,283 @@
+<div class="permisos-container">
+  <!-- Header -->
+  <div class="header-section">
+    <div class="title-section">
+      <mat-icon class="title-icon">security</mat-icon>
+      <h1>Gestión de Permisos</h1>
+      <span class="subtitle">Sistema de Control de Acceso Basado en Roles (RBAC)</span>
+    </div>
+    
+    <div class="actions-section">
+      <button mat-raised-button 
+              color="primary" 
+              (click)="openCreateDialog()"
+              class="create-button">
+        <mat-icon>add</mat-icon>
+        Nuevo Permiso
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-container">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Buscar permisos</mat-label>
+          <input matInput 
+                 [(ngModel)]="filtros.busqueda" 
+                 (input)="onFilterChange()"
+                 placeholder="Recurso, método, descripción...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Módulo</mat-label>
+          <mat-select [(ngModel)]="filtros.modulo" (selectionChange)="onFilterChange()">
+            <mat-option value="">Todos los módulos</mat-option>
+            <mat-option *ngFor="let modulo of modulosDisponibles" [value]="modulo">
+              <mat-icon>{{ getModuloIcon(modulo) }}</mat-icon>
+              {{ modulo }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Método HTTP</mat-label>
+          <mat-select [(ngModel)]="filtros.metodo" (selectionChange)="onFilterChange()">
+            <mat-option value="">Todos los métodos</mat-option>
+            <mat-option *ngFor="let metodo of metodosDisponibles" [value]="metodo">
+              <span [class]="'method-badge method-' + metodo.toLowerCase()">{{ metodo }}</span>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Estado</mat-label>
+          <mat-select [(ngModel)]="filtros.activo" (selectionChange)="onFilterChange()">
+            <mat-option value="">Todos</mat-option>
+            <mat-option [value]="true">Activos</mat-option>
+            <mat-option [value]="false">Inactivos</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-icon-button 
+                (click)="clearFilters()"
+                matTooltip="Limpiar filtros"
+                class="clear-filters-btn">
+          <mat-icon>clear</mat-icon>
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Stats Cards -->
+  <div class="stats-section">
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon total">security</mat-icon>
+          <div class="stat-info">
+            <span class="stat-number">{{ stats.total }}</span>
+            <span class="stat-label">Total Permisos</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon active">check_circle</mat-icon>
+          <div class="stat-info">
+            <span class="stat-number">{{ stats.activos }}</span>
+            <span class="stat-label">Activos</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon modules">folder</mat-icon>
+          <div class="stat-info">
+            <span class="stat-number">{{ stats.modulos }}</span>
+            <span class="stat-label">Módulos</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon inactive">cancel</mat-icon>
+          <div class="stat-info">
+            <span class="stat-number">{{ stats.inactivos }}</span>
+            <span class="stat-label">Inactivos</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando permisos...</p>
+  </div>
+
+  <!-- Error State -->
+  <mat-card *ngIf="error()" class="error-card">
+    <mat-card-content>
+      <div class="error-content">
+        <mat-icon class="error-icon">error</mat-icon>
+        <div class="error-info">
+          <h3>Error al cargar permisos</h3>
+          <p>{{ error() }}</p>
+          <button mat-raised-button color="primary" (click)="loadPermisos()">
+            <mat-icon>refresh</mat-icon>
+            Reintentar
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Permisos por Módulo -->
+  <div *ngIf="!loading() && !error()" class="permisos-content">
+    <div *ngFor="let grupo of permisosAgrupados" class="modulo-section">
+      <mat-expansion-panel 
+        [expanded]="grupo.expanded"
+        (expandedChange)="grupo.expanded = $event"
+        class="modulo-panel">
+        
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <div class="modulo-header">
+              <mat-icon class="modulo-icon">{{ getModuloIcon(grupo.modulo) }}</mat-icon>
+              <span class="modulo-name">{{ grupo.modulo }}</span>
+              <mat-chip class="permisos-count">{{ grupo.permisos.length }}</mat-chip>
+            </div>
+          </mat-panel-title>
+          <mat-panel-description>
+            <div class="modulo-stats">
+              <span class="stat-item">
+                <mat-icon class="small-icon active">check_circle</mat-icon>
+                {{ getPermisosActivosPorModulo(grupo.permisos) }}
+              </span>
+              <span class="stat-item">
+                <mat-icon class="small-icon inactive">cancel</mat-icon>
+                {{ getPermisosInactivosPorModulo(grupo.permisos) }}
+              </span>
+            </div>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div class="permisos-table-container">
+          <table mat-table [dataSource]="grupo.permisos" class="permisos-table">
+            <!-- Recurso Column -->
+            <ng-container matColumnDef="recurso">
+              <th mat-header-cell *matHeaderCellDef>Recurso</th>
+              <td mat-cell *matCellDef="let permiso">
+                <div class="recurso-cell">
+                  <mat-icon class="resource-icon">{{ getRecursoIcon(permiso.recurso) }}</mat-icon>
+                  <span class="resource-name">{{ permiso.recurso }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Método Column -->
+            <ng-container matColumnDef="metodo">
+              <th mat-header-cell *matHeaderCellDef>Método</th>
+              <td mat-cell *matCellDef="let permiso">
+                <span [class]="'method-badge method-' + permiso.metodo.toLowerCase()">
+                  {{ permiso.metodo }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Descripción Column -->
+            <ng-container matColumnDef="descripcion">
+              <th mat-header-cell *matHeaderCellDef>Descripción</th>
+              <td mat-cell *matCellDef="let permiso">
+                <span class="description-text">{{ permiso.descripcion }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Estado Column -->
+            <ng-container matColumnDef="activo">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let permiso">
+                <mat-slide-toggle 
+                  [checked]="permiso.activo"
+                  (change)="togglePermisoStatus(permiso)"
+                  color="primary">
+                </mat-slide-toggle>
+                <span class="status-text" [class.active]="permiso.activo" [class.inactive]="!permiso.activo">
+                  {{ permiso.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Acciones Column -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let permiso">
+                <div class="actions-cell">
+                  <button mat-icon-button 
+                          (click)="openEditDialog(permiso)"
+                          matTooltip="Editar permiso"
+                          class="edit-btn">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  
+                  <button mat-icon-button 
+                          (click)="confirmDelete(permiso)"
+                          matTooltip="Eliminar permiso"
+                          class="delete-btn"
+                          [disabled]="permiso.activo">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                  
+                  <button mat-icon-button 
+                          (click)="viewPermisoDetails(permiso)"
+                          matTooltip="Ver detalles"
+                          class="details-btn">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+      </mat-expansion-panel>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="permisosAgrupados.length === 0" class="empty-state">
+      <mat-icon class="empty-icon">security</mat-icon>
+      <h3>No se encontraron permisos</h3>
+      <p>No hay permisos que coincidan con los filtros aplicados.</p>
+      <button mat-raised-button color="primary" (click)="clearFilters()">
+        <mat-icon>clear</mat-icon>
+        Limpiar Filtros
+      </button>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <mat-paginator 
+    *ngIf="!loading() && !error() && permisosAgrupados.length > 0"
+    [length]="totalPermisos"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="[10, 25, 50, 100]"
+    (page)="onPageChange($event)"
+    showFirstLastButtons
+    class="permisos-paginator">
+  </mat-paginator>
+</div>

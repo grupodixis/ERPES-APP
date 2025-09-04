@@ -339,7 +339,7 @@ export class MonedasComponent implements OnInit {
     if (!campo) return;
 
     const updates: UpdateMonedaDto = {};
-    updates[campo as keyof UpdateMonedaDto] = this.formularioEdit.get(campo)?.value;
+    (updates as any)[campo] = this.formularioEdit.get(campo)?.value;
 
     this.updatingMonedas.update(set => {
       set.add(moneda.id);

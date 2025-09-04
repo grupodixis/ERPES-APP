@@ -1,15 +1,62 @@
+// Global styles for mat-expansion-panel-header
+::ng-deep .mat-expansion-panel-header {
+  outline: none !important;
+  border: none !important;
+  
+  &:focus, &.cdk-keyboard-focused, &.cdk-program-focused {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
+
 // App Container
 .app-container {
   height: 100vh;
   background-color: var(--mat-card-background-color);
   overflow: hidden;
+  
+  // Variables CSS para el ancho del sidebar
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 64px;
+  
+  // Estado normal del sidebar
+  &:not(.sidebar-collapsed) {
+    --current-sidebar-width: var(--sidebar-width);
+  }
+  
+  // Cuando el sidebar está colapsado
+  &.sidebar-collapsed {
+    --current-sidebar-width: var(--sidebar-collapsed-width);
+    
+    .app-content {
+      // El contenido se expande para usar todo el espacio disponible
+      width: 100%;
+      max-width: 100%;
+      margin-left: 0 !important; // Forzar margin-left a 0 cuando está colapsado
+    }
+    
+    .app-toolbar {
+      // El toolbar se expande para usar todo el espacio disponible
+      width: 100%;
+      max-width: 100%;
+    }
+  }
+  
+  // Estado normal del sidebar (expandido)
+  &:not(.sidebar-collapsed) {
+    .app-content {
+      margin-left: 0 !important; // Asegurar que no hay margin cuando está expandido
+    }
+  }
 }
 
 // Sidebar Styles
 .app-sidenav {
   width: fit-content;
   min-width: 64px;
-  max-height: 100vh;
+  max-height: calc(100vh - 64px); // Restar altura del toolbar
+  margin-top: 64px; // Compensar altura del toolbar fijo
   padding: 0 5px;
   background-color: var(--sidebar-background);
   border-right: 1px solid var(--sidebar-border);
@@ -17,6 +64,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  z-index: 999; // Asegurar que esté por encima del contenido pero por debajo del toolbar
   
   &.mat-drawer-side {
     border-right: 1px solid var(--sidebar-border);
@@ -154,6 +202,7 @@
     height: 40px;
     width: fit-content;
     max-width: calc(100% - 10px);
+    z-index: 1; // Asegurar que los elementos del menú estén correctamente posicionados
     
     &::before {
       content: '';
@@ -232,6 +281,18 @@
     border-radius: 12px;
     background: transparent;
     box-shadow: none;
+    width: fit-content;
+    max-width: calc(100% - 24px);
+    
+    // Ensure panel width matches header width
+    .mat-expansion-panel-content {
+      width: inherit;
+    }
+    
+    .mat-expansion-panel-body {
+      width: inherit;
+      padding: 0;
+    }
     
     // Hide arrow indicator completely
     .mat-expansion-indicator {
@@ -260,9 +321,42 @@
       padding: 0;
       height: 40px;
       border-radius: 12px;
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      margin: 1px 1px;
+      width: fit-content;
+      max-width: calc(100% - 10px);
+      outline: none !important;
+      border: none !important;
       
-      &:hover { background-color: var(--sidebar-hover); }
+      &::before {
+        display: none;
+      }
+      
+      &:hover {
+        background-color: var(--sidebar-hover);
+        transform: translateX(4px);
+        
+        .nav-icon {
+          transform: scale(1.1);
+        }
+      }
+      
+      &.active {
+        background-color: var(--sidebar-active);
+        transform: translateX(4px);
+        
+        .nav-icon {
+          transform: scale(1.1);
+        }
+      }
+      
+      &:focus, &.mat-expanded {
+        outline: none !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
       
       .mat-expansion-panel-header-title { 
         margin: 0;
@@ -284,15 +378,19 @@
           height: 20px;
           color: var(--sidebar-text);
           flex-shrink: 0;
+          transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
         
         .nav-text {
           font-size: 14px;
           font-weight: 500;
-          color: var(--sidebar-text);
+          color: var(--sidebar-text) !important;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+          line-height: 1.2;
+          transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
       }
     }
@@ -301,6 +399,8 @@
     
     .nav-subitems {
       padding-left: 20px;
+      width: fit-content;
+      max-width: 100%;
       
       .nav-subitem {
         margin: 1px 0;
@@ -310,6 +410,8 @@
         width: fit-content;
         max-width: calc(100% - 10px);
         transition: all 0.3s ease;
+        position: relative;
+        z-index: 1; // Asegurar que los enlaces estén por encima de otros elementos
         
         &:hover {
           background-color: var(--sidebar-hover);
@@ -426,18 +528,25 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  margin-left: 0 !important; // Sobrescribir el margin-left: auto aplicado por Angular Material
 }
 
 // Toolbar
 .app-toolbar {
+  position: relative;
   flex-shrink: 0;
   z-index: 1000;
   background-color: var(--mat-raised-button-background-color);
   color: var(--mat-raised-button-text-color);
-  box-shadow: var(--shadow-1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   padding: 0 24px;
   height: 64px;
   border-bottom: 1px solid var(--sidebar-border);
+  width: 100%;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
   
   .toolbar-left {
     display: flex;
@@ -458,6 +567,24 @@
       align-items: center;
       gap: 12px;
       transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+      text-decoration: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin: -8px -12px;
+      cursor: pointer;
+      
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: scale(1.02);
+        
+        .logo-icon {
+          transform: rotate(5deg);
+        }
+      }
+      
+      &:active {
+        transform: scale(0.98);
+      }
       
       .logo-icon {
         font-size: 32px;
@@ -537,9 +664,12 @@
 .page-content {
   flex: 1;
   padding: 32px;
+  padding-top: 140px; // 64px del toolbar + 76px de padding adicional
   background-color: var(--mat-card-background-color);
   overflow-y: auto;
   overflow-x: hidden;
+  width: 100%;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
   
   // Estilos específicos para la página de login
   &.login-page {
@@ -585,6 +715,15 @@
   .page-content {
     padding: 24px;
   }
+  
+  // Asegurar que el contenido se ajuste correctamente en tablets
+  .app-container.sidebar-collapsed {
+    .app-content,
+    .app-toolbar {
+      width: 100%;
+      max-width: 100%;
+    }
+  }
 }
 
 @media (max-width: 768px) {
@@ -608,6 +747,18 @@
   .sidenav-header {
     padding: 16px 12px;
     min-height: 72px;
+  }
+  
+  // En móviles, asegurar que el contenido use todo el ancho disponible
+  .app-container {
+    &.sidebar-collapsed,
+    &:not(.sidebar-collapsed) {
+      .app-content,
+      .app-toolbar {
+        width: 100%;
+        max-width: 100%;
+      }
+    }
   }
 }
 
@@ -657,6 +808,33 @@
   transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
+// Sobrescribir estilos específicos de Angular Material para mat-sidenav-content
+::ng-deep .mat-sidenav-content {
+  margin-left: 0 !important;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+
+// Asegurar que el contenido del sidenav se adapte correctamente
+.app-container {
+  ::ng-deep .mat-sidenav-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  &.sidebar-collapsed {
+    ::ng-deep .mat-sidenav-content {
+      margin-left: 0 !important;
+    }
+  }
+  
+  &:not(.sidebar-collapsed) {
+    ::ng-deep .mat-sidenav-content {
+      margin-left: 0 !important;
+    }
+  }
+}
+
 // Smooth scrolling
 html {
   scroll-behavior: smooth;
@@ -669,9 +847,12 @@ html {
 }
 
 .sidenav-toggle:focus-visible {
-  outline: 2px solid var(--status-info);
-  outline-offset: 2px;
-    
+  outline: none;
+}
+
+// Responsive styles
+@media (max-width: 768px) {
+  .app-toolbar {
     .toolbar-left {
       gap: 12px;
       
@@ -710,7 +891,7 @@ html {
   .page-content {
     padding: 16px;
   }
-
+}
 
 @media (max-width: 480px) {
   .app-toolbar {
@@ -825,4 +1006,121 @@ html {
   @media (min-width: 1025px) {
     display: none !important;
   }
+}
+
+// Fun animated tooltips
+::ng-deep .fun-tooltip {
+  background-color: #424242 !important;
+  color: white !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  border: none !important;
+  
+  &::after {
+    border-right-color: #424242 !important;
+  }
+}
+
+::ng-deep .mat-mdc-tooltip {
+  --mdc-plain-tooltip-container-color: #424242 !important;
+  --mdc-plain-tooltip-supporting-text-color: white !important;
+  --mat-tooltip-delay: 300ms !important;
+  --mat-tooltip-hide-delay: 100ms !important;
+}
+
+::ng-deep .mat-tooltip {
+  --mat-tooltip-delay: 300ms !important;
+  --mat-tooltip-hide-delay: 100ms !important;
+}
+
+::ng-deep .cdk-overlay-pane .mat-mdc-tooltip {
+  --mat-tooltip-hide-delay: 100ms !important;
+}
+
+::ng-deep .fun-tooltip.mat-mdc-tooltip {
+  --mat-tooltip-hide-delay: 100ms !important;
+}
+
+::ng-deep .mat-tooltip-panel {
+   --mat-tooltip-hide-delay: 100ms !important;
+ }
+
+ // Colores específicos para cada tooltip
+ ::ng-deep .tooltip-maestros {
+   background-color: #2196F3 !important; // Azul
+   color: white !important;
+ }
+
+ ::ng-deep .tooltip-produccion {
+   background-color: #FF9800 !important; // Naranja
+   color: white !important;
+ }
+
+ ::ng-deep .tooltip-compras {
+   background-color: #4CAF50 !important; // Verde
+   color: white !important;
+ }
+
+ ::ng-deep .tooltip-ventas {
+   background-color: #E91E63 !important; // Rosa
+   color: white !important;
+ }
+
+ ::ng-deep .tooltip-finanzas {
+   background-color: #9C27B0 !important; // Púrpura
+   color: white !important;
+ }
+
+ ::ng-deep .tooltip-logistica {
+   background-color: #607D8B !important; // Azul gris
+   color: white !important;
+ }
+
+ ::ng-deep .tooltip-contabilidad {
+   background-color: #795548 !important; // Marrón
+   color: white !important;
+ }
+
+ ::ng-deep .tooltip-configuracion {
+   background-color: #FF5722 !important; // Rojo naranja
+   color: white !important;
+ }
+
+ ::ng-deep .tooltip-calidad {
+   background-color: #009688 !important; // Verde azulado
+   color: white !important;
+ }
+
+ ::ng-deep .tooltip-rrhh {
+   background-color: #3F51B5 !important; // Índigo
+   color: white !important;
+ }
+
+@keyframes tooltipBounce {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateX(-10px);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05) translateX(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+  }
+}
+
+// Hover effect for tooltip triggers when collapsed
+.app-sidenav.collapsed .nav-group-header:hover {
+  background-color: rgba(33, 150, 243, 0.1) !important;
+  transform: translateX(2px);
+  transition: all 0.2s ease-in-out;
+}
+
+.app-sidenav.collapsed .nav-group-header {
+  transition: all 0.2s ease-in-out;
 }

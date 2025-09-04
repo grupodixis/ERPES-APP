@@ -1,0 +1,279 @@
+.operarios-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+}
+
+.filters-card {
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+
+  .mat-card-header {
+    background-color: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+    padding: 16px;
+  }
+
+  .filters-form {
+    .filter-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+
+      mat-form-field {
+        min-width: 200px;
+        flex: 1;
+      }
+
+      button {
+        height: 40px;
+        margin-top: 8px;
+      }
+    }
+  }
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+
+  .stat-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 8px;
+
+      .stat-icon {
+        font-size: 2.5rem;
+        width: 2.5rem;
+        height: 2.5rem;
+        color: #6c757d;
+
+        &.active {
+          color: #28a745;
+        }
+
+        &.pending {
+          color: #ffc107;
+        }
+      }
+
+      .stat-info {
+        .stat-number {
+          font-size: 2rem;
+          font-weight: bold;
+          color: #495057;
+          line-height: 1;
+        }
+
+        .stat-label {
+          font-size: 0.9rem;
+          color: #6c757d;
+          margin-top: 4px;
+        }
+      }
+    }
+  }
+}
+
+.table-card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+
+  .operarios-table {
+    width: 100%;
+
+    .mat-header-cell {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      color: #495057;
+    }
+
+    .mat-row {
+      &:hover {
+        background-color: #f8f9fa;
+      }
+    }
+
+    .persona-info {
+      .persona-id {
+        font-weight: 500;
+        color: #495057;
+      }
+
+      .email {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 2px;
+      }
+    }
+
+    .no-category {
+      color: #6c757d;
+      font-style: italic;
+    }
+
+    .active-chip {
+      background-color: #d4edda !important;
+      color: #155724 !important;
+    }
+
+    .inactive-chip {
+      background-color: #f8d7da !important;
+      color: #721c24 !important;
+    }
+  }
+}
+
+// Dialog styles
+.operario-form {
+  min-width: 600px;
+  max-width: 800px;
+
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    mat-form-field {
+      flex: 1;
+    }
+
+    mat-checkbox {
+      align-self: center;
+      margin-top: 8px;
+    }
+  }
+}
+
+.mat-dialog-content {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .operarios-container {
+    padding: 10px;
+  }
+
+  .filters-form .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+
+    mat-form-field {
+      min-width: unset;
+    }
+  }
+
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .operario-form {
+    min-width: unset;
+    width: 100%;
+
+    .form-row {
+      flex-direction: column;
+      gap: 8px;
+    }
+  }
+
+  .operarios-table {
+    .mat-column-persona,
+    .mat-column-categoria {
+      display: none;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    .page-title {
+      font-size: 1.2rem;
+    }
+  }
+
+  .operarios-table {
+    .mat-column-fechaAlta,
+    .mat-column-costeHora {
+      display: none;
+    }
+  }
+}
+
+// Material Design enhancements
+.mat-raised-button {
+  border-radius: 6px;
+  text-transform: none;
+  font-weight: 500;
+}
+
+.mat-icon-button {
+  border-radius: 50%;
+}
+
+.mat-form-field {
+  .mat-form-field-outline {
+    border-radius: 6px;
+  }
+}
+
+.mat-card {
+  border-radius: 8px;
+}
+
+// Custom scrollbar
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

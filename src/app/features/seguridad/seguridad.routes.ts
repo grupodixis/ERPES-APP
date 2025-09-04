@@ -12,6 +12,15 @@ export const SEGURIDAD_ROUTES: Routes = [
     component: UsuariosComponent
   },
   {
+    path: 'permisos',
+    loadChildren: () => import('./permisos/permisos.module').then(m => m.PermisosModule),
+    data: {
+      breadcrumb: 'Permisos',
+      title: 'Gestión de Permisos',
+      description: 'Sistema de Control de Acceso Basado en Roles (RBAC)'
+    }
+  },
+  {
     path: 'roles-permisos',
     loadChildren: () => import('./roles-permisos/roles-permisos.routes').then(m => m.ROLES_PERMISOS_ROUTES),
     data: {
@@ -22,10 +31,6 @@ export const SEGURIDAD_ROUTES: Routes = [
   // {
   //   path: 'roles',
   //   component: RolesComponent
-  // },
-  // {
-  //   path: 'permisos',
-  //   component: PermisosComponent
   // },
   // {
   //   path: 'auditoria',

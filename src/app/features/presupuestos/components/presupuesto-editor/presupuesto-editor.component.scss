@@ -6,7 +6,7 @@
   flex-direction: column;
   gap: 24px;
   min-height: calc(100vh - 120px);
-  background-color: #f5f5f5;
+  background-color: #ffffff;
 }
 
 // ===== TOOLBAR =====
@@ -47,6 +47,34 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      min-width: auto;
+      
+      // Ocultar texto en todos los botones, mostrar solo iconos
+      span:not(.mat-mdc-button-touch-target) {
+        display: none !important;
+      }
+      
+      // Asegurar que los iconos se mantengan visibles
+      mat-icon {
+        margin: 0 !important;
+        display: inline-flex !important;
+      }
+      
+      // Ajustar padding para botones solo con icono
+      &.mat-mdc-button {
+        padding: 8px !important;
+        min-width: 40px;
+      }
+      
+      &.mat-mdc-raised-button {
+        padding: 8px !important;
+        min-width: 40px;
+      }
+      
+      // Mantener tooltips para UX
+      &[matTooltip] {
+        cursor: pointer;
+      }
     }
 
     .inline-spinner {
@@ -411,11 +439,11 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      color: #000000; // Texto en negro
+      color: #212529; // Color más suave que negro puro para mejor contraste
       font-weight: 500; // Peso medio para mejor legibilidad
 
       &.total-amount {
-        color: #000000; // También en negro para consistencia
+        color: #198754; // Verde para totales, mejor contraste
         font-weight: 600;
       }
     }
@@ -1143,6 +1171,67 @@ mat-form-field {
   }
 }
 
+// Responsive para tablets
+@media (max-width: 992px) {
+  .editor-toolbar {
+    .toolbar-right {
+      button {
+        // En tablets, mostrar texto abreviado
+        span:not(.mat-mdc-button-touch-target) {
+          display: none;
+        }
+        
+        mat-icon {
+          margin: 0;
+        }
+        
+        // Mantener tooltips visibles para mejor UX
+        &[matTooltip] {
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}
+
+// Responsive para pantallas menores a 800px - Solo iconos
+@media (max-width: 800px) {
+  .editor-toolbar {
+    .toolbar-right {
+      button {
+        min-width: auto;
+        
+        // Ocultar completamente el texto, mantener solo iconos
+        span:not(.mat-mdc-button-touch-target) {
+          display: none !important;
+        }
+        
+        // Asegurar que los iconos se mantengan visibles
+        mat-icon {
+          margin: 0 !important;
+          display: inline-flex !important;
+        }
+        
+        // Ajustar padding para botones solo con icono
+        &.mat-mdc-button {
+          padding: 8px !important;
+          min-width: 40px;
+        }
+        
+        &.mat-mdc-raised-button {
+          padding: 8px !important;
+          min-width: 40px;
+        }
+        
+        // Mantener tooltips para UX
+        &[matTooltip] {
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}
+
 @media (max-width: 768px) {
   .editor-toolbar {
     padding: 0 8px;
@@ -1162,9 +1251,24 @@ mat-form-field {
       button {
         min-width: auto;
         padding: 0 8px;
-
-        span {
+        
+        // Ocultar texto en botones, mantener solo iconos
+        span:not(.mat-mdc-button-touch-target) {
           display: none;
+        }
+        
+        // Asegurar que los iconos se mantengan visibles
+        mat-icon {
+          margin: 0;
+        }
+        
+        // Ajustar padding para botones solo con icono
+        &.mat-mdc-button {
+          padding: 0 12px;
+        }
+        
+        &.mat-mdc-raised-button {
+          padding: 0 16px;
         }
       }
     }
@@ -1323,16 +1427,16 @@ mat-form-field {
 // ===== MODO OSCURO =====
 @media (prefers-color-scheme: dark) {
   .presupuesto-editor-container {
-    background-color: #121212; // Darker background for better contrast
+    background-color: #ffffff; // Mantener fondo blanco incluso en modo oscuro
   }
 
   .editor-toolbar {
-    background-color: #1e1e1e; // Darker background
+    background-color: #ffffff; // White background
     border-bottom-color: #424242; // Lighter border
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); // Enhanced shadow
 
     .toolbar-title {
-      color: #ffffff; // Pure white for maximum contrast
+      color: #212529; // Dark gray text for better contrast
     }
   }
 

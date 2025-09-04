@@ -1,0 +1,430 @@
+<div class="cuentas-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon class="title-icon">account_tree</mat-icon>
+          Plan de Cuentas Contables
+        </h1>
+        <p class="page-description">
+          Gestión del catálogo de cuentas contables y su estructura jerárquica
+        </p>
+      </div>
+      <div class="header-actions">
+        <button mat-stroked-button (click)="toggleViewMode()" 
+                [matTooltip]="viewMode() === 'tree' ? 'Vista de tabla' : 'Vista de árbol'">
+          <mat-icon>{{ viewMode() === 'tree' ? 'table_view' : 'account_tree' }}</mat-icon>
+          {{ viewMode() === 'tree' ? 'Tabla' : 'Árbol' }}
+        </button>
+        <button mat-stroked-button (click)="importCuentas()" matTooltip="Importar cuentas">
+          <mat-icon>upload</mat-icon>
+          Importar
+        </button>
+        <button mat-stroked-button (click)="exportCuentas()" matTooltip="Exportar cuentas">
+          <mat-icon>download</mat-icon>
+          Exportar
+        </button>
+        <button mat-raised-button color="primary" (click)="createCuenta()">
+          <mat-icon>add</mat-icon>
+          Nueva Cuenta
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <mat-card class="filters-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>filter_list</mat-icon>
+        Filtros de Búsqueda
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="filters-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Código</mat-label>
+          <input matInput [formControl]="codigoFilter" placeholder="Buscar por código...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre</mat-label>
+          <input matInput [formControl]="nombreFilter" placeholder="Buscar por nombre...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo</mat-label>
+          <mat-select [formControl]="tipoFilter">
+            <mat-option value="">Todos</mat-option>
+            <mat-option [value]="TipoCuenta.ACTIVO">{{ getTipoLabel(TipoCuenta.ACTIVO) }}</mat-option>
+            <mat-option [value]="TipoCuenta.PASIVO">{{ getTipoLabel(TipoCuenta.PASIVO) }}</mat-option>
+            <mat-option [value]="TipoCuenta.PATRIMONIO">{{ getTipoLabel(TipoCuenta.PATRIMONIO) }}</mat-option>
+            <mat-option [value]="TipoCuenta.INGRESOS">{{ getTipoLabel(TipoCuenta.INGRESOS) }}</mat-option>
+              <mat-option [value]="TipoCuenta.GASTOS">{{ getTipoLabel(TipoCuenta.GASTOS) }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Naturaleza</mat-label>
+          <mat-select [formControl]="naturalezaFilter">
+            <mat-option value="">Todas</mat-option>
+            <mat-option [value]="NaturalezaCuenta.DEUDORA">{{ getNaturalezaLabel(NaturalezaCuenta.DEUDORA) }}</mat-option>
+            <mat-option [value]="NaturalezaCuenta.ACREEDORA">{{ getNaturalezaLabel(NaturalezaCuenta.ACREEDORA) }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Nivel</mat-label>
+          <mat-select [formControl]="nivelFilter">
+            <mat-option [value]="null">Todos</mat-option>
+            <mat-option [value]="1">Nivel 1</mat-option>
+            <mat-option [value]="2">Nivel 2</mat-option>
+            <mat-option [value]="3">Nivel 3</mat-option>
+            <mat-option [value]="4">Nivel 4</mat-option>
+            <mat-option [value]="5">Nivel 5</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Estado</mat-label>
+          <mat-select [formControl]="activoFilter">
+            <mat-option value="">Todos</mat-option>
+            <mat-option value="true">Activos</mat-option>
+            <mat-option value="false">Inactivos</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="filter-actions">
+          <button mat-stroked-button (click)="clearFilters()" matTooltip="Limpiar filtros">
+            <mat-icon>clear</mat-icon>
+            Limpiar
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Estadísticas -->
+  <div class="stats-grid">
+    <mat-card class="stat-card">
+      <mat-card-content class="stat-content">
+        <div class="stat-icon primary">
+          <mat-icon>account_tree</mat-icon>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ estadisticas().total }}</div>
+          <div class="stat-label">Total Cuentas</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content class="stat-content">
+        <div class="stat-icon success">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ estadisticas().activas }}</div>
+          <div class="stat-label">Cuentas Activas</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content class="stat-content">
+        <div class="stat-icon warning">
+          <mat-icon>account_balance_wallet</mat-icon>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ estadisticas().conSaldo }}</div>
+          <div class="stat-label">Con Saldo</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content class="stat-content">
+        <div class="stat-icon accent">
+          <mat-icon>pie_chart</mat-icon>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ estadisticas().porTipo.activo }}</div>
+          <div class="stat-label">Cuentas Activo</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Loading State -->
+  <mat-card *ngIf="loading()" class="loading-card">
+    <mat-card-content class="loading-content">
+      <mat-spinner diameter="50"></mat-spinner>
+      <h3>Cargando cuentas contables...</h3>
+      <p>Por favor espere mientras se cargan los datos</p>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Error State -->
+  <mat-card *ngIf="error() && !loading()" class="error-card">
+    <mat-card-content class="error-content">
+      <mat-icon class="error-icon">error</mat-icon>
+      <h3>Error al cargar datos</h3>
+      <p>{{ error() }}</p>
+      <button mat-raised-button color="primary" (click)="loadCuentas()">
+        <mat-icon>refresh</mat-icon>
+        Reintentar
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Empty State -->
+  <mat-card *ngIf="!loading() && !error() && cuentas().length === 0" class="empty-card">
+    <mat-card-content class="empty-content">
+      <mat-icon class="empty-icon">account_tree</mat-icon>
+      <h3>No hay cuentas contables</h3>
+      <p>Comience creando su primera cuenta contable</p>
+      <button mat-raised-button color="primary" (click)="createCuenta()">
+        <mat-icon>add</mat-icon>
+        Crear Primera Cuenta
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Vista de Árbol -->
+  <mat-card *ngIf="!loading() && !error() && cuentas().length > 0 && viewMode() === 'tree'" class="tree-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>account_tree</mat-icon>
+        Estructura Jerárquica
+      </mat-card-title>
+      <div class="tree-actions">
+        <span class="results-count">{{ filteredCuentas().length }} cuentas</span>
+        <button mat-icon-button (click)="treeControl.expandAll()" matTooltip="Expandir todo">
+          <mat-icon>unfold_more</mat-icon>
+        </button>
+        <button mat-icon-button (click)="treeControl.collapseAll()" matTooltip="Contraer todo">
+          <mat-icon>unfold_less</mat-icon>
+        </button>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="tree-container" cdkDropList (cdkDropListDropped)="onTreeDrop($event)">
+        <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+          <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding cdkDrag>
+            <div class="tree-node-content">
+              <div class="node-info">
+                <span class="node-codigo">{{ node.cuenta.codigo }}</span>
+                <span class="node-nombre">{{ node.cuenta.nombre }}</span>
+                <mat-chip-set>
+                  <mat-chip [color]="node.cuenta.activa ? 'primary' : 'warn'" selected>
+          {{ node.cuenta.activa ? 'Activo' : 'Inactivo' }}
+                  </mat-chip>
+                  <mat-chip color="accent" selected>
+                    {{ getTipoLabel(node.cuenta.tipo) }}
+                  </mat-chip>
+                </mat-chip-set>
+              </div>
+              <div class="node-saldo">
+                {{ formatSaldo(node.cuenta.saldoActual) }}
+              </div>
+              <div class="node-actions">
+                <button mat-icon-button [matMenuTriggerFor]="nodeMenu" (click)="selectCuenta(node.cuenta)">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+              </div>
+            </div>
+          </mat-tree-node>
+
+          <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding cdkDrag>
+            <div class="tree-node-content expandable">
+              <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.cuenta.nombre">
+                <mat-icon class="mat-icon-rtl-mirror">
+                  {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+                </mat-icon>
+              </button>
+              <div class="node-info">
+                <span class="node-codigo">{{ node.cuenta.codigo }}</span>
+                <span class="node-nombre">{{ node.cuenta.nombre }}</span>
+                <mat-chip-set>
+                  <mat-chip [color]="node.cuenta.activa ? 'primary' : 'warn'" selected>
+          {{ node.cuenta.activa ? 'Activo' : 'Inactivo' }}
+                  </mat-chip>
+                  <mat-chip color="accent" selected>
+                    {{ getTipoLabel(node.cuenta.tipo) }}
+                  </mat-chip>
+                </mat-chip-set>
+              </div>
+              <div class="node-saldo">
+                {{ formatSaldo(node.cuenta.saldoActual) }}
+              </div>
+              <div class="node-actions">
+                <button mat-icon-button [matMenuTriggerFor]="nodeMenu" (click)="selectCuenta(node.cuenta)">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+              </div>
+            </div>
+          </mat-tree-node>
+        </mat-tree>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Vista de Tabla -->
+  <mat-card *ngIf="!loading() && !error() && cuentas().length > 0 && viewMode() === 'table'" class="table-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>table_view</mat-icon>
+        Lista de Cuentas
+      </mat-card-title>
+      <div class="table-actions">
+        <span class="results-count">{{ filteredCuentas().length }} cuentas encontradas</span>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="paginatedCuentas()" matSort 
+               (matSortChange)="onSortChange($event)" class="cuentas-table">
+          
+          <!-- Columna Código -->
+          <ng-container matColumnDef="codigo">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Código</th>
+            <td mat-cell *matCellDef="let cuenta" class="codigo-cell">
+              <span class="codigo-text">{{ cuenta.codigo }}</span>
+              <mat-icon *ngIf="!cuenta.activa" class="inactive-icon" matTooltip="Cuenta inactiva">visibility_off</mat-icon>
+            </td>
+          </ng-container>
+
+          <!-- Columna Nombre -->
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
+            <td mat-cell *matCellDef="let cuenta" class="nombre-cell">
+              <div class="nombre-content">
+                <span class="indentation">{{ getCuentaIndentation(cuenta.nivel) }}</span>
+                <span class="nombre-principal">{{ cuenta.nombre }}</span>
+                <div *ngIf="cuenta.descripcion" class="descripcion">{{ cuenta.descripcion }}</div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Columna Tipo -->
+          <ng-container matColumnDef="tipo">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
+            <td mat-cell *matCellDef="let cuenta">
+              <mat-chip color="accent" selected>
+                {{ getTipoLabel(cuenta.tipo) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Columna Naturaleza -->
+          <ng-container matColumnDef="naturaleza">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Naturaleza</th>
+            <td mat-cell *matCellDef="let cuenta">
+              <mat-chip [color]="cuenta.naturaleza === NaturalezaCuenta.DEUDORA ? 'primary' : 'warn'" selected>
+                {{ getNaturalezaLabel(cuenta.naturaleza) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Columna Nivel -->
+          <ng-container matColumnDef="nivel">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Nivel</th>
+            <td mat-cell *matCellDef="let cuenta" class="text-center">
+              <mat-chip color="primary" selected>
+                {{ cuenta.nivel }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Columna Saldo -->
+          <ng-container matColumnDef="saldo">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Saldo Actual</th>
+            <td mat-cell *matCellDef="let cuenta" class="saldo-cell">
+              <span [class]="cuenta.saldoActual >= 0 ? 'saldo-positivo' : 'saldo-negativo'">
+                {{ formatSaldo(cuenta.saldoActual) }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Columna Estado -->
+          <ng-container matColumnDef="activo">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let cuenta" class="text-center">
+              <mat-chip [color]="cuenta.activa ? 'primary' : 'warn'" selected>
+          {{ cuenta.activa ? 'Activo' : 'Inactivo' }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Columna Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let cuenta" class="actions-cell">
+              <button mat-icon-button [matMenuTriggerFor]="actionMenu" (click)="selectCuenta(cuenta)">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <mat-paginator 
+        [length]="totalItems()" 
+        [pageSize]="pageSize()" 
+        [pageIndex]="pageIndex()"
+        [pageSizeOptions]="[25, 50, 100, 200]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<!-- Menú de acciones para nodos del árbol -->
+<mat-menu #nodeMenu="matMenu">
+  <button mat-menu-item (click)="editCuenta(selectedCuenta()!)" *ngIf="selectedCuenta()">
+    <mat-icon>edit</mat-icon>
+    <span>Editar</span>
+  </button>
+  <button mat-menu-item (click)="duplicateCuenta(selectedCuenta()!)" *ngIf="selectedCuenta()">
+    <mat-icon>content_copy</mat-icon>
+    <span>Duplicar</span>
+  </button>
+  <button mat-menu-item (click)="toggleActivoCuenta(selectedCuenta()!)" *ngIf="selectedCuenta()">
+    <mat-icon>{{ selectedCuenta()!.activa ? 'visibility_off' : 'visibility' }}</mat-icon>
+    <span>{{ selectedCuenta()!.activa ? 'Desactivar' : 'Activar' }}</span>
+  </button>
+  <mat-divider></mat-divider>
+  <button mat-menu-item (click)="deleteCuenta(selectedCuenta()!)" *ngIf="selectedCuenta()" class="danger-action">
+    <mat-icon>delete</mat-icon>
+    <span>Eliminar</span>
+  </button>
+</mat-menu>
+
+<!-- Menú de acciones para tabla -->
+<mat-menu #actionMenu="matMenu">
+  <button mat-menu-item (click)="editCuenta(selectedCuenta()!)" *ngIf="selectedCuenta()">
+    <mat-icon>edit</mat-icon>
+    <span>Editar</span>
+  </button>
+  <button mat-menu-item (click)="duplicateCuenta(selectedCuenta()!)" *ngIf="selectedCuenta()">
+    <mat-icon>content_copy</mat-icon>
+    <span>Duplicar</span>
+  </button>
+  <button mat-menu-item (click)="toggleActivoCuenta(selectedCuenta()!)" *ngIf="selectedCuenta()">
+    <mat-icon>{{ selectedCuenta()!.activa ? 'visibility_off' : 'visibility' }}</mat-icon>
+    <span>{{ selectedCuenta()!.activa ? 'Desactivar' : 'Activar' }}</span>
+  </button>
+  <mat-divider></mat-divider>
+  <button mat-menu-item (click)="deleteCuenta(selectedCuenta()!)" *ngIf="selectedCuenta()" class="danger-action">
+    <mat-icon>delete</mat-icon>
+    <span>Eliminar</span>
+  </button>
+</mat-menu>

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostListener, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, OnInit, inject, signal, computed, effect, Injector } from '@angular/core';
 
 import { Router, RouterOutlet, RouterModule } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -46,11 +46,18 @@ export class AppComponent implements OnInit {
   private configService = inject(AppConfigService);
   private tenantService = inject(TenantService);
   private toastService = inject(ToastService);
+  private injector = inject(Injector);
 
   // Sidebar properties
   sidenavMode = signal<'side' | 'over'>('side');
   sidenavOpened = signal(true);
   sidenavCollapsed = signal(false);
+  
+  // Computed signal to check if any menu is expanded
+  hasExpandedMenu = computed(() => {
+    const expanded = this.menuExpanded();
+    return Object.values(expanded).some(isExpanded => isExpanded);
+  });
   
   // Menu expansion states
   menuExpanded = signal({
@@ -63,9 +70,7 @@ export class AppComponent implements OnInit {
     contabilidad: false,
     configuracion: false,
     calidad: false,
-    rrhh: false,
-    cobros: false,
-    pagos: false
+    rrhh: false
   });
 
   // Theme properties
@@ -76,6 +81,15 @@ export class AppComponent implements OnInit {
   // Responsive breakpoints
   private readonly MOBILE_BREAKPOINT = 768;
   private readonly TABLET_BREAKPOINT = 1024;
+
+  constructor() {
+    // Effect to keep sidenav open when any menu is expanded
+    effect(() => {
+      if (this.hasExpandedMenu() && this.sidenavMode() === 'side') {
+        this.sidenavCollapsed.set(false);
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.checkScreenSize();
@@ -107,7 +121,27 @@ export class AppComponent implements OnInit {
     if (this.sidenavMode() === 'over') {
       this.sidenavOpened.update(opened => !opened);
     } else {
-      this.sidenavCollapsed.update(collapsed => !collapsed);
+      this.sidenavCollapsed.update(collapsed => {
+        const newCollapsed = !collapsed;
+        
+        // Si se está colapsando el sidebar, cerrar todos los menús
+        if (newCollapsed) {
+          this.menuExpanded.set({
+            produccion: false,
+            maestros: false,
+            compras: false,
+            ventas: false,
+            finanzas: false,
+            logistica: false,
+            contabilidad: false,
+            configuracion: false,
+            calidad: false,
+            rrhh: false
+          });
+        }
+        
+        return newCollapsed;
+      });
     }
   }
 
@@ -120,6 +154,27 @@ export class AppComponent implements OnInit {
   // Menu expansion toggles
   toggleMenu(menuKey: keyof ReturnType<typeof this.menuExpanded>): void {
     this.menuExpanded.update(current => {
+      const isCurrentlyOpen = (current as any)[menuKey];
+      
+      // Si el menú está abierto y se hace clic para cerrarlo, cerrar todos los menús
+      if (isCurrentlyOpen) {
+        return {
+          produccion: false,
+          maestros: false,
+          compras: false,
+          ventas: false,
+          finanzas: false,
+          logistica: false,
+          contabilidad: false,
+          configuracion: false,
+          calidad: false,
+          rrhh: false,
+          cobros: false,
+          pagos: false
+        };
+      }
+      
+      // Si el menú está cerrado, cerrar todos los demás y abrir solo este
       const newState = {
         produccion: false,
         maestros: false,
@@ -134,7 +189,7 @@ export class AppComponent implements OnInit {
         cobros: false,
         pagos: false
       };
-      (newState as any)[menuKey] = !(current as any)[menuKey];
+      (newState as any)[menuKey] = true;
       return newState;
     });
   }
@@ -179,13 +234,7 @@ export class AppComponent implements OnInit {
     this.toggleMenu('rrhh');
   }
 
-  toggleCobros(): void {
-    this.toggleMenu('cobros');
-  }
 
-  togglePagos(): void {
-    this.toggleMenu('pagos');
-  }
 
   private loadTheme(): void {
     const savedTheme = localStorage.getItem('theme');
@@ -244,14 +293,12 @@ export class AppComponent implements OnInit {
       '/pedidos-proveedores': 'Pedidos Proveedores',
       '/entradas': 'Entradas',
       '/facturas-compra': 'Facturas Compra',
-      '/pagos': 'Pagos',
       '/compras': 'Compras',
       // Ventas
       '/presupuestos': 'Presupuestos',
       '/pedidos-cliente': 'Pedidos Cliente',
       '/albaranes': 'Albaranes',
       '/facturas': 'Facturas',
-      '/cobros': 'Cobros',
       '/certificaciones': 'Certificaciones',
       '/ventas': 'Ventas',
       // Finanzas
@@ -325,5 +372,30 @@ export class AppComponent implements OnInit {
     this.authStore.logout();
     this.router.navigate(['/login']);
     this.toastService.showSuccess('Sesión cerrada correctamente');
+  }
+
+  // Método para manejar la navegación y auto-colapso del sidebar
+  onMenuItemClick(): void {
+    // En modo móvil (over), cerrar completamente el sidenav
+    if (this.sidenavMode() === 'over') {
+      this.sidenavOpened.set(false);
+    } else {
+      // En modo desktop (side), colapsar el sidebar
+      this.sidenavCollapsed.set(true);
+      
+      // Cerrar todos los menús expandidos
+      this.menuExpanded.set({
+        produccion: false,
+        maestros: false,
+        compras: false,
+        ventas: false,
+        finanzas: false,
+        logistica: false,
+        contabilidad: false,
+        configuracion: false,
+        calidad: false,
+        rrhh: false
+      });
+    }
   }
 }

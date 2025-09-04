@@ -1,0 +1,700 @@
+// Variables
+$primary-color: #1976d2;
+$accent-color: #ff4081;
+$warn-color: #f44336;
+$success-color: #4caf50;
+$warning-color: #ff9800;
+$info-color: #2196f3;
+$light-gray: #f5f5f5;
+$border-color: #e0e0e0;
+$text-primary: #212121;
+$text-secondary: #757575;
+$shadow: 0 2px 4px rgba(0,0,0,0.1);
+$border-radius: 8px;
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+// Responsive breakpoints
+$mobile: 768px;
+$tablet: 1024px;
+$desktop: 1200px;
+
+.informes-container {
+  padding: $spacing-lg;
+  max-width: 1400px;
+  margin: 0 auto;
+  
+  @media (max-width: $mobile) {
+    padding: $spacing-md;
+  }
+}
+
+// Header Section
+.header-section {
+  margin-bottom: $spacing-xl;
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: $spacing-lg;
+    
+    @media (max-width: $mobile) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+  
+  .title-section {
+    flex: 1;
+    
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: $spacing-md;
+      margin: 0 0 $spacing-sm 0;
+      font-size: 2rem;
+      font-weight: 500;
+      color: $text-primary;
+      
+      .title-icon {
+        font-size: 2rem;
+        color: $primary-color;
+      }
+    }
+    
+    .page-description {
+      margin: 0;
+      color: $text-secondary;
+      font-size: 1.1rem;
+    }
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: $spacing-md;
+    
+    @media (max-width: $mobile) {
+      justify-content: stretch;
+      
+      button {
+        flex: 1;
+      }
+    }
+  }
+}
+
+// Configuration Card
+.config-card {
+  margin-bottom: $spacing-xl;
+  
+  mat-card-header {
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      margin: 0;
+    }
+  }
+  
+  .config-basic {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: $spacing-md;
+    margin-bottom: $spacing-lg;
+    
+    @media (max-width: $mobile) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .config-periodo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: $spacing-md;
+    margin-bottom: $spacing-lg;
+    
+    @media (max-width: $mobile) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .opciones-avanzadas {
+    margin: $spacing-lg 0;
+    
+    .opciones-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: $spacing-md;
+      align-items: center;
+      
+      @media (max-width: $mobile) {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+  
+  .generate-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: $spacing-xl;
+    
+    button {
+      min-width: 200px;
+      height: 48px;
+      font-size: 1.1rem;
+    }
+  }
+  
+  .ejercicio-activo-chip {
+    margin-left: $spacing-sm;
+    font-size: 0.7rem;
+  }
+}
+
+// Loading, Error States
+.loading-card,
+.error-card {
+  .loading-content,
+  .error-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-xl;
+    text-align: center;
+    min-height: 300px;
+    
+    mat-spinner {
+      margin-bottom: $spacing-lg;
+    }
+    
+    .error-icon {
+      font-size: 4rem;
+      width: 4rem;
+      height: 4rem;
+      margin-bottom: $spacing-lg;
+      color: $warn-color;
+    }
+    
+    h3 {
+      margin: 0 0 $spacing-md 0;
+      color: $text-primary;
+    }
+    
+    p {
+      margin: 0 0 $spacing-lg 0;
+      color: $text-secondary;
+      max-width: 400px;
+    }
+  }
+}
+
+// Informe Card
+.informe-card {
+  margin-bottom: $spacing-xl;
+  
+  mat-card-header {
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      margin: 0;
+    }
+    
+    mat-card-subtitle {
+      margin-top: $spacing-sm;
+      font-size: 1rem;
+      color: $text-secondary;
+    }
+  }
+}
+
+// Balance de Situación
+.balance-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-xl;
+  margin-bottom: $spacing-xl;
+  
+  @media (max-width: $tablet) {
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+  }
+  
+  .balance-section {
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      margin: 0 0 $spacing-lg 0;
+      padding: $spacing-md;
+      background-color: $light-gray;
+      border-radius: $border-radius;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: $text-primary;
+      
+      &.activo {
+        background-color: rgba($success-color, 0.1);
+        color: $success-color;
+      }
+      
+      &.pasivo {
+        background-color: rgba($info-color, 0.1);
+        color: $info-color;
+      }
+    }
+    
+    .balance-table-container {
+      overflow-x: auto;
+      margin-bottom: $spacing-md;
+      
+      .balance-table {
+        width: 100%;
+        
+        .mat-mdc-header-cell {
+          font-weight: 600;
+          color: $text-primary;
+          background-color: $light-gray;
+        }
+        
+        .mat-mdc-cell {
+          padding: $spacing-sm;
+          
+          &.codigo-cell {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: $primary-color;
+            min-width: 80px;
+          }
+          
+          &.nombre-cell {
+            min-width: 200px;
+          }
+          
+          &.importe-cell {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            min-width: 100px;
+            
+            &.debe {
+              color: $warn-color;
+            }
+            
+            &.haber {
+              color: $success-color;
+            }
+            
+            &.saldo {
+              color: $text-primary;
+            }
+          }
+        }
+        
+        .mat-mdc-row {
+          &.total-row {
+            background-color: rgba($primary-color, 0.1);
+            font-weight: 600;
+            
+            .mat-mdc-cell {
+              border-top: 2px solid $primary-color;
+              font-weight: 600;
+            }
+          }
+          
+          &.subtotal-row {
+            background-color: rgba($primary-color, 0.05);
+            font-weight: 500;
+            
+            .mat-mdc-cell {
+              border-top: 1px solid $border-color;
+            }
+          }
+        }
+      }
+    }
+    
+    .section-total {
+      padding: $spacing-md;
+      background-color: rgba($primary-color, 0.1);
+      border-radius: $border-radius;
+      text-align: right;
+      font-size: 1.1rem;
+      color: $primary-color;
+    }
+  }
+}
+
+.balance-summary {
+  .summary-card {
+    background-color: $light-gray;
+    
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: $spacing-lg;
+      
+      @media (max-width: $mobile) {
+        grid-template-columns: 1fr;
+        gap: $spacing-md;
+      }
+      
+      .summary-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        
+        .label {
+          font-size: 0.9rem;
+          color: $text-secondary;
+          margin-bottom: $spacing-xs;
+        }
+        
+        .value {
+          font-size: 1.3rem;
+          font-weight: 600;
+          font-family: 'Courier New', monospace;
+          
+          &.activo {
+            color: $success-color;
+          }
+          
+          &.pasivo {
+            color: $info-color;
+          }
+          
+          &.balanced {
+            color: $success-color;
+          }
+          
+          &.unbalanced {
+            color: $warn-color;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Pérdidas y Ganancias
+.pyg-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-xl;
+  margin-bottom: $spacing-xl;
+  
+  @media (max-width: $tablet) {
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+  }
+  
+  .pyg-section {
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      margin: 0 0 $spacing-lg 0;
+      padding: $spacing-md;
+      background-color: $light-gray;
+      border-radius: $border-radius;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: $text-primary;
+      
+      &.ingresos {
+        background-color: rgba($success-color, 0.1);
+        color: $success-color;
+      }
+      
+      &.gastos {
+        background-color: rgba($warn-color, 0.1);
+        color: $warn-color;
+      }
+    }
+    
+    .pyg-table-container {
+      overflow-x: auto;
+      margin-bottom: $spacing-md;
+      
+      .pyg-table {
+        width: 100%;
+        
+        .mat-mdc-header-cell {
+          font-weight: 600;
+          color: $text-primary;
+          background-color: $light-gray;
+        }
+        
+        .mat-mdc-cell {
+          padding: $spacing-sm;
+          
+          &.codigo-cell {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: $primary-color;
+            min-width: 80px;
+          }
+          
+          &.nombre-cell {
+            min-width: 200px;
+          }
+          
+          &.importe-cell {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            min-width: 120px;
+            
+            &.ingresos {
+              color: $success-color;
+            }
+            
+            &.gastos {
+              color: $warn-color;
+            }
+          }
+          
+          &.porcentaje-cell {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            color: $text-secondary;
+            min-width: 80px;
+          }
+        }
+        
+        .mat-mdc-row {
+          &.total-row {
+            background-color: rgba($primary-color, 0.1);
+            font-weight: 600;
+            
+            .mat-mdc-cell {
+              border-top: 2px solid $primary-color;
+              font-weight: 600;
+            }
+          }
+          
+          &.subtotal-row {
+            background-color: rgba($primary-color, 0.05);
+            font-weight: 500;
+            
+            .mat-mdc-cell {
+              border-top: 1px solid $border-color;
+            }
+          }
+        }
+      }
+    }
+    
+    .section-total {
+      padding: $spacing-md;
+      background-color: rgba($primary-color, 0.1);
+      border-radius: $border-radius;
+      text-align: right;
+      font-size: 1.1rem;
+      color: $primary-color;
+    }
+  }
+}
+
+.resultado-ejercicio {
+  .resultado-card {
+    background: linear-gradient(135deg, $light-gray 0%, rgba($primary-color, 0.1) 100%);
+    
+    &.beneficio {
+      background: linear-gradient(135deg, rgba($success-color, 0.1) 0%, rgba($success-color, 0.2) 100%);
+      border-left: 4px solid $success-color;
+    }
+    
+    &.perdida {
+      background: linear-gradient(135deg, rgba($warn-color, 0.1) 0%, rgba($warn-color, 0.2) 100%);
+      border-left: 4px solid $warn-color;
+    }
+    
+    .resultado-content {
+      display: flex;
+      align-items: center;
+      gap: $spacing-lg;
+      padding: $spacing-lg;
+      
+      .resultado-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background-color: white;
+        box-shadow: $shadow;
+        
+        mat-icon {
+          font-size: 32px;
+          width: 32px;
+          height: 32px;
+        }
+      }
+      
+      .resultado-info {
+        flex: 1;
+        
+        h3 {
+          margin: 0 0 $spacing-sm 0;
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: $text-primary;
+        }
+        
+        .resultado-importe {
+          font-size: 2rem;
+          font-weight: 700;
+          font-family: 'Courier New', monospace;
+          color: $text-primary;
+          margin-bottom: $spacing-xs;
+        }
+        
+        .resultado-porcentaje {
+          font-size: 1rem;
+          color: $text-secondary;
+        }
+      }
+    }
+  }
+}
+
+// Global Styles
+:host {
+  display: block;
+  
+  // Custom expansion panel
+  ::ng-deep {
+    .mat-expansion-panel {
+      box-shadow: $shadow;
+      border-radius: $border-radius;
+      
+      .mat-expansion-panel-header {
+        padding: $spacing-md $spacing-lg;
+        
+        .mat-expansion-panel-header-title {
+          display: flex;
+          align-items: center;
+          gap: $spacing-sm;
+        }
+      }
+      
+      .mat-expansion-panel-content {
+        .mat-expansion-panel-body {
+          padding: $spacing-lg;
+        }
+      }
+    }
+    
+    // Custom chips
+    .mat-mdc-chip {
+      font-size: 0.7rem;
+      font-weight: 500;
+      height: 24px;
+      
+      &.mat-primary {
+        --mdc-chip-selected-container-color: #{$primary-color};
+      }
+    }
+    
+    // Custom snackbar
+    .success-snackbar {
+      --mdc-snackbar-container-color: #{$success-color};
+      --mdc-snackbar-supporting-text-color: white;
+    }
+    
+    .error-snackbar {
+      --mdc-snackbar-container-color: #{$warn-color};
+      --mdc-snackbar-supporting-text-color: white;
+    }
+    
+    // Form field improvements
+    .mat-mdc-form-field {
+      .mat-mdc-form-field-subscript-wrapper {
+        margin-top: $spacing-xs;
+      }
+    }
+    
+    // Table improvements
+    .mat-mdc-table {
+      .mat-mdc-header-row {
+        background-color: $light-gray;
+      }
+      
+      .mat-mdc-row:hover {
+        background-color: rgba($primary-color, 0.04);
+      }
+    }
+    
+    // Checkbox improvements
+    .mat-mdc-checkbox {
+      margin-bottom: $spacing-sm;
+    }
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.informes-container > * {
+  animation: fadeIn 0.3s ease-out;
+}
+
+// Print styles
+@media print {
+  .header-actions,
+  .config-card,
+  .loading-card,
+  .error-card {
+    display: none !important;
+  }
+  
+  .informe-card {
+    box-shadow: none !important;
+    border: 1px solid $border-color;
+    page-break-inside: avoid;
+    
+    mat-card-header {
+      border-bottom: 2px solid $primary-color;
+      padding-bottom: $spacing-md;
+      margin-bottom: $spacing-lg;
+    }
+  }
+  
+  .balance-container,
+  .pyg-container {
+    grid-template-columns: 1fr !important;
+    gap: $spacing-lg !important;
+  }
+  
+  .balance-table-container,
+  .pyg-table-container {
+    overflow: visible !important;
+  }
+  
+  .balance-table,
+  .pyg-table {
+    font-size: 0.8rem;
+    
+    .mat-mdc-cell,
+    .mat-mdc-header-cell {
+      padding: $spacing-xs !important;
+    }
+  }
+}

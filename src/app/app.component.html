@@ -1,4 +1,4 @@
-<mat-sidenav-container class="app-container">
+<mat-sidenav-container class="app-container" [class.sidebar-collapsed]="sidenavCollapsed()">
   <!-- Sidebar - Solo mostrar si está autenticado -->
   @if (authStore.isLoggedIn()) {
     <mat-sidenav
@@ -26,22 +26,15 @@
 
     <!-- Navigation Menu -->
     <mat-nav-list class="sidenav-menu">
-      <!-- Dashboard -->
-      <a mat-list-item
-        routerLink="/dashboard"
-        routerLinkActive="active"
-        class="nav-item">
-        <mat-icon matListItemIcon class="nav-icon">dashboard</mat-icon>
-        @if (!sidenavCollapsed()) {
-          <span matListItemTitle class="nav-text">Dashboard</span>
-        }
-      </a>
-
-
-
       <!-- Maestros -->
       <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().maestros">
-        <mat-expansion-panel-header class="nav-group-header" (click)="toggleMaestros()">
+        <mat-expansion-panel-header 
+          class="nav-group-header" 
+          (click)="toggleMaestros()"
+          [matTooltip]="sidenavCollapsed() ? 'Maestros - ¡Los datos maestros te esperan! Clientes, proveedores y más...' : ''"
+          matTooltipPosition="right"
+          matTooltipClass="tooltip-maestros"
+          matTooltipHideDelay="100">
           <mat-panel-title class="nav-group-title">
             <mat-icon class="nav-icon">library_books</mat-icon>
             @if (!sidenavCollapsed()) {
@@ -54,7 +47,8 @@
           <a mat-list-item
             routerLink="/terceros"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">people</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Clientes</span>
@@ -64,7 +58,8 @@
           <a mat-list-item
             routerLink="/proveedores"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">business</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Proveedores</span>
@@ -74,7 +69,8 @@
           <a mat-list-item
             routerLink="/operarios"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">engineering</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Operarios</span>
@@ -84,7 +80,8 @@
           <a mat-list-item
             routerLink="/series-documentales"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">description</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Series Documentales</span>
@@ -94,7 +91,8 @@
           <a mat-list-item
             routerLink="/unidades-medida"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">straighten</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Unidades Medida</span>
@@ -104,7 +102,8 @@
           <a mat-list-item
             routerLink="/formas-pago"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">payment</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Formas Pago</span>
@@ -112,9 +111,21 @@
           </a>
           
           <a mat-list-item
+            routerLink="/personas"
+            routerLinkActive="active"
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
+            <mat-icon matListItemIcon class="nav-subicon">person</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Personas</span>
+            }
+          </a>
+          
+          <a mat-list-item
             routerLink="/condiciones-pago"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">schedule</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Condiciones Pago</span>
@@ -124,7 +135,8 @@
           <a mat-list-item
             routerLink="/tipos-iva"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">percent</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Tipos IVA</span>
@@ -134,7 +146,8 @@
           <a mat-list-item
             routerLink="/descuentos"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">local_offer</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Descuentos</span>
@@ -144,7 +157,8 @@
           <a mat-list-item
             routerLink="/maquinaria"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">build</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Maquinaria</span>
@@ -155,7 +169,13 @@
 
       <!-- Producción -->
       <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().produccion">
-        <mat-expansion-panel-header class="nav-group-header" (click)="toggleProduccion()">
+        <mat-expansion-panel-header 
+          class="nav-group-header" 
+          (click)="toggleProduccion()"
+          [matTooltip]="sidenavCollapsed() ? 'Producción - ¡A producir se ha dicho! Obras, capítulos y mucho más...' : ''"
+          matTooltipPosition="right"
+          matTooltipClass="tooltip-produccion"
+          matTooltipHideDelay="100">
           <mat-panel-title class="nav-group-title">
             <mat-icon class="nav-icon">precision_manufacturing</mat-icon>
             @if (!sidenavCollapsed()) {
@@ -168,7 +188,8 @@
           <a mat-list-item
             routerLink="/obras"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">construction</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Obras</span>
@@ -178,7 +199,8 @@
           <a mat-list-item
             routerLink="/capitulos"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">list_alt</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Capítulos</span>
@@ -188,7 +210,8 @@
           <a mat-list-item
             routerLink="/partidas"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">format_list_numbered</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Partidas</span>
@@ -198,7 +221,8 @@
           <a mat-list-item
             routerLink="/trabajos-realizar"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">assignment</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Trabajos a Realizar</span>
@@ -208,7 +232,8 @@
           <a mat-list-item
             routerLink="/escandallo"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">analytics</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Escandallo</span>
@@ -218,7 +243,8 @@
           <a mat-list-item
             routerLink="/partes-diarios"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">today</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Partes Diarios</span>
@@ -228,7 +254,8 @@
           <a mat-list-item
             routerLink="/planificacion"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">schedule</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Planificación Operarios</span>
@@ -239,7 +266,13 @@
 
       <!-- Compras -->
       <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().compras">
-        <mat-expansion-panel-header class="nav-group-header" (click)="toggleCompras()">
+        <mat-expansion-panel-header 
+          class="nav-group-header" 
+          (click)="toggleCompras()"
+          [matTooltip]="sidenavCollapsed() ? 'Compras - ¡Hora de ir de compras! Presupuestos, pedidos y facturas...' : ''"
+          matTooltipPosition="right"
+          matTooltipClass="tooltip-compras"
+          matTooltipHideDelay="100">
           <mat-panel-title class="nav-group-title">
             <mat-icon class="nav-icon">shopping_cart</mat-icon>
             @if (!sidenavCollapsed()) {
@@ -252,7 +285,8 @@
           <a mat-list-item
             routerLink="/presupuestos-proveedor"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">request_quote</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Presupuestos Proveedor</span>
@@ -262,7 +296,8 @@
           <a mat-list-item
             routerLink="/pedidos-proveedores"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">shopping_bag</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Pedidos Proveedores</span>
@@ -272,7 +307,8 @@
           <a mat-list-item
             routerLink="/entradas"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">input</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Entradas</span>
@@ -282,7 +318,8 @@
           <a mat-list-item
             routerLink="/facturas-compra"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">receipt</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Facturas Compra</span>
@@ -295,7 +332,13 @@
 
       <!-- Ventas -->
       <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().ventas">
-        <mat-expansion-panel-header class="nav-group-header" (click)="toggleVentas()">
+        <mat-expansion-panel-header 
+          class="nav-group-header" 
+          (click)="toggleVentas()"
+          [matTooltip]="sidenavCollapsed() ? 'Ventas - ¡Vamos a vender! Presupuestos, pedidos y albaranes...' : ''"
+          matTooltipPosition="right"
+          matTooltipClass="tooltip-ventas"
+          matTooltipHideDelay="100">
           <mat-panel-title class="nav-group-title">
             <mat-icon class="nav-icon">point_of_sale</mat-icon>
             @if (!sidenavCollapsed()) {
@@ -308,7 +351,8 @@
           <a mat-list-item
             routerLink="/presupuestos"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">calculate</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Presupuestos</span>
@@ -318,7 +362,8 @@
           <a mat-list-item
             routerLink="/pedidos-cliente"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">shopping_basket</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Pedidos Cliente</span>
@@ -328,7 +373,8 @@
           <a mat-list-item
             routerLink="/albaranes"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">local_shipping</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Albaranes</span>
@@ -338,7 +384,8 @@
           <a mat-list-item
             routerLink="/ventas"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">receipt_long</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Facturas</span>
@@ -350,7 +397,8 @@
           <a mat-list-item
             routerLink="/certificaciones"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">verified</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Certificaciones</span>
@@ -361,7 +409,13 @@
 
       <!-- Finanzas -->
       <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().finanzas">
-        <mat-expansion-panel-header class="nav-group-header" (click)="toggleFinanzas()">
+        <mat-expansion-panel-header 
+          class="nav-group-header" 
+          (click)="toggleFinanzas()"
+          [matTooltip]="sidenavCollapsed() ? 'Finanzas - ¡El dinero llama! Cobros, pagos y vencimientos...' : ''"
+          matTooltipPosition="right"
+          matTooltipClass="tooltip-finanzas"
+          matTooltipHideDelay="100">
           <mat-panel-title class="nav-group-title">
             <mat-icon class="nav-icon">account_balance</mat-icon>
             @if (!sidenavCollapsed()) {
@@ -371,28 +425,33 @@
         </mat-expansion-panel-header>
         
         <div class="nav-subitems">
-          <mat-expansion-panel-header class="nav-group-header" (click)="toggleCobros()">
-            <mat-panel-title class="nav-group-title">
-              <mat-icon class="nav-icon">account_balance_wallet</mat-icon>
-              @if (!sidenavCollapsed()) {
-                <span class="nav-text">Cobros</span>
-              }
-            </mat-panel-title>
-          </mat-expansion-panel-header>
+          <a mat-list-item
+            routerLink="/cobros"
+            routerLinkActive="active"
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
+            <mat-icon matListItemIcon class="nav-subicon">account_balance_wallet</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Cobros</span>
+            }
+          </a>
           
-          <mat-expansion-panel-header class="nav-group-header" (click)="togglePagos()">
-            <mat-panel-title class="nav-group-title">
-              <mat-icon class="nav-icon">payments</mat-icon>
-              @if (!sidenavCollapsed()) {
-                <span class="nav-text">Pagos</span>
-              }
-            </mat-panel-title>
-          </mat-expansion-panel-header>
+          <a mat-list-item
+            routerLink="/pagos"
+            routerLinkActive="active"
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
+            <mat-icon matListItemIcon class="nav-subicon">payments</mat-icon>
+            @if (!sidenavCollapsed()) {
+              <span matListItemTitle class="nav-text">Pagos</span>
+            }
+          </a>
           
           <a mat-list-item
             routerLink="/vencimientos"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">event</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Vencimientos</span>
@@ -402,7 +461,8 @@
           <a mat-list-item
             routerLink="/remesas"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">send</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Remesas</span>
@@ -413,7 +473,13 @@
 
       <!-- Logística -->
       <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().logistica">
-        <mat-expansion-panel-header class="nav-group-header" (click)="toggleLogistica()">
+        <mat-expansion-panel-header 
+          class="nav-group-header" 
+          (click)="toggleLogistica()"
+          [matTooltip]="sidenavCollapsed() ? 'Logística - ¡En movimiento! Artículos, depósitos e inventarios...' : ''"
+          matTooltipPosition="right"
+          matTooltipClass="tooltip-logistica"
+          matTooltipHideDelay="100">
           <mat-panel-title class="nav-group-title">
             <mat-icon class="nav-icon">local_shipping</mat-icon>
             @if (!sidenavCollapsed()) {
@@ -426,7 +492,8 @@
           <a mat-list-item
             routerLink="/articulos"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">inventory_2</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Artículos</span>
@@ -436,7 +503,8 @@
           <a mat-list-item
             routerLink="/depositos"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">store</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Depósitos</span>
@@ -446,7 +514,8 @@
           <a mat-list-item
             routerLink="/ubicaciones"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">place</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Ubicaciones</span>
@@ -456,7 +525,8 @@
           <a mat-list-item
             routerLink="/movimientos-stock"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">swap_horiz</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Movimientos Stock</span>
@@ -466,7 +536,8 @@
           <a mat-list-item
             routerLink="/inventario"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">warehouse</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Inventarios</span>
@@ -476,7 +547,8 @@
           <a mat-list-item
             routerLink="/movimientos-internos"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">transform</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Movimientos Internos</span>
@@ -487,7 +559,13 @@
 
       <!-- Contabilidad -->
       <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().contabilidad">
-        <mat-expansion-panel-header class="nav-group-header" (click)="toggleContabilidad()">
+        <mat-expansion-panel-header 
+          class="nav-group-header" 
+          (click)="toggleContabilidad()"
+          [matTooltip]="sidenavCollapsed() ? 'Contabilidad - ¡Los números no mienten! Ejercicios, asientos y cuentas...' : ''"
+          matTooltipPosition="right"
+          matTooltipClass="tooltip-contabilidad"
+          matTooltipHideDelay="100">
           <mat-panel-title class="nav-group-title">
             <mat-icon class="nav-icon">account_balance</mat-icon>
             @if (!sidenavCollapsed()) {
@@ -500,7 +578,8 @@
           <a mat-list-item
             routerLink="/ejercicios-contables"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">calendar_today</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Ejercicios Contables</span>
@@ -510,7 +589,8 @@
           <a mat-list-item
             routerLink="/contabilidad"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">book</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Asientos Contables</span>
@@ -520,7 +600,8 @@
           <a mat-list-item
             routerLink="/cuentas-contables"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">account_tree</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Cuentas Contables</span>
@@ -530,7 +611,8 @@
           <a mat-list-item
             routerLink="/auditoria"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">fact_check</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Auditoría</span>
@@ -541,7 +623,13 @@
 
       <!-- Configuración -->
       <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().configuracion">
-        <mat-expansion-panel-header class="nav-group-header" (click)="toggleConfiguracion()">
+        <mat-expansion-panel-header 
+          class="nav-group-header" 
+          (click)="toggleConfiguracion()"
+          [matTooltip]="sidenavCollapsed() ? 'Configuración - ¡Ajustemos todo! Empresas, monedas y configuraciones...' : ''"
+          matTooltipPosition="right"
+          matTooltipClass="tooltip-configuracion"
+          matTooltipHideDelay="100">
           <mat-panel-title class="nav-group-title">
             <mat-icon class="nav-icon">settings</mat-icon>
             @if (!sidenavCollapsed()) {
@@ -554,7 +642,8 @@
           <a mat-list-item
             routerLink="/configuracion"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">business</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Empresas</span>
@@ -564,7 +653,8 @@
           <a mat-list-item
             routerLink="/monedas"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">monetization_on</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Monedas</span>
@@ -574,7 +664,8 @@
           <a mat-list-item
             routerLink="/tipos-cambio"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">currency_exchange</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Tipos Cambio</span>
@@ -584,7 +675,8 @@
           <a mat-list-item
             routerLink="/centros-coste"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">account_balance_wallet</mat-icon>
             @if (!sidenavCollapsed()) {
                <span matListItemTitle class="nav-text">Centros Coste</span>
@@ -605,7 +697,8 @@
           <a mat-list-item
             routerLink="/roles"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">admin_panel_settings</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Roles</span>
@@ -615,7 +708,8 @@
           <a mat-list-item
             routerLink="/permisos"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">lock</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Permisos</span>
@@ -626,7 +720,13 @@
 
       <!-- Calidad -->
       <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().calidad">
-        <mat-expansion-panel-header class="nav-group-header" (click)="toggleCalidad()">
+        <mat-expansion-panel-header 
+          class="nav-group-header" 
+          (click)="toggleCalidad()"
+          [matTooltip]="sidenavCollapsed() ? 'Calidad - ¡Excelencia garantizada! Controles e inspecciones...' : ''"
+          matTooltipPosition="right"
+          matTooltipClass="tooltip-calidad"
+          matTooltipHideDelay="100">
           <mat-panel-title class="nav-group-title">
             <mat-icon class="nav-icon">verified</mat-icon>
             @if (!sidenavCollapsed()) {
@@ -639,7 +739,8 @@
           <a mat-list-item
             routerLink="/controles-calidad"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">checklist</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Controles Calidad</span>
@@ -649,7 +750,8 @@
           <a mat-list-item
             routerLink="/inspecciones"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">search</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Inspecciones</span>
@@ -659,7 +761,8 @@
           <a mat-list-item
             routerLink="/no-conformidades"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">report_problem</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">No Conformidades</span>
@@ -670,7 +773,13 @@
 
       <!-- RRHH -->
       <mat-expansion-panel class="nav-group" [expanded]="menuExpanded().rrhh">
-        <mat-expansion-panel-header class="nav-group-header" (click)="toggleRrhh()">
+        <mat-expansion-panel-header 
+          class="nav-group-header" 
+          (click)="toggleRrhh()"
+          [matTooltip]="sidenavCollapsed() ? 'RRHH - ¡El equipo es lo primero! Operarios, contratos y nóminas...' : ''"
+           matTooltipPosition="right"
+           matTooltipClass="tooltip-rrhh"
+           matTooltipHideDelay="100">
           <mat-panel-title class="nav-group-title">
             <mat-icon class="nav-icon">work</mat-icon>
             @if (!sidenavCollapsed()) {
@@ -683,7 +792,8 @@
           <a mat-list-item
             routerLink="/rrhh"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">engineering</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Operarios</span>
@@ -693,7 +803,8 @@
           <a mat-list-item
             routerLink="/categorias-operario"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">category</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Categorías Operario</span>
@@ -703,7 +814,8 @@
           <a mat-list-item
             routerLink="/contratos-laborales"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">description</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Contratos Laborales</span>
@@ -713,7 +825,8 @@
           <a mat-list-item
             routerLink="/solicitudes-vacaciones"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">beach_access</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Solicitudes Vacaciones</span>
@@ -723,7 +836,8 @@
           <a mat-list-item
             routerLink="/bajas-medicas"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">local_hospital</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Bajas Médicas</span>
@@ -733,7 +847,8 @@
           <a mat-list-item
             routerLink="/cursos-formacion"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">school</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Cursos Formación</span>
@@ -743,7 +858,8 @@
           <a mat-list-item
             routerLink="/marcas-reloj"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">access_time</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">Marcas Reloj</span>
@@ -753,7 +869,8 @@
           <a mat-list-item
             routerLink="/dms"
             routerLinkActive="active"
-            class="nav-subitem">
+            class="nav-subitem"
+            (click)="onMenuItemClick()">
             <mat-icon matListItemIcon class="nav-subicon">folder</mat-icon>
             @if (!sidenavCollapsed()) {
               <span matListItemTitle class="nav-text">DMS</span>
@@ -796,10 +913,10 @@
         }
 
         <!-- Logo Container -->
-        <div class="logo-container">
+        <a routerLink="/dashboard" class="logo-container">
           <mat-icon class="logo-icon">business</mat-icon>
           <span class="logo-text">ERP ES</span>
-        </div>
+        </a>
 
         @if (!sidenavCollapsed()) {
           <div class="breadcrumb">

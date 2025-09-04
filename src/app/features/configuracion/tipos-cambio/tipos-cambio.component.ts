@@ -403,7 +403,7 @@ export class TiposCambioComponent implements OnInit {
     if (!campo) return;
 
     const updates: UpdateTipoCambioDto = {};
-    updates[campo as keyof UpdateTipoCambioDto] = this.formularioEdit.get(campo)?.value;
+    (updates as any)[campo] = this.formularioEdit.get(campo)?.value;
 
     this.updatingTiposCambio.update(set => {
       set.add(tipoCambio.id);

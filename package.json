@@ -25,7 +25,9 @@
     "@angular/service-worker": "^19.2.14",
     "@angular/ssr": "^19.2.14",
     "@daypilot/daypilot-lite-angular": "^4.3.0",
+    "chart.js": "^4.5.0",
     "express": "^4.18.2",
+    "ng2-charts": "^8.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
